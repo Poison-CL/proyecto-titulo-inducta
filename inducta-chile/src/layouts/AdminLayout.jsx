@@ -1,98 +1,93 @@
-import { useOrganization, useUser } from '@clerk/clerk-react'
-import { useSupabase } from '../hooks/useSupabase'
-import { useState, useEffect } from 'react'
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import { OrganizationSwitcher, useOrganization, useUser } from '@clerk/clerk-react'
+import { Home } from 'lucide-react'
+import { Link as RouterLink, NavLink, Outlet } from 'react-router-dom'
+import InductaUserButton from '../components/auth/InductaUserButton'
+import { etiquetaRol, getRolUsuario } from '../lib/authRol'
+import { clerkAppearance } from '../theme/clerkAppearance'
 
-export default function AdminLayout({ children }) {
-  const { organization } = useOrganization()
+export default function AdminLayout() {
   const { user } = useUser()
-  const supabase = useSupabase()
-  
-  const [empresaGuardada, setEmpresaGuardada] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    async function verificarEmpresa() {
-      if (!organization) return
-      
-      // Intenta leer la empresa actual en Supabase usando el aislamiento RLS
-      const { data, error } = await supabase
-        .from('empresa')
-        .select('*')
-        .eq('id_empresa', organization.id)
-        .single()
-
-      if (data) {
-        setEmpresaGuardada(true)
-      }
-    }
-
-    verificarEmpresa()
-  }, [organization, supabase])
-
-  const registrarEmpresa = async () => {
-    if (!organization) return
-    setLoading(true)
-
-    const { error } = await supabase.from('empresa').insert([
-      {
-        id_empresa: organization.id,
-        nombre_comercial: organization.name,
-      }
-    ])
-
-    if (!error) {
-      setEmpresaGuardada(true)
-    } else {
-      console.error("Error al registrar:", error.message)
-    }
-    setLoading(false)
-  }
+  const { organization } = useOrganization()
+  const rol = getRolUsuario(user)
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar provisional */}
-      <aside className="w-64 bg-white border-r p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-blue-600 mb-6">Inducta CHILE</h2>
-          <nav className="space-y-3">
-            <a href="#" className="block p-2 rounded hover:bg-gray-50 font-medium">Inicio</a>
-            <a href="#" className="block p-2 rounded hover:bg-gray-50 font-medium">Empresa</a>
-            <a href="#" className="block p-2 rounded hover:bg-gray-50 font-medium">Evaluaciones</a>
-          </nav>
-        </div>
-        <div className="text-sm text-gray-500">
-          <p className="font-semibold text-gray-700">{user?.fullName}</p>
-          <p className="truncate">Org: {organization?.name}</p>
-        </div>
-      </aside>
+    <Flex h="100vh" bg="brand.soft">
+      <Flex
+        as="aside"
+        w="264px"
+        bg="white"
+        borderRightWidth="1px"
+        borderColor="blackAlpha.100"
+        p={6}
+        direction="column"
+        justify="space-between"
+        flexShrink={0}
+      >
+        <Box>
+          <Heading
+            as={RouterLink}
+            to="/"
+            size="md"
+            color="brand.primary"
+            display="block"
+            mb={6}
+            _hover={{ color: 'brand.ink' }}
+          >
+            Inducta Chile
+          </Heading>
+          <VStack as="nav" align="stretch" spacing={1}>
+            <Button
+              as={NavLink}
+              to="/dashboard"
+              end
+              variant="ghost"
+              justifyContent="flex-start"
+              leftIcon={<Home size={16} />}
+              _activeLink={{ bg: 'brand.soft', color: 'brand.primary' }}
+            >
+              Inicio
+            </Button>
+          </VStack>
+        </Box>
 
-      {/* Contenido principal */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
-          <h1 className="text-2xl font-bold mb-4">Panel de Control Corporativo</h1>
-          
-          {!empresaGuardada ? (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800 mb-3">La organización actual aún no está sincronizada con Supabase.</p>
-              <button 
-                onClick={registrarEmpresa}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? "Sincronizando..." : "Sincronizar Empresa con Base de Datos"}
-              </button>
-            </div>
-          ) : (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800 font-medium">✓ Organización sincronizada correctamente con Supabase bajo RLS.</p>
-            </div>
-          )}
+        <VStack align="stretch" spacing={3}>
+          <Box fontSize="sm">
+            <Text fontWeight="semibold" color="brand.ink" noOfLines={1}>
+              {user?.fullName}
+            </Text>
+            <Text color="gray.500" noOfLines={1}>
+              Rol: {etiquetaRol(rol)}
+            </Text>
+            <Text color="gray.500" noOfLines={1}>
+              {organization?.name}
+            </Text>
+          </Box>
 
-          <div className="mt-6">
-            {children}
-          </div>
-        </div>
-      </main>
-    </div>
+          <Divider borderColor="blackAlpha.100" />
+
+          <Flex align="center" gap={2}>
+            <OrganizationSwitcher
+              hidePersonal
+              afterSelectOrganizationUrl="/dashboard"
+              appearance={clerkAppearance}
+            />
+            <InductaUserButton afterSignOutUrl="/" />
+          </Flex>
+        </VStack>
+      </Flex>
+
+      <Box as="main" flex="1" p={8} overflowY="auto">
+        <Outlet />
+      </Box>
+    </Flex>
   )
 }
