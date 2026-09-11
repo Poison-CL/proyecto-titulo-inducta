@@ -1,36 +1,93 @@
-import { useOrganization, useUser } from '@clerk/clerk-react'
-import { Outlet } from 'react-router-dom'
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import { OrganizationSwitcher, useOrganization, useUser } from '@clerk/clerk-react'
+import { Home } from 'lucide-react'
+import { Link as RouterLink, NavLink, Outlet } from 'react-router-dom'
+import InductaUserButton from '../components/auth/InductaUserButton'
+import { etiquetaRol, getRolUsuario } from '../lib/authRol'
+import { clerkAppearance } from '../theme/clerkAppearance'
 
 export default function AdminLayout() {
   const { user } = useUser()
   const { organization } = useOrganization()
+  const rol = getRolUsuario(user)
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <aside className="w-64 bg-white border-r p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-blue-600 mb-6">Inducta CHILE</h2>
-          <nav className="space-y-3">
-            <a href="/dashboard" className="block p-2 rounded hover:bg-gray-50 font-medium">
+    <Flex h="100vh" bg="brand.soft">
+      <Flex
+        as="aside"
+        w="264px"
+        bg="white"
+        borderRightWidth="1px"
+        borderColor="blackAlpha.100"
+        p={6}
+        direction="column"
+        justify="space-between"
+        flexShrink={0}
+      >
+        <Box>
+          <Heading
+            as={RouterLink}
+            to="/"
+            size="md"
+            color="brand.primary"
+            display="block"
+            mb={6}
+            _hover={{ color: 'brand.ink' }}
+          >
+            Inducta Chile
+          </Heading>
+          <VStack as="nav" align="stretch" spacing={1}>
+            <Button
+              as={NavLink}
+              to="/dashboard"
+              end
+              variant="ghost"
+              justifyContent="flex-start"
+              leftIcon={<Home size={16} />}
+              _activeLink={{ bg: 'brand.soft', color: 'brand.primary' }}
+            >
               Inicio
-            </a>
-            <a href="#" className="block p-2 rounded hover:bg-gray-50 font-medium">
-              Empresa
-            </a>
-            <a href="#" className="block p-2 rounded hover:bg-gray-50 font-medium">
-              Evaluaciones
-            </a>
-          </nav>
-        </div>
-        <div className="text-sm text-gray-500">
-          <p className="font-semibold text-gray-700">{user?.fullName}</p>
-          <p className="truncate">Org: {organization?.name}</p>
-        </div>
-      </aside>
+            </Button>
+          </VStack>
+        </Box>
 
-      <main className="flex-1 p-8 overflow-y-auto">
+        <VStack align="stretch" spacing={3}>
+          <Box fontSize="sm">
+            <Text fontWeight="semibold" color="brand.ink" noOfLines={1}>
+              {user?.fullName}
+            </Text>
+            <Text color="gray.500" noOfLines={1}>
+              Rol: {etiquetaRol(rol)}
+            </Text>
+            <Text color="gray.500" noOfLines={1}>
+              {organization?.name}
+            </Text>
+          </Box>
+
+          <Divider borderColor="blackAlpha.100" />
+
+          <Flex align="center" gap={2}>
+            <OrganizationSwitcher
+              hidePersonal
+              afterSelectOrganizationUrl="/dashboard"
+              appearance={clerkAppearance}
+            />
+            <InductaUserButton afterSignOutUrl="/" />
+          </Flex>
+        </VStack>
+      </Flex>
+
+      <Box as="main" flex="1" p={8} overflowY="auto">
         <Outlet />
-      </main>
-    </div>
+      </Box>
+    </Flex>
   )
 }

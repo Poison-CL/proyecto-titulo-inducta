@@ -30,7 +30,7 @@ docker compose version
 
 También necesitas cuentas (son servicios en la nube, no se instalan):
 
-- [Clerk](https://dashboard.clerk.com) — login
+- [Clerk](https://dashboard.clerk.com) — login Empresa/Empleado (`docs/CLERK-EMPRESA-EMPLEADO.md`)
 - [Supabase](https://supabase.com/dashboard) — base de datos
 
 ---
@@ -124,7 +124,11 @@ inducta-chile/
 │   │   ├── providers.jsx   # Clerk + Saas UI
 │   │   └── router.jsx      # rutas
 │   ├── pages/              # pantallas por ruta
+│   │   ├── LandingPage.jsx
 │   │   └── DashboardPage.jsx
+│   ├── components/
+│   │   └── landing/        # navbar, hero, footer
+│   ├── theme/              # paleta Saas UI
 │   ├── layouts/            # shells (sidebar, etc.)
 │   │   └── AdminLayout.jsx
 │   ├── features/           # lógica de negocio por dominio
@@ -145,7 +149,9 @@ inducta-chile/
 | Carpeta | Qué va ahí |
 |---|---|
 | `src/app` | Arranque, providers y rutas |
-| `src/pages` | Pantallas ligadas a una URL |
+| `src/pages` | Landing, dashboard y pantallas |
+| `src/components/landing` | Navbar, hero, footer |
+| `src/theme` | Colores y tema Saas UI |
 | `src/layouts` | Marcos compartidos (sidebar) |
 | `src/features` | Reglas de negocio por dominio |
 | `src/lib` | Env, cliente Supabase |

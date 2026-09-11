@@ -9,9 +9,17 @@ export const env = {
 }
 
 export function assertClientEnv() {
-  if (!publishableKey) {
+  const faltantes = Object.entries({
+    VITE_CLERK_PUBLISHABLE_KEY: publishableKey,
+    VITE_SUPABASE_URL: supabaseUrl,
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
+  })
+    .filter(([, valor]) => !valor)
+    .map(([nombre]) => nombre)
+
+  if (faltantes.length) {
     throw new Error(
-      'Falta VITE_CLERK_PUBLISHABLE_KEY. Copia .env.example a .env en la raíz del proyecto y reinicia.',
+      `Faltan variables de entorno: ${faltantes.join(', ')}. Copia .env.example a .env en la raíz del proyecto y reinicia.`,
     )
   }
 }
