@@ -16,6 +16,9 @@ dist-ssr
 !.env.example
 *.local
 copia-env-pendrive/
+AGENTS.md
+.cursor/
+agents.md
 
 # Editor directories and files
 .vscode/*

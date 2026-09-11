@@ -6,7 +6,8 @@ import {
   WebpayPlus,
 } from 'transbank-sdk'
 
-// ponytail: SDK de Node; CORS/secretos piden mover esto a un endpoint de servidor
+// Credenciales de integracion para probar Webpay. Antes de produccion esto tiene
+// que correr en el servidor, no en el navegador.
 const tx = new WebpayPlus.Transaction(
   new Options(
     IntegrationCommerceCodes.WEBPAY_PLUS,
