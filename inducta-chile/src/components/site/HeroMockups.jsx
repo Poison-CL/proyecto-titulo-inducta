@@ -54,7 +54,7 @@ export function PhoneMock() {
             </Box>
             <Box>
               <Text fontSize="10px" color="blackAlpha.500" lineHeight="1.1">
-                Â¡Buen dia!
+                ¡Buen dia!
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
                 Camila R.
