@@ -1,16 +1,154 @@
-# React + Vite
+# Inducta CHILE
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React (Vite) con autenticación Clerk, datos en Supabase y pagos Transbank.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 1. Qué hay que instalar
 
-## React Compiler
+Hazlo **una vez** en el PC.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Programa | Para qué | Dónde bajarlo |
+|---|---|---|
+| [Node.js 22 LTS](https://nodejs.org) | Corre la app sin Docker. Incluye `npm`. | https://nodejs.org |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Levanta todo con un comando. | https://www.docker.com/products/docker-desktop/ |
+| [Git](https://git-scm.com/download/win) | Clonar el repositorio. | https://git-scm.com/download/win |
 
-## Expanding the ESLint configuration
+Después de instalar Node, cierra y abre la terminal y comprueba:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```powershell
+node -v
+npm -v
+```
+
+Después de instalar Docker Desktop, **ábrelo y espera** a que diga que está en marcha. Comprueba:
+
+```powershell
+docker -v
+docker compose version
+```
+
+También necesitas cuentas (son servicios en la nube, no se instalan):
+
+- [Clerk](https://dashboard.clerk.com) — login
+- [Supabase](https://supabase.com/dashboard) — base de datos
+
+---
+
+## 2. Entrar al proyecto
+
+```powershell
+cd ruta\del\repo\inducta-chile
+```
+
+Tienes que estar en la carpeta que tiene `package.json` y `docker-compose.yml`.
+
+---
+
+## 3. Variables de entorno
+
+Las claves van en la **raíz** (junto a `package.json`), nunca en `src/`.
+
+```powershell
+copy .env.example .env
+```
+
+Abre `.env` y pega tus claves:
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+VITE_SUPABASE_ANON_KEY=sb_publishable_...
+```
+
+---
+
+## 4. Levantar el proyecto
+
+Guía detallada por equipo (Docker Desktop, `.env`, verificación y problemas frecuentes): [docs/INSTALACION-DOCKER.md](docs/INSTALACION-DOCKER.md).
+
+### Opción A — Docker (la que piden para compartir el proyecto)
+
+1. Abre Docker Desktop y espera a que inicie.
+2. En la carpeta del proyecto:
+
+```powershell
+docker compose up --build
+```
+
+3. Abre el navegador en [http://localhost:8080](http://localhost:8080)
+
+Para parar: `Ctrl+C` en la terminal, o:
+
+```powershell
+docker compose down
+```
+
+Clerk y Supabase siguen en la nube. El contenedor solo sirve la web.
+
+### Opción B — Local con Node (desarrollo)
+
+```powershell
+npm install
+npm run dev
+```
+
+Abre [http://localhost:5173](http://localhost:5173)
+
+Si cambias el `.env`, para el servidor (`Ctrl+C`) y vuelve a correr `npm run dev`.
+
+---
+
+## 5. Otros comandos
+
+```powershell
+npm run build      # genera la carpeta dist
+npm run preview    # sirve el build en local
+npm run lint       # revisa el código
+docker compose down
+```
+
+---
+
+## 6. Estructura del proyecto
+
+```
+inducta-chile/
+├── docker/
+│   └── nginx.conf          # SPA routing en producción
+├── public/                 # estáticos públicos
+├── src/
+│   ├── app/                # shell de la app
+│   │   ├── App.jsx
+│   │   ├── providers.jsx   # Clerk + Saas UI
+│   │   └── router.jsx      # rutas
+│   ├── pages/              # pantallas por ruta
+│   │   └── DashboardPage.jsx
+│   ├── layouts/            # shells (sidebar, etc.)
+│   │   └── AdminLayout.jsx
+│   ├── features/           # lógica de negocio por dominio
+│   │   └── empresa/
+│   ├── hooks/              # hooks reutilizables
+│   ├── lib/                # clientes e infraestructura
+│   ├── services/           # integraciones externas (Transbank)
+│   ├── styles/
+│   └── main.jsx
+├── supabase/
+│   └── migrations/         # esquema SQL
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+└── README.md
+```
+
+| Carpeta | Qué va ahí |
+|---|---|
+| `src/app` | Arranque, providers y rutas |
+| `src/pages` | Pantallas ligadas a una URL |
+| `src/layouts` | Marcos compartidos (sidebar) |
+| `src/features` | Reglas de negocio por dominio |
+| `src/lib` | Env, cliente Supabase |
+| `src/services` | APIs externas (Transbank) |
+| `supabase/migrations` | SQL versionado |
+| `docker/` | Config del contenedor |

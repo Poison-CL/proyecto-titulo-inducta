@@ -1,17 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ClerkProvider } from '@clerk/clerk-react'
-import { SaasProvider } from '@saas-ui/react'
-import App from './App.jsx'
+import App from './app/App.jsx'
+import { assertClientEnv } from './lib/env'
+import './styles/global.css'
 
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+assertClientEnv()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey}>
-      <SaasProvider>
-        <App />
-      </SaasProvider>
-    </ClerkProvider>
+    <App />
   </StrictMode>,
 )
