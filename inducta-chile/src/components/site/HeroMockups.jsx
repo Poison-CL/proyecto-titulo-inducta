@@ -14,7 +14,7 @@ import {
 const HIGHLIGHT = '#9BD4F0'
 
 const iconTile = [
-  { label: 'Induccion', icon: ClipboardList, bg: '#E3F2FD', color: '#1565C0' },
+  { label: 'Inducción', icon: ClipboardList, bg: '#E3F2FD', color: '#1565C0' },
   { label: 'Seguridad', icon: ShieldCheck, bg: '#E8F5E9', color: '#2E7D32' },
   { label: 'Documentos', icon: FileText, bg: '#FFF3E0', color: '#EF6C00' },
   { label: 'Certificados', icon: Award, bg: '#F3E5F5', color: '#7B1FA2' },
@@ -57,7 +57,7 @@ export function PhoneMock() {
                 ¡Buen dia!
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
-                Camila R.
+                Fabiana M.
               </Text>
             </Box>
           </HStack>
@@ -70,7 +70,7 @@ export function PhoneMock() {
         <Box bg="brand.soft" borderRadius="lg" px={3} py={2.5} mb={3}>
           <Flex justify="space-between" align="center" mb={1}>
             <Text fontSize="10px" fontWeight="semibold" color="brand.ink">
-              Tu induccion
+              Tu inducción
             </Text>
             <Text fontSize="10px" fontWeight="bold" color="brand.primary">
               62%
@@ -183,7 +183,7 @@ export function DesktopMock() {
             Completados este mes
           </Text>
           {[
-            { name: 'Induccion general', meta: '148 / 160', pct: 92 },
+            { name: 'Inducción general', meta: '148 / 160', pct: 92 },
             { name: 'Seguridad laboral', meta: '125 / 160', pct: 78 },
             { name: 'Onboarding area', meta: '86 / 160', pct: 54 },
           ].map((row) => (
@@ -287,10 +287,10 @@ export function DesktopMock() {
               </Text>
             </HStack>
             <Text fontSize="10px" color="blackAlpha.600" lineHeight="1.4">
-              â€œComplete la induccion en 2 dias. Todo claro y ordenado.â€
+              Completé la inducción en 2 dias. Todo claro y ordenado
             </Text>
             <Text fontSize="9px" color="brand.primary" mt={1} fontWeight="semibold">
-              â€” Mateo M.
+              Mateo M.
             </Text>
           </Box>
         </VStack>
