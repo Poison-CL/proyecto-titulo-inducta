@@ -53,7 +53,7 @@ export default function Footer() {
               Inducta Chile
             </Text>
             <Text fontSize="sm" color="whiteAlpha.700" maxW="34ch" lineHeight="1.7">
-              Plataforma de induccion y capacitacion para empresas: programas por cargo,
+              Plataforma de inducción y capacitacion para empresas: programas por cargo,
               seguimiento del avance y evidencia lista para auditorias.
             </Text>
           </VStack>

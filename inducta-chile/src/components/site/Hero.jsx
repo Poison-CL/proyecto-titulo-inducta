@@ -82,7 +82,7 @@ export default function Hero() {
             px={3}
             py={1}
           >
-            Plataforma de induccion y capacitacion
+            Plataforma de inducción y capacitación
           </Text>
 
           <Heading
@@ -94,7 +94,7 @@ export default function Hero() {
             letterSpacing="-0.03em"
             sx={{ color: 'white' }}
           >
-            Induccion clara.
+            Inducción clara.
             <Box as="br" />
             <Box as="span" color={HIGHLIGHT}>
               Equipo listo.
@@ -109,7 +109,7 @@ export default function Hero() {
             opacity={0.95}
           >
             Organice inducciones y capacitaciones por cargo o area, siga el avance de cada
-            colaborador y deje evidencia lista para auditorias.
+            colaborador y deje evidencia lista para auditorías.
           </Text>
 
           <HStack
