@@ -6,11 +6,8 @@ import {
   HStack,
   Icon,
   IconButton,
+  Image,
   Link,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   SimpleGrid,
   Text,
   VStack,
@@ -19,14 +16,12 @@ import {
 import { SignedIn, SignedOut } from '@clerk/clerk-react'
 import {
   BookOpen,
-  Building2,
   ChevronDown,
   FileText,
   HelpCircle,
   Layers,
   Menu as MenuIcon,
   ShieldCheck,
-  UserRound,
   X,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -39,14 +34,14 @@ const MotionPanel = motion.create(Box)
 
 const recursos = [
   {
-    title: 'Guias de induccion',
-    desc: 'Documentacion para procesos de ingreso',
+    title: 'Guías de inducción',
+    desc: 'Documentación para procesos de ingreso',
     icon: BookOpen,
     href: '/recursos',
   },
   {
     title: 'Capacitaciones',
-    desc: 'Programas por area y cargo',
+    desc: 'Programas por área y cargo',
     icon: Layers,
     href: '/recursos',
   },
@@ -57,7 +52,7 @@ const recursos = [
     href: '/recursos',
   },
   {
-    title: 'Documentacion',
+    title: 'Documentación',
     desc: 'Manuales institucionales',
     icon: FileText,
     href: '/recursos',
@@ -76,8 +71,15 @@ const linkBtn = {
   h: '40px',
   px: 3,
   fontWeight: 'medium',
-  color: 'brand.ink',
-  _hover: { bg: 'transparent', color: 'brand.primary' },
+  color: 'white',
+  _hover: { bg: 'whiteAlpha.200', color: 'white' },
+}
+
+const mobileBtn = {
+  variant: 'ghost',
+  justifyContent: 'flex-start',
+  color: 'white',
+  _hover: { bg: 'whiteAlpha.200' },
 }
 
 export default function Navbar() {
@@ -109,9 +111,9 @@ export default function Navbar() {
       left={0}
       right={0}
       zIndex={50}
-      bg="white"
-      borderBottomWidth="2px"
-      borderColor="brand.primary"
+      bg="brand.primary"
+      borderBottomWidth="1px"
+      borderColor="whiteAlpha.200"
       onMouseLeave={onMegaClose}
     >
       {showBanner ? (
@@ -126,23 +128,23 @@ export default function Navbar() {
         align="center"
         gap={{ base: 3, md: 6 }}
       >
-        {/* Logo */}
-        <Text
+        <Box
           as={RouterLink}
           to="/"
-          fontFamily="heading"
-          fontWeight="bold"
-          fontSize={{ base: 'md', md: 'lg' }}
-          lineHeight="1"
-          color="brand.primary"
+          display="flex"
+          alignItems="center"
           flexShrink={0}
           onClick={closeAll}
-          _hover={{ textDecoration: 'none', color: 'brand.ink' }}
+          _hover={{ opacity: 0.85 }}
         >
-          Inducta Chile
-        </Text>
+          <Image
+            src="/logo-blanco.png"
+            alt="Inducta Chile"
+            h={{ base: '22px', md: '26px' }}
+            w="auto"
+          />
+        </Box>
 
-        {/* Links desktop (junto al logo, estilo Buk) */}
         <HStack
           as="nav"
           spacing={0}
@@ -178,7 +180,6 @@ export default function Navbar() {
           </Button>
         </HStack>
 
-        {/* Derecha: Precios + Ingresar */}
         <Flex align="center" justify="flex-end" gap={{ base: 2, md: 4 }} h="40px" ml="auto">
           <Button
             as={RouterLink}
@@ -192,67 +193,27 @@ export default function Navbar() {
             fontWeight="bold"
             display={{ base: 'none', sm: 'inline-flex' }}
             onClick={closeAll}
-            _hover={{ bg: '#d33a3a' }}
-            _active={{ bg: '#c03232' }}
+            _hover={{ bg: 'brand.accentDark' }}
+            _active={{ bg: 'brand.primaryDark' }}
           >
             Precios
           </Button>
 
           <SignedOut>
-            <Menu placement="bottom-end">
-              <MenuButton
-                as={Button}
-                variant="ghost"
-                size="sm"
-                h="40px"
-                px={2}
-                fontWeight="semibold"
-                color="brand.primary"
-                _hover={{ bg: 'transparent', color: 'brand.ink' }}
-              >
-                Ingresar
-              </MenuButton>
-              <MenuList
-                borderColor="blackAlpha.100"
-                boxShadow="lg"
-                py={2}
-                minW="220px"
-              >
-                <Text
-                  px={3}
-                  pb={2}
-                  fontSize="xs"
-                  fontWeight="semibold"
-                  color="gray.500"
-                  textTransform="uppercase"
-                  letterSpacing="0.04em"
-                >
-                  Ingresar como
-                </Text>
-                <MenuItem
-                  as={RouterLink}
-                  to="/entrar?rol=empresa"
-                  icon={<Icon as={Building2} boxSize={4} color="brand.primary" />}
-                  fontWeight="medium"
-                  py={3}
-                  onClick={closeAll}
-                  _hover={{ bg: 'brand.soft', textDecoration: 'none' }}
-                >
-                  Empresa
-                </MenuItem>
-                <MenuItem
-                  as={RouterLink}
-                  to="/entrar?rol=empleado"
-                  icon={<Icon as={UserRound} boxSize={4} color="brand.ink" />}
-                  fontWeight="medium"
-                  py={3}
-                  onClick={closeAll}
-                  _hover={{ bg: 'brand.soft', textDecoration: 'none' }}
-                >
-                  Empleado
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Button
+              as={RouterLink}
+              to="/entrar"
+              variant="ghost"
+              size="sm"
+              h="40px"
+              px={3}
+              fontWeight="semibold"
+              color="white"
+              onClick={closeAll}
+              _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
+            >
+              Ingresar
+            </Button>
           </SignedOut>
 
           <SignedIn>
@@ -263,9 +224,9 @@ export default function Navbar() {
               h="40px"
               variant="ghost"
               fontWeight="semibold"
-              color="brand.primary"
+              color="white"
               display={{ base: 'none', sm: 'inline-flex' }}
-              _hover={{ bg: 'transparent', color: 'brand.ink' }}
+              _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
             >
               Ir al panel
             </Button>
@@ -276,10 +237,11 @@ export default function Navbar() {
 
           <IconButton
             display={{ base: 'inline-flex', md: 'none' }}
-            aria-label={mobileOpen ? 'Cerrar menu' : 'Abrir menu'}
+            aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
             icon={<Icon as={mobileOpen ? X : MenuIcon} boxSize={5} />}
             variant="ghost"
-            color="brand.ink"
+            color="white"
+            _hover={{ bg: 'whiteAlpha.200' }}
             h="40px"
             w="40px"
             minW="40px"
@@ -288,43 +250,23 @@ export default function Navbar() {
         </Flex>
       </Flex>
 
-      {/* Menu movil */}
       <Collapse in={mobileOpen} animateOpacity>
         <Box
           display={{ base: 'block', md: 'none' }}
           borderTopWidth="1px"
-          borderColor="blackAlpha.100"
-          bg="white"
+          borderColor="whiteAlpha.200"
+          bg="brand.primary"
           px={4}
           py={4}
         >
           <VStack as="nav" align="stretch" spacing={1}>
-            <Button
-              as={NavLink}
-              to="/"
-              end
-              variant="ghost"
-              justifyContent="flex-start"
-              onClick={onMobileClose}
-            >
+            <Button as={NavLink} to="/" end {...mobileBtn} onClick={onMobileClose}>
               Inicio
             </Button>
-            <Button
-              as={NavLink}
-              to="/recursos"
-              variant="ghost"
-              justifyContent="flex-start"
-              onClick={onMobileClose}
-            >
+            <Button as={NavLink} to="/recursos" {...mobileBtn} onClick={onMobileClose}>
               Recursos
             </Button>
-            <Button
-              as={NavLink}
-              to="/contacto"
-              variant="ghost"
-              justifyContent="flex-start"
-              onClick={onMobileClose}
-            >
+            <Button as={NavLink} to="/contacto" {...mobileBtn} onClick={onMobileClose}>
               Contacto
             </Button>
             <Button
@@ -335,18 +277,12 @@ export default function Navbar() {
               borderRadius="full"
               mt={2}
               onClick={onMobileClose}
-              _hover={{ bg: '#d33a3a' }}
+              _hover={{ bg: 'brand.accentDark' }}
             >
               Precios
             </Button>
             <SignedIn>
-              <Button
-                as={RouterLink}
-                to="/dashboard"
-                variant="ghost"
-                justifyContent="flex-start"
-                onClick={onMobileClose}
-              >
+              <Button as={RouterLink} to="/dashboard" {...mobileBtn} onClick={onMobileClose}>
                 Ir al panel
               </Button>
             </SignedIn>
@@ -354,7 +290,6 @@ export default function Navbar() {
         </Box>
       </Collapse>
 
-      {/* Mega menu recursos */}
       <AnimatePresence>
         {megaOpen ? (
           <MotionPanel

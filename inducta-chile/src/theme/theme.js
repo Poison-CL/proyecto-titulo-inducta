@@ -4,10 +4,13 @@ import { theme as saasTheme } from '@saas-ui/react'
 // Colores y tipografia de Inducta sobre el tema base de Saas UI
 const colors = {
   brand: {
-    soft: '#F0F5F9',
-    ink: '#2B2E4A',
-    primary: '#005691',
-    accent: '#E84545',
+    soft: '#FAFAFA',
+    ink: '#0D0D0D',
+    wash: '#EEF0FC',
+    primary: '#1B22A7',
+    primaryDark: '#151A85',
+    accent: '#4260E6',
+    accentDark: '#3550C4',
   },
 }
 
@@ -15,8 +18,8 @@ export const theme = extendTheme(
   {
     colors,
     fonts: {
-      heading: `'Plus Jakarta Sans', 'Segoe UI', sans-serif`,
-      body: `'Plus Jakarta Sans', 'Segoe UI', sans-serif`,
+      heading: `'Inter', 'Segoe UI', sans-serif`,
+      body: `'Inter', 'Segoe UI', sans-serif`,
     },
     styles: {
       global: {
@@ -36,7 +39,7 @@ export const theme = extendTheme(
           solid: {
             bg: 'brand.primary',
             color: 'white',
-            _hover: { bg: '#004578' },
+            _hover: { bg: 'brand.primaryDark' },
           },
           outline: {
             borderColor: 'blackAlpha.200',

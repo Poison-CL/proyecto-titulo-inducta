@@ -93,17 +93,8 @@ export function AccesoSinMembresiaPage() {
       body={copy.body}
       actions={
         <>
-          <Button as={RouterLink} to={RUTAS_AUTH.contacto}>
+          <Button as={RouterLink} to={RUTAS_AUTH.inicio}>
             {copy.ctaPrimario}
-          </Button>
-          <Button
-            as={RouterLink}
-            to={RUTAS_AUTH.inicio}
-            variant="outline"
-            borderWidth="2px"
-            borderColor="brand.ink"
-          >
-            {copy.ctaSecundario}
           </Button>
           <Button variant="ghost" color="brand.ink" onClick={() => signOut({ redirectUrl: '/' })}>
             {copy.ctaSalir}

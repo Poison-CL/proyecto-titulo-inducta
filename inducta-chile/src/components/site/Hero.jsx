@@ -1,7 +1,6 @@
-﻿import { Box, Button, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
 import { Link as RouterLink } from 'react-router-dom'
-import Silk from '../bits/Silk'
 import { DesktopMock, PhoneMock } from './HeroMockups'
 
 const fadeUp = keyframes`
@@ -9,49 +8,20 @@ const fadeUp = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `
 
-const HIGHLIGHT = '#9BD4F0'
-
 export default function Hero() {
   return (
     <Box
       as="section"
       position="relative"
       overflow="hidden"
-      bg="brand.primary"
+      bgGradient={{
+        base: 'linear(to-b, white 0%, brand.wash 100%)',
+        md: 'linear(to-r, white 0%, white 45%, brand.wash 100%)',
+      }}
       minH="100vh"
       pt="var(--site-header-h, 72px)"
       pb={{ base: 12, md: 0 }}
     >
-      {/* El fondo animado va solo a la derecha; a la izquierda dejamos color plano
-          para que el titulo se lea bien */}
-      <Box
-        position="absolute"
-        inset={0}
-        zIndex={0}
-        opacity={0.35}
-        display={{ base: 'none', md: 'block' }}
-        clipPath="inset(0 0 0 45%)"
-      >
-        <Silk
-          speed={3.5}
-          scale={0.85}
-          color="#005691"
-          noiseIntensity={0.35}
-          rotation={0.2}
-        />
-      </Box>
-      <Box
-        position="absolute"
-        inset={0}
-        zIndex={1}
-        pointerEvents="none"
-        bgGradient={{
-          base: 'linear(to-b, #004578 0%, brand.primary 100%)',
-          md: 'linear(to-r, #003a63 0%, #004578 42%, brand.primary 70%, #0066a8 100%)',
-        }}
-      />
-
-      {/* El texto ocupa la mitad izquierda */}
       <Container
         maxW="7xl"
         px={{ base: 5, md: 8 }}
@@ -75,9 +45,10 @@ export default function Hero() {
             display="inline-block"
             fontSize="xs"
             fontWeight="semibold"
-            color="white"
+            color="brand.primary"
+            bg="brand.wash"
             borderWidth="1px"
-            borderColor="white"
+            borderColor="brand.primary"
             borderRadius="md"
             px={3}
             py={1}
@@ -92,23 +63,23 @@ export default function Hero() {
             fontWeight="semibold"
             lineHeight="1.15"
             letterSpacing="-0.03em"
-            sx={{ color: 'white' }}
+            sx={{ color: 'brand.ink' }}
           >
             Inducción clara.
             <Box as="br" />
-            <Box as="span" color={HIGHLIGHT}>
+            <Box as="span" color="brand.primary">
               Equipo listo.
             </Box>
           </Heading>
 
           <Text
             fontSize={{ base: 'md', md: 'lg' }}
-            color="white"
+            color="brand.ink"
             lineHeight="1.65"
             maxW="42ch"
-            opacity={0.95}
+            opacity={0.75}
           >
-            Organice inducciones y capacitaciones por cargo o area, siga el avance de cada
+            Organice inducciones y capacitaciones por cargo o área, siga el avance de cada
             colaborador y deje evidencia lista para auditorías.
           </Text>
 
@@ -127,8 +98,8 @@ export default function Hero() {
               bg="brand.accent"
               color="white"
               fontWeight="bold"
-              _hover={{ bg: '#d33a3a' }}
-              _active={{ bg: '#c03232' }}
+              _hover={{ bg: 'brand.accentDark' }}
+              _active={{ bg: 'brand.primaryDark' }}
             >
               Ver planes
             </Button>
@@ -140,10 +111,10 @@ export default function Hero() {
               borderRadius="full"
               variant="outline"
               borderWidth="1.5px"
-              borderColor="white"
-              color="white"
+              borderColor="blackAlpha.300"
+              color="brand.ink"
               bg="transparent"
-              _hover={{ bg: 'whiteAlpha.200', borderColor: 'white', color: 'white' }}
+              _hover={{ bg: 'brand.soft', borderColor: 'brand.ink' }}
             >
               Agendar demo
             </Button>
@@ -151,10 +122,7 @@ export default function Hero() {
         </VStack>
       </Container>
 
-      {/*
-        Los mockups arrancan pasada la mitad para no pisar el texto y se anclan al
-        borde derecho. El dashboard queda cortado contra ese borde, es a proposito.
-      */}
+      {/* Anclados al borde derecho: el dashboard queda cortado a proposito */}
       <Box
         aria-hidden
         display={{ base: 'none', md: 'block' }}
@@ -167,44 +135,22 @@ export default function Hero() {
         right={0}
         sx={{ animation: `${fadeUp} 0.55s ease 0.08s both` }}
       >
-        <Box position="relative" h="full">
-          {/* Glow detras del movil */}
-          <Box
-            position="absolute"
-            left="-40px"
-            top="50%"
-            transform="translateY(-50%)"
-            w={{ md: '320px', lg: '380px' }}
-            h={{ md: '340px', lg: '400px' }}
-            borderRadius="full"
-            bg="#5EB8F0"
-            opacity={0.5}
-            filter="blur(60px)"
-            zIndex={0}
-          />
-
-          {/* El dashboard va detras del telefono */}
-          <Box
-            position="absolute"
-            left={{ md: '110px', lg: '140px' }}
-            top="50%"
-            transform="translateY(-50%)"
-            zIndex={1}
-          >
-            <DesktopMock />
-          </Box>
-
-          {/* El telefono va encima, pisando el tercio izquierdo del dashboard */}
-          <Box
-            position="absolute"
-            left={{ md: '0px', lg: '16px' }}
-            top="50%"
-            transform="translateY(-50%)"
-            zIndex={3}
-          >
+        {/* El brillo de los dos mockups se toca solo aca. drop-shadow sigue la
+            silueta real de las tarjetas, por eso rodea el contorno del conjunto en
+            vez de dibujar una caja: el primer valor es el halo, el segundo la sombra. */}
+        <Flex
+          position="relative"
+          h="full"
+          align="center"
+          filter="drop-shadow(0 0 30px rgba(66, 96, 230, 0.8)) drop-shadow(0 20px 38px rgba(13, 13, 13, 0.16))"
+        >
+          <Box flexShrink={0} zIndex={3}>
             <PhoneMock />
           </Box>
-        </Box>
+          <Box flexShrink={0} ml="-32px" zIndex={1}>
+            <DesktopMock />
+          </Box>
+        </Flex>
       </Box>
     </Box>
   )

@@ -17,28 +17,28 @@ const fadeUp = keyframes`
 
 const preguntas = [
   {
-    q: '¿Que es Inducta Chile y para que sirve?',
-    a: 'Es una plataforma para gestionar inducciones y capacitaciones de personal. Centraliza los programas, registra el avance de cada colaborador y guarda la evidencia necesaria para auditorias.',
+    q: '¿Qué es Inducta Chile?',
+    a: 'Una plataforma para gestionar las inducciones y capacitaciones de su personal. Reúne los programas en un solo lugar, registra el avance de cada colaborador y guarda la evidencia que piden las auditorías.',
   },
   {
-    q: '¿Para que tipo de empresas esta pensada?',
-    a: 'Para empresas y organizaciones en Chile que necesitan estandarizar el ingreso de colaboradores y acreditar el cumplimiento formativo, sin importar el tamano del equipo.',
+    q: '¿Para qué empresas está pensada?',
+    a: 'Para empresas en Chile que necesitan ordenar el ingreso de nuevos colaboradores y poder demostrar que las capacitaciones se realizaron. Funciona igual con equipos chicos y grandes.',
   },
   {
     q: '¿Puedo probar la plataforma antes de contratar?',
-    a: 'Si. Puede agendar una demo sin costo para revisar el flujo completo con su equipo antes de tomar una decision.',
+    a: 'Sí. Puede agendar una demo sin costo y recorrer el flujo completo con su equipo antes de decidir.',
   },
   {
-    q: '¿Como se organizan los contenidos?',
-    a: 'Por area, cargo o normativa. Cada programa deja trazabilidad de quien completo cada etapa y en que fecha.',
+    q: '¿Cómo se organizan los contenidos?',
+    a: 'Por área, cargo o normativa, como le acomode a su empresa. Cada programa deja registro de quién completó cada etapa y en qué fecha.',
   },
   {
-    q: '¿Como acceden los colaboradores?',
-    a: 'La empresa crea los accesos desde su panel. Cada colaborador entra con su correo y ve solo los programas asignados a su cargo.',
+    q: '¿Cómo acceden los colaboradores?',
+    a: 'Usted crea los accesos desde el panel de su empresa. Cada colaborador entra con su correo y ve únicamente los programas asignados a su cargo.',
   },
   {
-    q: '¿Donde pido soporte?',
-    a: 'Escriba a contacto@inductachile.cl o use la seccion Contacto del sitio. Respondemos en horario habil.',
+    q: '¿Cómo pido soporte?',
+    a: 'Escríbanos a contacto@inductachile.cl o use la sección Contacto del sitio. Respondemos en días hábiles.',
   },
 ]
 
@@ -66,30 +66,30 @@ export default function FaqSection() {
           sx={{ animation: `${fadeUp} 0.45s ease 0.06s both` }}
         >
           {preguntas.map((item) => (
-            <AccordionItem
-              key={item.q}
-              border="none"
-              bg="white"
-              borderRadius="full"
-              boxShadow="0 1px 6px rgba(0, 40, 80, 0.10)"
-              overflow="hidden"
-              _expanded={{ borderRadius: '2xl' }}
-            >
+            <AccordionItem key={item.q} border="none">
               {({ isExpanded }) => (
-                <Box borderRadius={isExpanded ? '2xl' : 'full'} bg="white">
+                // Todo el estilo va en este elemento porque es el unico que sabe
+                // si la pregunta esta abierta; repartirlo recorta las esquinas
+                <Box
+                  bg="white"
+                  borderRadius={isExpanded ? '2xl' : 'full'}
+                  boxShadow="0 1px 3px rgba(13, 13, 13, 0.08)"
+                  overflow="hidden"
+                  transition="border-radius 0.2s ease, box-shadow 0.2s ease"
+                  _hover={{ boxShadow: '0 4px 14px rgba(13, 13, 13, 0.10)' }}
+                >
                   <h3>
                     <AccordionButton
                       px={{ base: 5, md: 7 }}
-                      py={{ base: 4, md: 4 }}
-                      borderRadius={isExpanded ? '2xl' : 'full'}
+                      py={4}
                       _hover={{ bg: 'brand.soft' }}
                     >
                       <Box
                         as="span"
                         flex="1"
                         textAlign="left"
-                        fontWeight="medium"
-                        color="brand.primary"
+                        fontWeight="semibold"
+                        color="brand.ink"
                         fontSize={{ base: 'sm', md: 'md' }}
                         pr={3}
                       >

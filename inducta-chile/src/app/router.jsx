@@ -40,7 +40,6 @@ export function AppRouter() {
           <Route path="*" element={<NoEncontradaPage />} />
         </Route>
 
-        {/* Flujo de autenticacion */}
         <Route path={RUTAS_AUTH.entrar} element={<EntrarPage />} />
         <Route
           path={`${RUTAS_AUTH.entrarEmpresa}/*`}

@@ -31,7 +31,7 @@ export default function RequireOrg({ children }) {
     }
 
     setActive({ organization: orgId })
-      .catch((err) => console.error('No se pudo activar la organizacion:', err))
+      .catch((err) => console.error('No se pudo activar la organización:', err))
       .finally(() => {
         activating.current = false
       })

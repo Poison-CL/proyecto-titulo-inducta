@@ -5,6 +5,7 @@ import {
   Flex,
   HStack,
   Icon,
+  Image,
   Link,
   SimpleGrid,
   Text,
@@ -49,12 +50,10 @@ export default function Footer() {
       <Container maxW="6xl" px={{ base: 4, md: 8 }} py={{ base: 12, md: 16 }}>
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 10, md: 12 }}>
           <VStack align="start" spacing={4}>
-            <Text fontFamily="heading" fontWeight="bold" color="white" fontSize="lg">
-              Inducta Chile
-            </Text>
+            <Image src="/logo-azul.png" alt="Inducta Chile" h="30px" w="auto" />
             <Text fontSize="sm" color="whiteAlpha.700" maxW="34ch" lineHeight="1.7">
-              Plataforma de inducción y capacitacion para empresas: programas por cargo,
-              seguimiento del avance y evidencia lista para auditorias.
+              Plataforma de inducción y capacitación para empresas: programas por cargo,
+              seguimiento del avance y evidencia lista para auditorías.
             </Text>
           </VStack>
 
@@ -123,7 +122,7 @@ export default function Footer() {
               Privacidad
             </Link>
             <Link href="#" _hover={{ color: 'white' }}>
-              Terminos
+              Términos
             </Link>
             <Link as={RouterLink} to="/contacto" _hover={{ color: 'white' }}>
               Soporte
