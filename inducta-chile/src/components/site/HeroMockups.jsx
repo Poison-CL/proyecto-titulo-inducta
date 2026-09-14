@@ -54,7 +54,7 @@ export function PhoneMock() {
                 ¡Buen día!
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
-                Camila R.
+                Fabiana M.
               </Text>
             </Box>
           </HStack>
