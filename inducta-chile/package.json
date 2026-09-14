@@ -16,7 +16,6 @@
     "@clerk/localizations": "^4.16.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@react-three/fiber": "^9.7.0",
     "@saas-ui/react": "^2.11.4",
     "@supabase/supabase-js": "^2.115.0",
     "framer-motion": "^11.18.2",
@@ -25,7 +24,6 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3",
-    "three": "^0.186.0",
     "transbank-sdk": "^6.1.1"
   },
   "devDependencies": {

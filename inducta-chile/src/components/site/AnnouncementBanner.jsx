@@ -6,7 +6,7 @@ import { Link as RouterLink } from 'react-router-dom'
 export default function AnnouncementBanner({ onClose }) {
   return (
     <Box
-      bg="#E8F1F8"
+      bg="brand.wash"
       borderBottomWidth="1px"
       borderColor="blackAlpha.100"
       px={{ base: 3, md: 6 }}

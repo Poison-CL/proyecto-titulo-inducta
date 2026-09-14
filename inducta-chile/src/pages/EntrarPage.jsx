@@ -5,11 +5,14 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  Heading,
   Icon,
+  Image,
   Input,
   InputGroup,
   InputLeftElement,
   Link,
+  SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -20,24 +23,20 @@ import { useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { RUTAS_AUTH } from '../lib/authCopy'
 import { isRolValido, ROL, setRolPendiente } from '../lib/authRol'
-import { factorByStrategy, PASO, pasoSiguiente } from '../lib/loginPasos'
+import { clerkError, factorByStrategy, PASO, pasoSiguiente } from '../lib/loginPasos'
 
 const MotionBox = motion.create(Box)
 
 const COPY = {
   [ROL.EMPRESA]: {
-    ayuda: 'Si tu empresa aun no tiene acceso, contrata un plan o agenda una demo.',
+    ayuda: 'Si tu empresa aún no tiene acceso, contrata un plan o agenda una demo.',
   },
   [ROL.EMPLEADO]: {
-    ayuda: 'Si no puedes entrar, pide a tu administrador que te agregue.',
+    ayuda: 'Las cuentas de colaborador las crea tu empresa. Si no puedes entrar, pide a tu administrador que te agregue.',
   },
 }
 
 const ease = [0.22, 1, 0.36, 1]
-
-function clerkError(err, fallback) {
-  return err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || fallback
-}
 
 function RolToggle({ rol, onChange, disabled }) {
   const esEmpresa = rol === ROL.EMPRESA
@@ -137,7 +136,7 @@ const inputProps = {
   _focus: {
     bg: 'white',
     borderColor: 'brand.primary',
-    boxShadow: '0 0 0 1px #005691',
+    boxShadow: '0 0 0 1px #1B22A7',
   },
 }
 
@@ -168,7 +167,6 @@ function LoginCard() {
     setParams({ rol }, { replace: true })
   }, [rol, setParams])
 
-  // Cuenta regresiva para reenviar codigo
   useEffect(() => {
     if (cooldown <= 0) return undefined
     const id = setInterval(() => {
@@ -219,7 +217,9 @@ function LoginCard() {
 
       if (!siguiente) {
         setError(
-          'Esta cuenta no tiene un metodo de ingreso disponible. Contacta a Inducta o a tu empresa.',
+          rol === ROL.EMPRESA
+            ? 'Esta cuenta no tiene un método de ingreso disponible. Escríbenos y lo revisamos.'
+            : 'Esta cuenta no tiene un método de ingreso disponible. Pide a tu administrador que revise tu acceso.',
         )
         return
       }
@@ -230,12 +230,7 @@ function LoginCard() {
 
       setStep(siguiente)
     } catch (err) {
-      setError(
-        clerkError(
-          err,
-          'No encontramos una cuenta con ese correo. Si eres empresa, agenda una demo. Si eres empleado, pide acceso a tu empresa.',
-        ),
-      )
+      setError(clerkError(err, 'No pudimos continuar con ese correo. Intenta de nuevo.', rol))
     } finally {
       setLoading(false)
     }
@@ -244,14 +239,14 @@ function LoginCard() {
   const sendEmailCode = async (si = signIn) => {
     const factor = factorByStrategy(si, 'email_code')
     if (!factor?.emailAddressId) {
-      throw new Error('No hay correo verificado para enviar el codigo.')
+      throw new Error('No hay correo verificado para enviar el código.')
     }
 
     await si.prepareFirstFactor({
       strategy: 'email_code',
       emailAddressId: factor.emailAddressId,
     })
-    setInfo(`Enviamos un codigo a ${email.trim()}. Revisa tu bandeja de entrada.`)
+    setInfo(`Enviamos un código a ${email.trim()}. Revisa tu bandeja de entrada.`)
     setCooldown(RESEND_SEGUNDOS)
   }
 
@@ -262,7 +257,7 @@ function LoginCard() {
       await sendEmailCode()
       setStep('code')
     } catch (err) {
-      setError(clerkError(err, 'No pudimos enviar el codigo. Intenta de nuevo.'))
+      setError(clerkError(err, 'No pudimos enviar el código. Intenta de nuevo.', rol))
     } finally {
       setLoading(false)
     }
@@ -278,7 +273,7 @@ function LoginCard() {
     e.preventDefault()
     setError('')
     if (!code.trim()) {
-      setError('Ingresa el codigo de verificacion.')
+      setError('Ingresa el código de verificación.')
       return
     }
 
@@ -289,9 +284,9 @@ function LoginCard() {
         code: code.trim(),
       })
       if (await finishIfComplete(result)) return
-      setError('Codigo incorrecto o incompleto. Intenta otra vez.')
+      setError('Código incorrecto o incompleto. Intenta otra vez.')
     } catch (err) {
-      setError(clerkError(err, 'Codigo incorrecto o expirado.'))
+      setError(clerkError(err, 'Código incorrecto o expirado.', rol))
     } finally {
       setLoading(false)
     }
@@ -314,7 +309,7 @@ function LoginCard() {
       if (await finishIfComplete(result)) return
       setError('No pudimos completar el ingreso con contraseña.')
     } catch (err) {
-      setError(clerkError(err, 'Contraseña incorrecta.'))
+      setError(clerkError(err, 'Contraseña incorrecta.', rol))
     } finally {
       setLoading(false)
     }
@@ -327,7 +322,7 @@ function LoginCard() {
     try {
       await sendEmailCode()
     } catch (err) {
-      setError(clerkError(err, 'No pudimos reenviar el codigo.'))
+      setError(clerkError(err, 'No pudimos reenviar el código.', rol))
     } finally {
       setLoading(false)
     }
@@ -352,16 +347,8 @@ function LoginCard() {
       transition={{ duration: 0.45, ease }}
     >
       <VStack spacing={6} align="stretch">
-        <VStack spacing={1} textAlign="center">
-          <Text
-            fontFamily="heading"
-            fontWeight="bold"
-            fontSize="xl"
-            color="brand.ink"
-            letterSpacing="-0.02em"
-          >
-            Inducta Chile
-          </Text>
+        <VStack spacing={3} textAlign="center">
+          <Image src="/logo-azul-oscuro.png" alt="Inducta Chile" h="32px" w="auto" />
           <Text fontSize="sm" color="gray.500">
             Entrar al sistema
           </Text>
@@ -370,12 +357,14 @@ function LoginCard() {
         <RolToggle rol={rol} onChange={setRol} disabled={step !== 'email'} />
 
         <AnimatePresence mode="wait">
-          {/* Paso correo */}
           {step === 'email' ? (
             <MotionBox
               key="email"
               as="form"
               onSubmit={onContinueEmail}
+              // El aviso nativo de type="email" sale en el idioma del navegador;
+              // validamos nosotros para que el error siempre salga en espanol
+              noValidate
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -12 }}
@@ -383,14 +372,14 @@ function LoginCard() {
             >
               <VStack spacing={4} align="stretch">
                 <Text fontSize="sm" color="gray.600" textAlign="center">
-                  Ingresa tu correo. Luego podras verificar con codigo o contraseña.
+                  Ingresa tu correo. Luego podrás verificar con código o contraseña.
                 </Text>
                 <Field icon={Mail}>
                   <FormLabel srOnly>Correo</FormLabel>
                   <Input
                     type="email"
                     autoComplete="username"
-                    placeholder="Correo electronico"
+                    placeholder="Correo electrónico"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     {...inputProps}
@@ -404,7 +393,7 @@ function LoginCard() {
                   color="white"
                   isLoading={loading}
                   loadingText="Continuando…"
-                  _hover={{ bg: '#004578' }}
+                  _hover={{ bg: 'brand.primaryDark' }}
                 >
                   Continuar
                 </Button>
@@ -412,7 +401,6 @@ function LoginCard() {
             </MotionBox>
           ) : null}
 
-          {/* Elegir metodo */}
           {step === 'method' ? (
             <MotionBox
               key="method"
@@ -433,7 +421,7 @@ function LoginCard() {
                   Cambiar correo
                 </Button>
                 <Text fontSize="sm" color="gray.600" textAlign="center">
-                  Elige como quieres entrar con <Text as="span" fontWeight="semibold">{email}</Text>
+                  Elige cómo quieres entrar con <Text as="span" fontWeight="semibold">{email}</Text>
                 </Text>
                 {canEmailCode ? (
                   <Button
@@ -444,9 +432,9 @@ function LoginCard() {
                     leftIcon={<KeyRound size={16} />}
                     onClick={onChooseCode}
                     isLoading={loading}
-                    _hover={{ bg: '#004578' }}
+                    _hover={{ bg: 'brand.primaryDark' }}
                   >
-                    Codigo de verificacion
+                    Código de verificación
                   </Button>
                 ) : null}
                 {canPassword ? (
@@ -466,7 +454,6 @@ function LoginCard() {
             </MotionBox>
           ) : null}
 
-          {/* Codigo */}
           {step === 'code' ? (
             <MotionBox
               key="code"
@@ -493,18 +480,18 @@ function LoginCard() {
                   Volver
                 </Button>
                 <Text fontSize="sm" color="gray.600" textAlign="center">
-                  Escribe el codigo que enviamos a{' '}
+                  Escribe el código que enviamos a{' '}
                   <Text as="span" fontWeight="semibold">
                     {email}
                   </Text>
                 </Text>
                 <Field icon={KeyRound}>
-                  <FormLabel srOnly>Codigo</FormLabel>
+                  <FormLabel srOnly>Código</FormLabel>
                   <Input
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
-                    placeholder="Codigo de verificacion"
+                    placeholder="Código de verificación"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     {...inputProps}
@@ -518,7 +505,7 @@ function LoginCard() {
                   color="white"
                   isLoading={loading}
                   loadingText="Verificando…"
-                  _hover={{ bg: '#004578' }}
+                  _hover={{ bg: 'brand.primaryDark' }}
                 >
                   Verificar e ingresar
                 </Button>
@@ -531,8 +518,8 @@ function LoginCard() {
                   _hover={cooldown > 0 ? { textDecoration: 'none' } : undefined}
                 >
                   {cooldown > 0
-                    ? `Reenviar codigo en ${cooldown}s`
-                    : 'Reenviar codigo'}
+                    ? `Reenviar código en ${cooldown}s`
+                    : 'Reenviar código'}
                 </Button>
                 {canPassword ? (
                   <Button type="button" variant="link" color="gray.500" onClick={onChoosePassword}>
@@ -543,7 +530,6 @@ function LoginCard() {
             </MotionBox>
           ) : null}
 
-          {/* Contraseña */}
           {step === 'password' ? (
             <MotionBox
               key="password"
@@ -594,13 +580,13 @@ function LoginCard() {
                   color="white"
                   isLoading={loading}
                   loadingText="Ingresando…"
-                  _hover={{ bg: '#004578' }}
+                  _hover={{ bg: 'brand.primaryDark' }}
                 >
-                  Iniciar sesion
+                  Iniciar sesión
                 </Button>
                 {canEmailCode ? (
                   <Button type="button" variant="link" color="brand.primary" onClick={onChooseCode}>
-                    Preferir codigo de verificacion
+                    Preferir código de verificación
                   </Button>
                 ) : null}
               </VStack>
@@ -638,29 +624,45 @@ function LoginCard() {
               exit={{ opacity: 0 }}
             >
               <Text fontSize="sm" color="gray.500" textAlign="center" lineHeight="1.55">
-                {copy.ayuda}{' '}
-                <Link
-                  as={RouterLink}
-                  to={rol === ROL.EMPRESA ? RUTAS_AUTH.precios : RUTAS_AUTH.contacto}
-                  color="brand.primary"
-                  fontWeight="medium"
-                >
-                  {rol === ROL.EMPRESA ? 'Ver planes' : 'Contactar Inducta'}
-                </Link>
+                {copy.ayuda}
+                {/* Solo la empresa tiene algo que hacer aca; al colaborador lo
+                    resuelve su administrador, no nosotros */}
+                {rol === ROL.EMPRESA ? (
+                  <>
+                    {' '}
+                    <Link
+                      as={RouterLink}
+                      to={RUTAS_AUTH.precios}
+                      color="brand.primary"
+                      fontWeight="medium"
+                    >
+                      Ver planes
+                    </Link>
+                  </>
+                ) : null}
               </Text>
             </MotionBox>
           </AnimatePresence>
         ) : null}
 
-        <Text fontSize="sm" color="gray.400" textAlign="center">
-          <Link as={RouterLink} to={RUTAS_AUTH.inicio} color="brand.primary">
-            Volver al sitio
-          </Link>
-          {' · '}
-          <Link as={RouterLink} to={RUTAS_AUTH.contacto} color="brand.primary">
+        <VStack spacing={3}>
+          <Button
+            as={RouterLink}
+            to={RUTAS_AUTH.inicio}
+            variant="outline"
+            size="sm"
+            leftIcon={<ArrowLeft size={16} />}
+            color="gray.600"
+            borderColor="blackAlpha.200"
+            fontWeight="medium"
+            _hover={{ bg: 'brand.soft', borderColor: 'blackAlpha.300' }}
+          >
+            Volver al inicio
+          </Button>
+          <Link as={RouterLink} to={RUTAS_AUTH.contacto} fontSize="sm" color="gray.400">
             Contacto
           </Link>
-        </Text>
+        </VStack>
       </VStack>
     </MotionBox>
   )
@@ -675,15 +677,51 @@ export default function EntrarPage() {
       <SignedOut>
         <Box
           minH="100vh"
-          bg="brand.soft"
+          bgGradient="linear(to-b, white 0%, brand.wash 100%)"
           display="flex"
           alignItems="center"
           py={12}
           px={4}
-          backgroundImage="radial-gradient(ellipse at top, rgba(0,86,145,0.12), transparent 55%)"
         >
-          <Container maxW="lg">
-            <LoginCard />
+          <Container maxW="5xl">
+            <SimpleGrid
+              columns={{ base: 1, md: 2 }}
+              spacing={{ base: 10, md: 14 }}
+              alignItems="center"
+            >
+              <VStack
+                align={{ base: 'center', md: 'flex-start' }}
+                textAlign={{ base: 'center', md: 'left' }}
+                spacing={5}
+              >
+                <Heading
+                  as="h1"
+                  fontSize={{ base: '1.8rem', md: '2rem', lg: '2.4rem' }}
+                  lineHeight="1.15"
+                  letterSpacing="-0.03em"
+                  color="brand.ink"
+                >
+                  Inducción clara.
+                  <Box as="br" />
+                  <Box as="span" color="brand.primary">
+                    Equipo listo.
+                  </Box>
+                </Heading>
+                <Text color="brand.ink" opacity={0.7} maxW="38ch" lineHeight="1.65">
+                  Programas por cargo, avance del equipo y evidencia lista para auditorías.
+                </Text>
+                {/* La ilustracion es decorativa, por eso el alt va vacio */}
+                <Image
+                  src="/illustrations/undraw_thumbs-up.svg"
+                  alt=""
+                  w="full"
+                  maxW="200px"
+                  display={{ base: 'none', md: 'block' }}
+                />
+              </VStack>
+
+              <LoginCard />
+            </SimpleGrid>
           </Container>
         </Box>
       </SignedOut>

@@ -1,7 +1,6 @@
 // La extension .js es para que `npm run check` pueda correr esto en Node
 import { RUTAS_AUTH } from './authCopy.js'
 
-// Rol de ingreso (empresa | empleado)
 export const ROL = {
   EMPRESA: 'empresa',
   EMPLEADO: 'empleado',

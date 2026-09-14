@@ -1,39 +1,36 @@
-﻿import { Box, Flex, Grid, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Grid, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
 import {
   Award,
   Bell,
   CheckCircle2,
   ClipboardList,
   FileText,
-  FolderOpen,
   Search,
   ShieldCheck,
 } from 'lucide-react'
 
 // Los mockups del hero son solo decoracion, los datos que muestran son inventados.
-const HIGHLIGHT = '#9BD4F0'
-
 const iconTile = [
-  { label: 'Induccion', icon: ClipboardList, bg: '#E3F2FD', color: '#1565C0' },
+  { label: 'Inducción', icon: ClipboardList, bg: '#E3F2FD', color: '#1565C0' },
   { label: 'Seguridad', icon: ShieldCheck, bg: '#E8F5E9', color: '#2E7D32' },
   { label: 'Documentos', icon: FileText, bg: '#FFF3E0', color: '#EF6C00' },
   { label: 'Certificados', icon: Award, bg: '#F3E5F5', color: '#7B1FA2' },
 ]
 
-// Pantalla del telefono
 export function PhoneMock() {
   return (
     <Box
       w={{ md: '210px', lg: '230px' }}
       bg="white"
       borderRadius="2xl"
-      // El resplandor azul es lo que despega la tarjeta del fondo
-      boxShadow="0 24px 48px rgba(0, 30, 70, 0.4), 0 0 60px rgba(120, 200, 255, 0.55)"
+      // Corta a proposito: el brillo del conjunto lo pone Hero.jsx, esta solo
+      // despega el telefono del panel donde se montan uno sobre otro
+      boxShadow="0 8px 18px rgba(13, 13, 13, 0.16)"
       overflow="hidden"
       position="relative"
       zIndex={3}
       borderWidth="1px"
-      borderColor="white"
+      borderColor="blackAlpha.100"
     >
       <Box px={3.5} pt={4} pb={2}>
         <Flex align="center" justify="space-between" mb={3}>
@@ -54,7 +51,7 @@ export function PhoneMock() {
             </Box>
             <Box>
               <Text fontSize="10px" color="blackAlpha.500" lineHeight="1.1">
-                ¡Buen dia!
+                ¡Buen día!
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
                 Camila R.
@@ -70,7 +67,7 @@ export function PhoneMock() {
         <Box bg="brand.soft" borderRadius="lg" px={3} py={2.5} mb={3}>
           <Flex justify="space-between" align="center" mb={1}>
             <Text fontSize="10px" fontWeight="semibold" color="brand.ink">
-              Tu induccion
+              Tu inducción
             </Text>
             <Text fontSize="10px" fontWeight="bold" color="brand.primary">
               62%
@@ -81,7 +78,7 @@ export function PhoneMock() {
             size="sm"
             borderRadius="full"
             bg="blackAlpha.100"
-            sx={{ '& > div': { bg: HIGHLIGHT } }}
+            sx={{ '& > div': { bg: 'brand.accent' } }}
           />
         </Box>
 
@@ -122,25 +119,28 @@ export function PhoneMock() {
   )
 }
 
-// Dashboard de escritorio
+// El telefono pisa 32px del borde izquierdo, asi que el contenido arranca mas adentro
+const PL = 10
+
 export function DesktopMock() {
   return (
     <Box
-      w={{ md: '600px', lg: '680px', xl: '760px' }}
+      w={{ md: '520px', lg: '560px', xl: '700px' }}
       bg="white"
       borderRadius="xl"
-      boxShadow="0 28px 64px rgba(0, 30, 60, 0.38)"
       overflow="hidden"
       position="relative"
       zIndex={1}
+      borderWidth="1px"
+      borderColor="blackAlpha.100"
     >
-      {/* Barra superior */}
       <Flex
         align="center"
         gap={1.5}
-        px={3}
+        pl={PL}
+        pr={3}
         py={2}
-        bg="#F7FAFC"
+        bg="brand.soft"
         borderBottomWidth="1px"
         borderColor="blackAlpha.100"
       >
@@ -156,7 +156,8 @@ export function DesktopMock() {
         spacing={0}
         borderBottomWidth="1px"
         borderColor="blackAlpha.100"
-        px={4}
+        pl={PL}
+        pr={4}
         bg="white"
       >
         {['Programas', 'Avance', 'Evidencia'].map((tab, i) => (
@@ -176,16 +177,15 @@ export function DesktopMock() {
         ))}
       </HStack>
 
-      <Grid templateColumns="1.15fr 0.95fr" gap={3} p={3.5}>
-        {/* Columna izquierda: detalle */}
+      <Grid templateColumns="1.15fr 0.95fr" gap={3} pl={PL} pr={3.5} py={3.5}>
         <Box>
           <Text fontSize="10px" color="blackAlpha.500" mb={2} fontWeight="medium">
             Completados este mes
           </Text>
           {[
-            { name: 'Induccion general', meta: '148 / 160', pct: 92 },
+            { name: 'Inducción general', meta: '148 / 160', pct: 92 },
             { name: 'Seguridad laboral', meta: '125 / 160', pct: 78 },
-            { name: 'Onboarding area', meta: '86 / 160', pct: 54 },
+            { name: 'Onboarding área', meta: '86 / 160', pct: 54 },
           ].map((row) => (
             <Box
               key={row.name}
@@ -217,7 +217,6 @@ export function DesktopMock() {
           ))}
         </Box>
 
-        {/* Columna derecha: widgets */}
         <VStack align="stretch" spacing={2.5}>
           <Flex
             bg="brand.soft"
@@ -226,13 +225,12 @@ export function DesktopMock() {
             align="center"
             gap={3}
           >
-            {/* Anillo de cumplimiento */}
             <Box
               w="56px"
               h="56px"
               borderRadius="full"
               flexShrink={0}
-              bg={`conic-gradient(${HIGHLIGHT} 0 86%, #D6E4EF 86% 100%)`}
+              bg="conic-gradient(#4260E6 0 86%, #DDE1F7 86% 100%)"
               display="flex"
               alignItems="center"
               justifyContent="center"
@@ -256,7 +254,7 @@ export function DesktopMock() {
                 Cumplimiento
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
-                Equipo al dia
+                Equipo al día
               </Text>
               <Text fontSize="9px" color="blackAlpha.500">
                 124 colaboradores
@@ -287,54 +285,15 @@ export function DesktopMock() {
               </Text>
             </HStack>
             <Text fontSize="10px" color="blackAlpha.600" lineHeight="1.4">
-              â€œComplete la induccion en 2 dias. Todo claro y ordenado.â€
+              "Complete la inducción en 2 días. Todo claro y ordenado."
             </Text>
             <Text fontSize="9px" color="brand.primary" mt={1} fontWeight="semibold">
-              â€” Mateo M.
+              - Mateo M.
             </Text>
           </Box>
         </VStack>
       </Grid>
 
-      {/* Tabla archivos */}
-      <Box px={3.5} pb={3}>
-        <Flex
-          bg="brand.soft"
-          borderRadius="md"
-          px={2.5}
-          py={1.5}
-          mb={1.5}
-          justify="space-between"
-        >
-          <Text fontSize="9px" fontWeight="semibold" color="blackAlpha.500" flex="1">
-            Carpeta
-          </Text>
-          <Text fontSize="9px" fontWeight="semibold" color="blackAlpha.500" w="52px">
-            Fecha
-          </Text>
-          <Text fontSize="9px" fontWeight="semibold" color="blackAlpha.500" w="40px" textAlign="right">
-            Peso
-          </Text>
-        </Flex>
-        {[
-          { name: 'Certificados', date: 'Hoy', size: '2.1 MB' },
-          { name: 'Asistencia', date: 'Ayer', size: '840 KB' },
-          { name: 'Evaluaciones', date: '03 mar', size: '1.4 MB' },
-        ].map((f) => (
-          <HStack key={f.name} px={2.5} py={1.5} spacing={2}>
-            <Icon as={FolderOpen} boxSize={3.5} color="brand.primary" />
-            <Text flex="1" fontSize="10px" color="brand.ink" fontWeight="medium" noOfLines={1}>
-              {f.name}
-            </Text>
-            <Text fontSize="9px" color="blackAlpha.500" w="52px">
-              {f.date}
-            </Text>
-            <Text fontSize="9px" color="blackAlpha.400" w="40px" textAlign="right">
-              {f.size}
-            </Text>
-          </HStack>
-        ))}
-      </Box>
     </Box>
   )
 }

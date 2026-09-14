@@ -58,19 +58,19 @@ export default function DashboardPage() {
       {!esEmpresa ? (
         <Alert status="info" borderRadius="lg">
           <AlertIcon />
-          Vista de empleado. Aqui iran tus inducciones y capacitaciones asignadas.
+          Vista de empleado. Aquí irán tus inducciones y capacitaciones asignadas.
         </Alert>
       ) : synced ? (
         <Alert status="success" borderRadius="lg">
           <AlertIcon />
-          Organizacion sincronizada correctamente con Supabase.
+          Organización sincronizada correctamente con Supabase.
         </Alert>
       ) : (
         <Alert status="warning" borderRadius="lg" alignItems="flex-start">
           <AlertIcon />
           <Box>
             <Text mb={error ? 1 : 3}>
-              La organizacion actual aun no esta sincronizada con Supabase.
+              La organización actual aún no está sincronizada con Supabase.
             </Text>
             {error ? (
               <Text color="red.600" fontSize="sm" mb={3}>

@@ -36,7 +36,7 @@ export default function PostLoginPage() {
     }
 
     setActive({ organization: orgId }).catch((err) => {
-      console.error('Post-login: no se activo la organizacion', err)
+      console.error('Post-login: no se activo la organización', err)
       tried.current = false
     })
   }, [ready, isSignedIn, organization, memberships, setActive])

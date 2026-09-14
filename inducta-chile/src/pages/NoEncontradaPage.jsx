@@ -9,10 +9,10 @@ export default function NoEncontradaPage() {
           ERROR 404
         </Text>
         <Heading as="h1" size="xl" color="brand.ink" mt={3} mb={4}>
-          No encontramos esta pagina
+          No encontramos esta página
         </Heading>
         <Text color="blackAlpha.700" fontSize="md" maxW="46ch" mx="auto" lineHeight="1.7">
-          Es posible que el enlace este roto o que la seccion haya cambiado de lugar.
+          Es posible que el enlace esté roto o que la sección haya cambiado de lugar.
         </Text>
 
         <HStack spacing={3} justify="center" pt={8}>
@@ -23,7 +23,7 @@ export default function NoEncontradaPage() {
             px={6}
             bg="brand.primary"
             color="white"
-            _hover={{ bg: '#004578' }}
+            _hover={{ bg: 'brand.primaryDark' }}
           >
             Volver al inicio
           </Button>
