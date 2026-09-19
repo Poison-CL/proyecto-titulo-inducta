@@ -5,7 +5,6 @@ import { AUTH_COPY, RUTAS_AUTH } from '../../lib/authCopy'
 import { getRolUsuario, getUltimoRol, rutaAccesoSinOrg } from '../../lib/authRol'
 import AuthLoading from './AuthLoading'
 
-// Exige Organization activa. Si hay membresias sin org activa, activa la primera.
 export default function RequireOrg({ children }) {
   const { isLoaded: authLoaded, isSignedIn } = useAuth()
   const { user, isLoaded: userLoaded } = useUser()

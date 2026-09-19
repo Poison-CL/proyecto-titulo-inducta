@@ -10,8 +10,6 @@ import {
   rutaAccesoSinOrg,
 } from '../lib/authRol'
 
-// Pantalla puente: decide a donde mandar al usuario apenas termina de iniciar sesion,
-// asi nunca se queda pegado en el formulario de login.
 export default function PostLoginPage() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth()
   const { user, isLoaded: userLoaded } = useUser()

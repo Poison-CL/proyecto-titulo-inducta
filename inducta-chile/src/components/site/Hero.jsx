@@ -135,9 +135,7 @@ export default function Hero() {
         right={0}
         sx={{ animation: `${fadeUp} 0.55s ease 0.08s both` }}
       >
-        {/* El brillo de los dos mockups se toca solo aca. drop-shadow sigue la
-            silueta real de las tarjetas, por eso rodea el contorno del conjunto en
-            vez de dibujar una caja: el primer valor es el halo, el segundo la sombra. */}
+        {/* drop-shadow sigue la silueta; filter:drop-shadow en caja recorta mal */}
         <Flex
           position="relative"
           h="full"

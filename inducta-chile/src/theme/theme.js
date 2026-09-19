@@ -1,7 +1,6 @@
 import { extendTheme } from '@chakra-ui/react'
-import { theme as saasTheme } from '@saas-ui/react'
 
-// Colores y tipografia de Inducta sobre el tema base de Saas UI
+// Colores y tipografia de Inducta sobre Chakra
 const colors = {
   brand: {
     soft: '#FAFAFA',
@@ -26,6 +25,7 @@ export const theme = extendTheme(
         body: {
           bg: 'white',
           color: 'brand.ink',
+          fontFeatureSettings: '"liga" 0, "clig" 0, "dlig" 0, "calt" 0',
         },
       },
     },
@@ -54,7 +54,11 @@ export const theme = extendTheme(
         },
         defaultProps: {
           variant: 'solid',
-          colorScheme: 'blue',
+        },
+      },
+      Input: {
+        defaultProps: {
+          focusBorderColor: 'brand.primary',
         },
       },
       Heading: {
@@ -71,5 +75,4 @@ export const theme = extendTheme(
       },
     },
   },
-  saasTheme,
 )

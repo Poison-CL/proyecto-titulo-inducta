@@ -16,7 +16,6 @@
     "@clerk/localizations": "^4.16.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@saas-ui/react": "^2.11.4",
     "@supabase/supabase-js": "^2.115.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^1.45.0",
