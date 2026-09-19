@@ -1,4 +1,4 @@
-// Chequeo minimo de la logica de acceso. Correr con: npm run check
+// npm run check
 import assert from 'node:assert/strict'
 import { getRolUsuario, ROL } from './authRol.js'
 import { clerkError, PASO, pasoSiguiente } from './loginPasos.js'

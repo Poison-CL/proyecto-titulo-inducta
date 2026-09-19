@@ -7,8 +7,7 @@ import {
   peekRolPendiente,
 } from '../../lib/authRol'
 
-// Guarda el rol elegido en unsafeMetadata apenas el usuario entra. Es una solucion
-// temporal: lo correcto es escribirlo en publicMetadata desde el backend.
+// unsafeMetadata es temporal; el rol debería ir en publicMetadata desde el backend.
 export default function AuthRolBootstrap() {
   const { isLoaded, isSignedIn, user } = useUser()
   const busy = useRef(false)

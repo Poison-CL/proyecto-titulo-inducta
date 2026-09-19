@@ -1,4 +1,3 @@
-// Todos los textos de las pantallas de acceso juntos, para no repetirlos por ahi
 export const AUTH_COPY = {
   loading: {
     sesion: 'Validando tu sesión…',

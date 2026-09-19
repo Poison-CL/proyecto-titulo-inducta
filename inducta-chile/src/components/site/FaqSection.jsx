@@ -68,8 +68,7 @@ export default function FaqSection() {
           {preguntas.map((item) => (
             <AccordionItem key={item.q} border="none">
               {({ isExpanded }) => (
-                // Todo el estilo va en este elemento porque es el unico que sabe
-                // si la pregunta esta abierta; repartirlo recorta las esquinas
+                // El radio vive acá: si se parte, las esquinas se recortan.
                 <Box
                   bg="white"
                   borderRadius={isExpanded ? '2xl' : 'full'}

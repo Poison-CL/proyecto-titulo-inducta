@@ -12,7 +12,6 @@ import { useEmpresaSync } from '../features/empresa/useEmpresaSync'
 import { etiquetaRol, getRolUsuario, ROL } from '../lib/authRol'
 import { clerkAppearance } from '../theme/clerkAppearance'
 
-// Cuando llegamos aca RequireOrg ya confirmo que hay una organizacion activa
 export default function DashboardPage() {
   const { user } = useUser()
   const { organization } = useOrganization()

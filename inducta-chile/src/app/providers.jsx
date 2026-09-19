@@ -1,4 +1,4 @@
-import { SaasProvider } from '@saas-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { esES } from '@clerk/localizations'
 import AuthRolBootstrap from '../components/auth/AuthRolBootstrap'
@@ -16,10 +16,10 @@ export function AppProviders({ children }) {
       signUpUrl="/acceso/registro"
       afterSignOutUrl="/"
     >
-      <SaasProvider theme={theme}>
+      <ChakraProvider theme={theme}>
         <AuthRolBootstrap />
         {children}
-      </SaasProvider>
+      </ChakraProvider>
     </ClerkProvider>
   )
 }

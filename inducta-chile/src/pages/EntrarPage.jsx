@@ -710,14 +710,24 @@ export default function EntrarPage() {
                 <Text color="brand.ink" opacity={0.7} maxW="38ch" lineHeight="1.65">
                   Programas por cargo, avance del equipo y evidencia lista para auditorías.
                 </Text>
-                {/* La ilustracion es decorativa, por eso el alt va vacio */}
-                <Image
-                  src="/illustrations/undraw_thumbs-up.svg"
-                  alt=""
-                  w="full"
-                  maxW="200px"
+                <Box
                   display={{ base: 'none', md: 'block' }}
-                />
+                  bg="#4260e615"
+                  borderRadius="3xl"
+                  maxW="md"
+                  w="full"
+                  overflow="hidden"
+                  pt={8}
+                >
+                  {/* La ilustracion es decorativa, por eso el alt va vacio */}
+                  <Image
+                    src="/illustrations/undraw_thumbs-up.svg"
+                    alt=""
+                    w="70%"
+                    mx="auto"
+                    display="block"
+                  />
+                </Box>
               </VStack>
 
               <LoginCard />

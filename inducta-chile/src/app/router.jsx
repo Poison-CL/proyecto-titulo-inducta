@@ -9,6 +9,7 @@ import {
   AccesoSinMembresiaPage,
 } from '../pages/AccesoPages'
 import ContactoPage from '../pages/ContactoPage'
+import ContratarPage from '../pages/ContratarPage'
 import DashboardPage from '../pages/DashboardPage'
 import EntrarPage from '../pages/EntrarPage'
 import HomePage from '../pages/HomePage'
@@ -35,6 +36,7 @@ export function AppRouter() {
         <Route element={<SiteLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/precios" element={<PreciosPage />} />
+          <Route path="/contratar" element={<ContratarPage />} />
           <Route path="/recursos" element={<RecursosPage />} />
           <Route path="/contacto" element={<ContactoPage />} />
           <Route path="*" element={<NoEncontradaPage />} />

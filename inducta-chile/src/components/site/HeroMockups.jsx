@@ -23,8 +23,6 @@ export function PhoneMock() {
       w={{ md: '210px', lg: '230px' }}
       bg="white"
       borderRadius="2xl"
-      // Corta a proposito: el brillo del conjunto lo pone Hero.jsx, esta solo
-      // despega el telefono del panel donde se montan uno sobre otro
       boxShadow="0 8px 18px rgba(13, 13, 13, 0.16)"
       overflow="hidden"
       position="relative"

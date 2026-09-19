@@ -43,7 +43,6 @@ function useGateAutenticado() {
   return { isLoaded, isSignedIn, user, signOut }
 }
 
-// Empresa autenticada sin Organization
 export function AccesoSinEmpresaPage() {
   const { isLoaded, isSignedIn, signOut } = useGateAutenticado()
   const copy = AUTH_COPY.errores.sinEmpresa
@@ -79,7 +78,6 @@ export function AccesoSinEmpresaPage() {
   )
 }
 
-// Empleado autenticado sin membresia de Organization
 export function AccesoSinMembresiaPage() {
   const { isLoaded, isSignedIn, signOut } = useGateAutenticado()
   const copy = AUTH_COPY.errores.sinMembresia
@@ -105,7 +103,6 @@ export function AccesoSinMembresiaPage() {
   )
 }
 
-// Alguien intento registrarse solo; no tenemos registro abierto
 export function AccesoRegistroPage() {
   const copy = AUTH_COPY.errores.registroBloqueado
 
