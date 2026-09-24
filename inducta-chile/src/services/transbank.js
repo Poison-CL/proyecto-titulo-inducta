@@ -1,22 +1,23 @@
-import {
-  Environment,
-  IntegrationApiKeys,
-  IntegrationCommerceCodes,
-  Options,
-  WebpayPlus,
-} from 'transbank-sdk'
+import { createClient } from '@supabase/supabase-js'
+import { env } from '../lib/env'
 
-// Credenciales de integracion para probar Webpay. Antes de produccion esto tiene
-// que correr en el servidor, no en el navegador.
-const tx = new WebpayPlus.Transaction(
-  new Options(
-    IntegrationCommerceCodes.WEBPAY_PLUS,
-    IntegrationApiKeys.WEBPAY,
-    Environment.Integration,
-  ),
-)
+// Creamos un cliente público para invocar la Edge Function sin depender de Clerk
+const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey)
 
-export async function iniciarPagoPrueba(buyOrder, sessionId, amount, returnUrl) {
-  const { token, url } = await tx.create(buyOrder, sessionId, amount, returnUrl)
-  return { token, url }
+export const iniciarPagoTransbank = async (datosPago) => {
+  const { data, error } = await supabase.functions.invoke('tbk-iniciar', {
+    body: datosPago
+  })
+
+  if (error) {
+    console.error("Error en Edge Function:", error)
+    throw new Error('Error al conectar con el servidor de pagos')
+  }
+
+  if (!data?.token || !data?.url) {
+    console.error("Detalle del rechazo de Transbank:", data) // <-- Añade esta línea
+    throw new Error('Respuesta inválida desde Transbank')
+  }
+
+  return data
 }

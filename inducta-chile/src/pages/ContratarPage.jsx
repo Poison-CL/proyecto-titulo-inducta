@@ -28,6 +28,7 @@ import { Link as RouterLink, Navigate, useSearchParams } from 'react-router-dom'
 import { useUfHoy } from '../hooks/useUfHoy'
 import { formateaRut, formateaTel, mascaraTel, rutValido, telefonoValido } from '../lib/chile'
 import { clp, getPlan, montoPlan, precioFinalClp, uf } from '../lib/planes'
+import { iniciarPagoTransbank } from '../services/transbank'
 
 const MotionBox = motion.create(Box)
 
@@ -69,6 +70,7 @@ export default function ContratarPage() {
   const [datos, setDatos] = useState(VACIO)
   const [errores, setErrores] = useState({})
   const [listo, setListo] = useState(false)
+  const [procesandoPago, setProcesandoPago] = useState(false) 
   const esFactura = documento === 'factura'
 
   if (!plan?.contratable) {
@@ -99,6 +101,39 @@ export default function ContratarPage() {
       telefono: formateaTel(d.telefono),
     }))
     setListo(true)
+  }
+
+  const handleIniciarPago = async () => {
+    setProcesandoPago(true)
+    try {
+      const montoPagar = precioFinalClp(monto, ufClp) 
+
+      const tbkData = await iniciarPagoTransbank({
+        nombre_comercial: datos.titular,
+        email_contacto: datos.email,
+        monto: Math.round(montoPagar), 
+        plan_solicitado: plan.nombre.toLowerCase()
+      })
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = tbkData.url;
+
+      const inputToken = document.createElement('input');
+      inputToken.type = 'hidden';
+      inputToken.name = 'token_ws';
+      inputToken.value = tbkData.token;
+
+      form.appendChild(inputToken);
+      document.body.appendChild(form);
+      form.submit();
+      
+    } catch (error) {
+      console.error("Error al iniciar el pago:", error);
+      alert("Hubo un problema al contactar con Webpay. Por favor, intenta de nuevo.");
+    } finally {
+      setProcesandoPago(false)
+    }
   }
 
   return (
@@ -193,10 +228,21 @@ export default function ContratarPage() {
                 <Text fontSize="sm" color="blackAlpha.500" mt={6} mb={3}>
                   El pago seguro se habilita en el siguiente paso.
                 </Text>
-                {/* ponytail: aqui va iniciarPagoPrueba(plan, periodo, datos) */}
-                <Button size="lg" width="full" isDisabled>
+                
+                
+                <Button 
+                  size="lg" 
+                  width="full" 
+                  onClick={handleIniciarPago}
+                  isLoading={procesandoPago}
+                  loadingText="Conectando con Webpay..."
+                  bg="brand.primary"
+                  color="white"
+                  _hover={{ bg: "brand.primaryDark" }}
+                >
                   Ir a facturación segura
                 </Button>
+
                 <Button type="button" variant="ghost" width="full" mt={2} onClick={() => setListo(false)}>
                   Corregir datos
                 </Button>
@@ -362,7 +408,7 @@ export default function ContratarPage() {
                     />
                   </FormControl>
 
-                  <Button type="submit" size="lg" width="full">
+                  <Button type="submit" size="lg" width="full" bg="brand.primary" color="white" _hover={{ bg: 'brand.primaryDark' }}>
                     Ir a facturación segura
                   </Button>
                   <HStack justify="center" spacing={2}>
