@@ -7,18 +7,18 @@ import {
   AccesoRegistroPage,
   AccesoSinEmpresaPage,
   AccesoSinMembresiaPage,
-} from '../pages/AccesoPages'
-import ContactoPage from '../pages/ContactoPage'
-import ContratarPage from '../pages/ContratarPage'
-import DashboardPage from '../pages/DashboardPage'
-import EntrarPage from '../pages/EntrarPage'
-import HomePage from '../pages/HomePage'
-import NoEncontradaPage from '../pages/NoEncontradaPage'
-import PostLoginPage from '../pages/PostLoginPage'
-import PreciosPage from '../pages/PreciosPage'
-import RecursosPage from '../pages/RecursosPage'
+} from '../pages/auth/AccesoPages'
+import ContactoPage from '../pages/public/ContactoPage'
+import ContratarPage from '../pages/public/ContratarPage'
+import DashboardPage from '../pages/app/DashboardPage'
+import EntrarPage from '../pages/auth/EntrarPage'
+import HomePage from '../pages/public/HomePage'
+import NoEncontradaPage from '../pages/public/NoEncontradaPage'
+import PostLoginPage from '../pages/auth/PostLoginPage'
+import PreciosPage from '../pages/public/PreciosPage'
+import RecursosPage from '../pages/public/RecursosPage'
 import { RUTAS_AUTH } from '../lib/authCopy'
-import PagoResultadoPage from '../pages/PagoResultadoPage'
+import PagoResultadoPage from '../pages/public/PagoResultadoPage'
 
 
 function ProtectedApp() {

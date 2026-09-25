@@ -21,9 +21,9 @@ import { ArrowLeft, Building2, KeyRound, Lock, Mail, UserRound } from 'lucide-re
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { RUTAS_AUTH } from '../lib/authCopy'
-import { isRolValido, ROL, setRolPendiente } from '../lib/authRol'
-import { clerkError, factorByStrategy, PASO, pasoSiguiente } from '../lib/loginPasos'
+import { RUTAS_AUTH } from '../../lib/authCopy'
+import { isRolValido, ROL, setRolPendiente } from '../../lib/authRol'
+import { clerkError, factorByStrategy, PASO, pasoSiguiente } from '../../lib/loginPasos'
 
 const MotionBox = motion.create(Box)
 

@@ -25,10 +25,10 @@ import {
 import { AnimatePresence, motion } from 'motion/react'
 import { Check, CircleHelp, Lock } from 'lucide-react'
 import { Link as RouterLink, Navigate, useSearchParams } from 'react-router-dom'
-import { useUfHoy } from '../hooks/useUfHoy'
-import { formateaRut, formateaTel, mascaraTel, rutValido, telefonoValido } from '../lib/chile'
-import { clp, getPlan, montoPlan, precioFinalClp, uf } from '../lib/planes'
-import { iniciarPagoTransbank } from '../services/transbank'
+import { useUfHoy } from '../../hooks/useUfHoy'
+import { formateaRut, formateaTel, mascaraTel, rutValido, telefonoValido } from '../../lib/chile'
+import { clp, getPlan, montoPlan, precioFinalClp, uf } from '../../lib/planes'
+import { iniciarPagoTransbank } from '../../services/transbank'
 
 const MotionBox = motion.create(Box)
 

@@ -14,7 +14,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
-import { PLANES, etiquetaIva, uf } from '../lib/planes'
+import { PLANES, etiquetaIva, uf } from '../../lib/planes'
 
 const MotionBox = motion.create(Box)
 
