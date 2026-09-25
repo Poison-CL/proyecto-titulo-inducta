@@ -63,6 +63,13 @@ const VACIO = {
 
 export default function ContratarPage() {
   const [params] = useSearchParams()
+  
+
+  const errorPago = params.get('error')
+  if (errorPago === 'pago_fallido' || errorPago === 'servidor') {
+    return <Navigate to="/pago/rechazado" replace />
+  }
+
   const ufClp = useUfHoy()
   const plan = getPlan(params.get('plan'))
   const periodo = params.get('periodo') === 'anual' ? 'anual' : 'mensual'
@@ -103,34 +110,34 @@ export default function ContratarPage() {
     setListo(true)
   }
 
+
   const handleIniciarPago = async () => {
     setProcesandoPago(true)
     try {
-      const montoPagar = precioFinalClp(monto, ufClp) 
+      const montoPagar = precioFinalClp(monto, ufClp)
 
       const tbkData = await iniciarPagoTransbank({
         nombre_comercial: datos.titular,
         email_contacto: datos.email,
-        monto: Math.round(montoPagar), 
-        plan_solicitado: plan.nombre.toLowerCase()
+        monto: Math.round(montoPagar),
+        plan_solicitado: plan.nombre.toLowerCase(),
       })
 
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = tbkData.url;
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = tbkData.url
 
-      const inputToken = document.createElement('input');
-      inputToken.type = 'hidden';
-      inputToken.name = 'token_ws';
-      inputToken.value = tbkData.token;
+      const inputToken = document.createElement('input')
+      inputToken.type = 'hidden'
+      inputToken.name = 'token_ws'
+      inputToken.value = tbkData.token
 
-      form.appendChild(inputToken);
-      document.body.appendChild(form);
-      form.submit();
-      
+      form.appendChild(inputToken)
+      document.body.appendChild(form)
+      form.submit()
     } catch (error) {
-      console.error("Error al iniciar el pago:", error);
-      alert("Hubo un problema al contactar con Webpay. Por favor, intenta de nuevo.");
+      console.error('Error al iniciar el pago:', error)
+      alert('Hubo un problema al contactar con Webpay. Por favor, intenta de nuevo.')
     } finally {
       setProcesandoPago(false)
     }
@@ -229,7 +236,7 @@ export default function ContratarPage() {
                   El pago seguro se habilita en el siguiente paso.
                 </Text>
                 
-                
+                {/* 4. El botón ahora está seguro adentro del diseño */}
                 <Button 
                   size="lg" 
                   width="full" 
@@ -238,7 +245,7 @@ export default function ContratarPage() {
                   loadingText="Conectando con Webpay..."
                   bg="brand.primary"
                   color="white"
-                  _hover={{ bg: "brand.primaryDark" }}
+                  _hover={{ bg: 'brand.primaryDark' }}
                 >
                   Ir a facturación segura
                 </Button>

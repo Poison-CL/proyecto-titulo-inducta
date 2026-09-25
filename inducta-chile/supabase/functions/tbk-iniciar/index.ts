@@ -19,6 +19,16 @@ serve(async (req) => {
 
     const buyOrder = `ORDEN-${Math.floor(Math.random() * 1000000)}`
 
+Mateo-Martinez-Gijon
+
+    await supabaseAdmin.from('empresa').insert({
+      id_empresa: idEmpresa,
+      nombre_comercial: nombre_comercial,
+      email_contacto: email_contacto,
+      plan: 'demo'
+    })
+
+ main
     const tbkResponse = await fetch('https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions', {
       method: 'POST',
       headers: {
@@ -50,8 +60,13 @@ serve(async (req) => {
     })
     if (error) throw error
 
-    return new Response(JSON.stringify(tbkData), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify(tbkData), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { headers: corsHeaders, status: 400 })
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: corsHeaders,
+      status: 400
+    })
   }
 })

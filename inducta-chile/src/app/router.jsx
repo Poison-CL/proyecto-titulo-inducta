@@ -18,6 +18,8 @@ import PostLoginPage from '../pages/PostLoginPage'
 import PreciosPage from '../pages/PreciosPage'
 import RecursosPage from '../pages/RecursosPage'
 import { RUTAS_AUTH } from '../lib/authCopy'
+import PagoResultadoPage from '../pages/PagoResultadoPage'
+
 
 function ProtectedApp() {
   return (
@@ -37,6 +39,10 @@ export function AppRouter() {
           <Route path="/" element={<HomePage />} />
           <Route path="/precios" element={<PreciosPage />} />
           <Route path="/contratar" element={<ContratarPage />} />
+          <Route path="/pago/exitoso" element={<PagoResultadoPage />} />
+          <Route path="/pago/rechazado" element={<PagoResultadoPage />} />
+          <Route path="/pago/anulado" element={<PagoResultadoPage />} />
+          <Route path="/pago-exitoso" element={<Navigate to="/pago/exitoso" replace />} />
           <Route path="/recursos" element={<RecursosPage />} />
           <Route path="/contacto" element={<ContactoPage />} />
           <Route path="*" element={<NoEncontradaPage />} />
