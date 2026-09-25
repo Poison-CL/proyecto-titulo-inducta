@@ -2,8 +2,8 @@ import { useAuth, useClerk, useUser } from '@clerk/clerk-react'
 import { Box, Button, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { CalendarClock, Tags } from 'lucide-react'
 import { Link as RouterLink, Navigate } from 'react-router-dom'
-import AuthLoading from '../components/auth/AuthLoading'
-import { AUTH_COPY, RUTAS_AUTH } from '../lib/authCopy'
+import AuthLoading from '../../components/auth/AuthLoading'
+import { AUTH_COPY, RUTAS_AUTH } from '../../lib/authCopy'
 
 function AccesoCard({ title, body, actions }) {
   return (

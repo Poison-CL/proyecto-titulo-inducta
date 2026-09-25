@@ -1,7 +1,7 @@
-// npm run check
+// npm run test
 import assert from 'node:assert/strict'
-import { getRolUsuario, ROL } from './authRol.js'
-import { clerkError, PASO, pasoSiguiente } from './loginPasos.js'
+import { getRolUsuario, ROL } from '../../src/lib/authRol.js'
+import { clerkError, PASO, pasoSiguiente } from '../../src/lib/loginPasos.js'
 
 const signIn = (...estrategias) => ({
   supportedFirstFactors: estrategias.map((strategy) => ({ strategy })),

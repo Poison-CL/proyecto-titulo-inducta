@@ -1,14 +1,14 @@
 import { useAuth, useOrganization, useOrganizationList, useUser } from '@clerk/clerk-react'
 import { useEffect, useRef } from 'react'
 import { Navigate } from 'react-router-dom'
-import AuthLoading from '../components/auth/AuthLoading'
-import { AUTH_COPY, RUTAS_AUTH } from '../lib/authCopy'
+import AuthLoading from '../../components/auth/AuthLoading'
+import { AUTH_COPY, RUTAS_AUTH } from '../../lib/authCopy'
 import {
   getRolUsuario,
   getUltimoRol,
   peekRolPendiente,
   rutaAccesoSinOrg,
-} from '../lib/authRol'
+} from '../../lib/authRol'
 
 export default function PostLoginPage() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth()

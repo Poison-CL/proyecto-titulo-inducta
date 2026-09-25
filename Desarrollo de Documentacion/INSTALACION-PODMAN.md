@@ -1,13 +1,13 @@
-# Instalación Docker — Inducta CHILE
+# Instalación Podman — Inducta CHILE
 
-Guía para dejar el proyecto corriendo en un equipo nuevo con Docker.
+Guía para dejar el proyecto corriendo en un equipo nuevo con Podman.
 Aplica a Windows, macOS y Linux. Al terminar, la app debe responder en `http://localhost:8080`.
 
 ---
 
 ## Objetivo
 
-1. Tener Docker Desktop (o Docker Engine + Compose) operativo.
+1. Tener Podman (con Compose) operativo.
 2. Configurar el archivo `.env` en la raíz del proyecto.
 3. Construir la imagen y levantar el contenedor `web`.
 4. Verificar que el login de Clerk carga en el navegador.
@@ -21,12 +21,11 @@ Clerk y Supabase viven en la nube. No se levantan en el contenedor; solo se nece
 | Herramienta | Uso | Notas |
 |---|---|---|
 | Git | Clonar el repositorio | https://git-scm.com |
-| Docker Desktop | Construir y ejecutar el contenedor | https://www.docker.com/products/docker-desktop/ |
+| Podman Desktop | Construir y ejecutar el contenedor | https://podman-desktop.io/ |
 | Cuenta Clerk | Autenticación | Dashboard → Publishable key |
 | Proyecto Supabase | Base de datos | URL + anon/publishable key |
 
-En Windows hace falta WSL 2 habilitado (Docker Desktop lo solicita al instalar).
-En Linux se puede usar Docker Engine + el plugin Compose en lugar de Docker Desktop.
+En Windows, Podman Desktop instala una máquina virtual ligera.
 
 ---
 
@@ -34,25 +33,33 @@ En Linux se puede usar Docker Engine + el plugin Compose en lugar de Docker Desk
 
 ```bash
 git clone <url-del-repositorio>
-cd inducta-chile
+cd Desarrollo_Proyecto/inducta-chile
 ```
 
-La carpeta de trabajo debe contener `package.json`, `Dockerfile` y `docker-compose.yml`.
+La carpeta de trabajo debe contener `package.json`, `Containerfile` y `compose.yml`.
 
 ---
 
-## 2. Instalar y arrancar Docker
+## 2. Instalar y arrancar Podman
 
 ### Windows / macOS
 
-1. Instalar [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-2. Abrir Docker Desktop y esperar a que el estado diga **Engine running**.
+1. Instalar [Podman Desktop](https://podman-desktop.io/).
+2. Abrir Podman Desktop y esperar a que el motor quede en marcha (máquina Podman iniciada).
 3. En una terminal nueva, comprobar:
 
 ```bash
-docker -v
-docker compose version
+podman -v
+podman compose version
 ```
+
+Si `podman compose` dice que no encuentra el proveedor, instala:
+
+```bash
+pip install podman-compose
+```
+
+Cierra y reabre la terminal, o agrega al PATH la carpeta `Scripts` de Python (ej. `%LOCALAPPDATA%\Programs\Python\Python312\Scripts`).
 
 Si el comando no se reconoce, cerrar y reabrir la terminal, o reiniciar el equipo después de la instalación.
 
@@ -61,17 +68,17 @@ Si el comando no se reconoce, cerrar y reabrir la terminal, o reiniciar el equip
 ```bash
 # Ejemplo Ubuntu/Debian — ajustar según la distro
 sudo apt-get update
-sudo apt-get install -y docker.io docker-compose-v2
-sudo systemctl enable --now docker
-sudo usermod -aG docker $USER
+sudo apt-get install -y podman podman-compose
 ```
 
-Cerrar sesión y volver a entrar para que el grupo `docker` aplique. Luego:
+Luego:
 
 ```bash
-docker -v
-docker compose version
+podman -v
+podman compose version
 ```
+
+Si `podman compose` no está disponible, usa `podman-compose` (mismo uso).
 
 ---
 
@@ -102,36 +109,36 @@ Reglas:
 - No subir `.env` a Git (ya está en `.gitignore`).
 - Las variables `VITE_*` se inyectan en el **build** de la imagen. Si cambian, hay que reconstruir.
 
-Opcional en desarrollo local (sin Docker): también sirve `.env.local` con el mismo contenido; Vite lo lee al hacer `npm run dev`.
+Opcional en desarrollo local (sin contenedor): también sirve `.env.local` con el mismo contenido; Vite lo lee al hacer `npm run dev`.
 
 ---
 
 ## 4. Construir y levantar el contenedor
 
-Desde la raíz del proyecto, con Docker en marcha:
+Desde la raíz del proyecto (`inducta-chile`), con Podman en marcha:
 
 ```bash
-docker compose up --build
+podman compose up --build
 ```
 
 La primera vez descarga imágenes base (`node`, `nginx`) e instala dependencias; puede tardar varios minutos.
 
 Resultado esperado:
 
-- Imagen local: `inducta-chile-web`
+- Imagen local: `inducta-chile-web` (o similar)
 - Contenedor: `inducta-chile-web-1` (o similar)
 - Puerto publicado: `8080 → 80`
 
 En segundo plano:
 
 ```bash
-docker compose up --build -d
+podman compose up --build -d
 ```
 
 Ver logs:
 
 ```bash
-docker compose logs -f web
+podman compose logs -f web
 ```
 
 ---
@@ -140,11 +147,11 @@ docker compose logs -f web
 
 1. Abrir [http://localhost:8080](http://localhost:8080).
 2. Debe redirigir a `/sign-in` y mostrar el formulario de Clerk.
-3. En Docker Desktop → **Containers**, el servicio `web` debe estar en estado Running.
+3. En Podman Desktop → **Containers**, el servicio `web` debe estar en marcha.
 4. Comprobación rápida por terminal:
 
 ```bash
-docker compose ps
+podman compose ps
 curl -I http://localhost:8080
 ```
 
@@ -156,11 +163,11 @@ Si `curl` no existe en Windows, basta con abrir la URL en el navegador.
 
 | Acción | Comando |
 |---|---|
-| Parar | `docker compose down` |
-| Reconstruir tras cambiar `.env` o código | `docker compose up --build` |
-| Reconstruir forzado | `docker compose build --no-cache` y luego `docker compose up` |
-| Ver contenedores | `docker compose ps` |
-| Limpiar contenedor e imagen del proyecto | `docker compose down --rmi local` |
+| Parar | `podman compose down` |
+| Reconstruir tras cambiar `.env` o código | `podman compose up --build` |
+| Reconstruir forzado | `podman compose build --no-cache` y luego `podman compose up` |
+| Ver contenedores | `podman compose ps` |
+| Limpiar contenedor e imagen del proyecto | `podman compose down --rmi local` |
 
 ---
 
@@ -168,12 +175,13 @@ Si `curl` no existe en Windows, basta con abrir la URL en el navegador.
 
 | Síntoma | Qué revisar |
 |---|---|
-| `docker` no se reconoce | Docker Desktop cerrado o PATH sin actualizar; reiniciar terminal/PC |
-| Puerto 8080 ocupado | Cambiar `"8080:80"` en `docker-compose.yml` o liberar el puerto |
-| Pantalla en blanco / sin Clerk | `.env` vacío o mal ubicado; reconstruir con `docker compose up --build` |
+| `podman` no se reconoce | Podman Desktop cerrado o PATH sin actualizar; reiniciar terminal/PC |
+| Máquina Podman detenida | Abrir Podman Desktop e iniciar la máquina / el motor |
+| Puerto 8080 ocupado | Cambiar `"8080:80"` en `compose.yml` o liberar el puerto |
+| Pantalla en blanco / sin Clerk | `.env` vacío o mal ubicado; reconstruir con `podman compose up --build` |
 | Error al autenticarse en Clerk | En el dashboard de Clerk, permitir `http://localhost:8080` como origen |
-| Build falla en `npm ci` | Conexión a internet; borrar caché y `docker compose build --no-cache` |
-| Contenedor sale y se detiene | `docker compose logs web` y revisar la configuración de nginx |
+| Build falla en `npm ci` | Conexión a internet; borrar caché y `podman compose build --no-cache` |
+| Contenedor sale y se detiene | `podman compose logs web` y revisar `container/nginx.conf` |
 
 ---
 
@@ -181,10 +189,10 @@ Si `curl` no existe en Windows, basta con abrir la URL en el navegador.
 
 - [ ] Git instalado
 - [ ] Repositorio clonado
-- [ ] Docker Desktop / Engine instalado y en marcha
-- [ ] `docker -v` y `docker compose version` responden
+- [ ] Podman Desktop / Podman instalado y en marcha
+- [ ] `podman -v` y `podman compose version` responden
 - [ ] Archivo `.env` creado en la raíz con las cuatro variables `VITE_*`
-- [ ] `docker compose up --build` termina sin error
+- [ ] `podman compose up --build` termina sin error
 - [ ] [http://localhost:8080](http://localhost:8080) muestra el login de Clerk
 
-Cuando todos los ítems están marcados, el entorno Docker de ese equipo queda listo.
+Cuando todos los ítems están marcados, el entorno Podman de ese equipo queda listo.

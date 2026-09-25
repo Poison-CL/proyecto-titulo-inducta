@@ -8,9 +8,9 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { OrganizationSwitcher, useOrganization, useUser } from '@clerk/clerk-react'
-import { useEmpresaSync } from '../features/empresa/useEmpresaSync'
-import { etiquetaRol, getRolUsuario, ROL } from '../lib/authRol'
-import { clerkAppearance } from '../theme/clerkAppearance'
+import { useEmpresaSync } from '../../features/empresa/useEmpresaSync'
+import { etiquetaRol, getRolUsuario, ROL } from '../../lib/authRol'
+import { clerkAppearance } from '../../theme/clerkAppearance'
 
 export default function DashboardPage() {
   const { user } = useUser()
