@@ -24,7 +24,7 @@ serve(async (req) => {
       id_empresa: idEmpresa,
       nombre_comercial: nombre_comercial,
       email_contacto: email_contacto,
-      plan: 'demo' 
+      plan: 'demo'
     })
 
     const tbkResponse = await fetch('https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions', {
@@ -53,8 +53,13 @@ serve(async (req) => {
       estado: 'pendiente'
     })
 
-    return new Response(JSON.stringify(tbkData), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify(tbkData), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { headers: corsHeaders, status: 400 })
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: corsHeaders,
+      status: 400
+    })
   }
 })
