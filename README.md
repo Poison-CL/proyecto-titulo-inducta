@@ -20,7 +20,6 @@
   <img alt="Clerk" src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white">
   <img alt="Transbank" src="https://img.shields.io/badge/Transbank-Webpay-E30613?style=flat-square">
   <img alt="Podman" src="https://img.shields.io/badge/Podman-Compose-892CA0?style=flat-square&logo=podman&logoColor=white">
-  <img alt="Uso" src="https://img.shields.io/badge/Uso-Académico-0B6E4F?style=flat-square">
 </p>
 
 <p align="center">
@@ -65,7 +64,6 @@ La solución permite centralizar programas de inducción, registrar el avance de
       <br><br>
       Fullstack
       <br>
-      <sub>React · Vite · Chakra UI · Supabase · <a href="https://github.com/cathrynlavery/diagram-design">Diagram Design</a></sub>
       <br><br>
       <a href="https://github.com/Poison-CL"><img src="https://img.shields.io/badge/GitHub-Poison--CL-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub Mateo"></a>
       <a href="https://mateo-dev-seven.vercel.app/"><img src="https://img.shields.io/badge/Portfolio-Web-0B6E4F?style=flat-square" alt="Portfolio Mateo"></a>
@@ -81,7 +79,6 @@ La solución permite centralizar programas de inducción, registrar el avance de
       <br><br>
       Fullstack
       <br>
-      <sub>Supabase · RLS · Clerk · Transbank · <a href="https://github.com/cathrynlavery/diagram-design">Diagram Design</a></sub>
       <br><br>
       <a href="https://github.com/haelfert-ux"><img src="https://img.shields.io/badge/GitHub-haelfert--ux-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub Hans"></a>
     </td>
@@ -173,8 +170,6 @@ Aplicación en [http://localhost:8080/](http://localhost:8080/)
 ---
 
 ## Arquitectura
-
-Diagramas con [Diagram Design](https://github.com/cathrynlavery/diagram-design).
 
 <p align="center">
   <img src="assets/diagrams/arquitectura-inducta.png" alt="Arquitectura Inducta Chile" width="900">
