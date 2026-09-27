@@ -203,5 +203,7 @@ Aplicación en [http://localhost:8080/](http://localhost:8080/)
 
 ## Licencia y uso
 
-Proyecto de carácter **académico** (Portafolio de Título).  
-Uso restringido a fines formativos del equipo y de la asignatura Capstone.
+© 2026 Mateo Martínez Gijón y Hans Elfert.
+Todos los derechos reservados.
+Uso exclusivo académico del equipo del Proyecto de Título.
+Prohibida la copia, distribución o uso comercial sin autorización escrita de los autores.****
