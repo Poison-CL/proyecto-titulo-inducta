@@ -1,21 +1,23 @@
-# Secretos
 .env
 .env.*
 !.env.example
 copia-env-pendrive/
-
-# Dependencias y build (se regeneran con npm install / npm run build)
 node_modules/
 dist/
 dist-ssr/
-
-# Logs
 *.log
 npm-debug.log*
-
-# Editor y sistema
 .vscode/*
 !.vscode/extensions.json
 .idea/
 .DS_Store
 Thumbs.db
+.cursor/
+.agents/
+.claude/
+.cline/
+.kiro/
+.opencode/
+.copilot/
+.diagram-design
+.diagram-design/

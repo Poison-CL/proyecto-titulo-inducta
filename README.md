@@ -1,127 +1,212 @@
-# Inducta CHILE
+<p align="center">
+  <img src="assets/logo-oficial.png" alt="Inducta Chile" width="260">
+</p>
 
-Proyecto de título: plataforma web para gestionar **inducciones y capacitaciones** del personal en empresas de Chile.
+<h1 align="center">Inducta Chile</h1>
 
-## ¿De qué se trata?
+<p align="center">
+  <strong>Plataforma SaaS de inducción y capacitación corporativa</strong><br>
+  Proyecto de Título · Ingeniería en Informática · Duoc UC — San Joaquín
+</p>
 
-Inducta Chile ayuda a las empresas a ordenar el ingreso y la formación de colaboradores: programas por cargo o área, seguimiento del avance de cada persona y evidencia lista para auditorías.
+<p align="center">
+  <a href="https://github.com/Poison-CL/proyecto-titulo-inducta"><img alt="Repositorio" src="https://img.shields.io/badge/GitHub-Poison--CL%2Fproyecto--titulo--inducta-181717?style=for-the-badge&logo=github&logoColor=white"></a>
+</p>
 
-En la práctica, la plataforma:
+<p align="center">
+  <img alt="React" src="https://img.shields.io/badge/React-19-20232A?style=flat-square&logo=react&logoColor=61DAFB">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres-3FCF8E?style=flat-square&logo=supabase&logoColor=white">
+  <img alt="Clerk" src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white">
+  <img alt="Transbank" src="https://img.shields.io/badge/Transbank-Webpay-E30613?style=flat-square">
+  <img alt="Podman" src="https://img.shields.io/badge/Podman-Compose-892CA0?style=flat-square&logo=podman&logoColor=white">
+  <img alt="Uso" src="https://img.shields.io/badge/Uso-Académico-0B6E4F?style=flat-square">
+</p>
 
-- Centraliza inducciones y capacitaciones en un solo lugar
-- Asigna programas según cargo, área o normativa
-- Registra quién completó cada etapa y en qué fecha
-- Separa accesos de **empresa** (administración) y **empleado** (programas asignados)
-- Ofrece planes contratables con pago vía Transbank (precios en UF)
+<p align="center">
+  <a href="#sobre-el-proyecto">Proyecto</a> ·
+  <a href="#equipo">Equipo</a> ·
+  <a href="#stack-tecnológico">Stack</a> ·
+  <a href="#estructura-del-repositorio">Estructura</a> ·
+  <a href="#inicio-rápido">Inicio rápido</a> ·
+  <a href="#arquitectura">Arquitectura</a> ·
+  <a href="#documentación">Documentación</a>
+</p>
 
-Este repositorio agrupa el código de la aplicación, la documentación técnica y las evidencias académicas de la Fase 1 del proyecto de título.
+---
 
-### Stack
+## Sobre el proyecto
+
+**Inducta Chile** es una plataforma **SaaS multi-tenant** orientada a digitalizar el onboarding y la capacitación del personal en empresas de Chile.
+
+La solución permite centralizar programas de inducción, registrar el avance de cada colaborador, emitir certificados en PDF como evidencia para auditorías y gestionar planes comerciales con pago vía Transbank (precios en UF). El acceso se separa entre perfiles de **empresa (admin)** y **trabajador**.
+
+| Objetivo | Descripción |
+|---|---|
+| Ordenar | Inducciones y capacitaciones por cargo, área o normativa |
+| Trazar | Quién completó cada etapa y en qué fecha |
+| Evidenciar | Certificados listos para auditoría |
+| Monetizar | Suscripciones B2B con pasarela de pago |
+
+---
+
+## Equipo
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="https://github.com/Poison-CL">
+        <img src="https://avatars.githubusercontent.com/u/262444070?v=4" width="120" height="120" style="border-radius:50%;" alt="Mateo Martínez Gijón">
+      </a>
+      <br><br>
+      <strong><a href="https://github.com/Poison-CL">Mateo Martínez Gijón</a></strong>
+      <br>
+      <sub>@Poison-CL</sub>
+      <br><br>
+      Fullstack
+      <br>
+      <sub>React · Vite · Chakra UI · Supabase · <a href="https://github.com/cathrynlavery/diagram-design">Diagram Design</a></sub>
+      <br><br>
+      <a href="https://github.com/Poison-CL"><img src="https://img.shields.io/badge/GitHub-Poison--CL-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub Mateo"></a>
+      <a href="https://mateo-dev-seven.vercel.app/"><img src="https://img.shields.io/badge/Portfolio-Web-0B6E4F?style=flat-square" alt="Portfolio Mateo"></a>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="https://github.com/haelfert-ux">
+        <img src="https://avatars.githubusercontent.com/u/315952480?v=4" width="120" height="120" style="border-radius:50%;" alt="Hans Elfert">
+      </a>
+      <br><br>
+      <strong><a href="https://github.com/haelfert-ux">Hans Elfert</a></strong>
+      <br>
+      <sub>@haelfert-ux</sub>
+      <br><br>
+      Fullstack
+      <br>
+      <sub>Supabase · RLS · Clerk · Transbank · <a href="https://github.com/cathrynlavery/diagram-design">Diagram Design</a></sub>
+      <br><br>
+      <a href="https://github.com/haelfert-ux"><img src="https://img.shields.io/badge/GitHub-haelfert--ux-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub Hans"></a>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <sub>
+    <strong>Institución:</strong> Duoc UC — Sede San Joaquín<br>
+    <strong>Carrera:</strong> Ingeniería en Informática<br>
+    <strong>Asignatura:</strong> Capstone / Portafolio de Título (PTY4614)
+  </sub>
+</p>
+
+---
+
+## Stack tecnológico
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React + Vite + Chakra UI |
-| Auth | Clerk (roles empresa / empleado) |
-| Datos | Supabase (Postgres) |
-| Pagos | Transbank |
-| Contenedor (opcional) | Podman + Compose |
+| Frontend | React 19, Vite, Chakra UI, React Router |
+| Autenticación | Clerk (organizaciones y roles) |
+| Datos | Supabase (PostgreSQL, RLS, Storage, Edge Functions) |
+| Pagos | Transbank Webpay Plus |
+| Contenedor | Podman + Compose |
+
+---
 
 ## Estructura del repositorio
 
-```
+```text
 proyecto-titulo-inducta/
-├── Desarrollo de Documentacion/     # Guías y requisitos
-│   ├── CLERK-EMPRESA-EMPLEADO.md
-│   ├── INSTALACION-PODMAN.md
-│   └── requirements.txt
-├── Desarrollo_Proyecto/             # Código
-│   ├── inducta-chile/               # App web + Podman + Supabase
-│   │   ├── src/
-│   │   │   ├── app/                 # shell, providers, router
-│   │   │   ├── components/          # auth/ y site/
-│   │   │   ├── features/            # lógica por dominio
-│   │   │   ├── pages/
-│   │   │   │   ├── public/          # home, precios, contacto…
-│   │   │   │   ├── auth/            # entrar, post-login, acceso
-│   │   │   │   └── app/             # dashboard
-│   │   │   ├── lib/                 # env, supabase, auth, planes
-│   │   │   └── …
-│   │   ├── tests/unit/              # pruebas (node assert)
-│   │   ├── supabase/                # migraciones y edge functions
-│   │   ├── container/               # nginx
-│   │   ├── Containerfile
-│   │   └── compose.yml
-│   └── supabase/                    # link/config local de Supabase
-├── FASE 1/                          # Evidencias académicas
+├── assets/                        # Logo y diagramas del README
+├── Desarrollo de Documentacion/   # Guías técnicas y requisitos
+├── Desarrollo_Proyecto/           # Código de la aplicación
+│   ├── inducta-chile/             # App web + Supabase + Podman
+│   └── package.json               # Scripts npm del proyecto
+├── FASE 1/                        # Evidencias académicas
 │   ├── Evidencias grupales/
 │   └── Evidencias Individuales/
-├── package.json                     # Scripts npm desde la raíz
 └── README.md
 ```
 
-Detalle de carpetas de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md).
+Documentación técnica de la app:  
+[Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md)
 
-## Requisitos
+---
 
-- [Node.js](https://nodejs.org/) 20 o superior (incluye `npm`)
+## Inicio rápido
+
+### Requisitos
+
+- Node.js 20 o superior
 - Cuentas de [Clerk](https://dashboard.clerk.com) y [Supabase](https://supabase.com/dashboard)
-- (Opcional) [Podman Desktop](https://podman-desktop.io/) + `podman-compose` (`pip install podman-compose`)
+- Opcional: [Podman Desktop](https://podman-desktop.io/) y `podman-compose`
 
-Lista completa: [`Desarrollo de Documentacion/requirements.txt`](Desarrollo%20de%20Documentacion/requirements.txt).
+Detalle: [Desarrollo de Documentacion/requirements.txt](Desarrollo%20de%20Documentacion/requirements.txt)
 
-## Instalación rápida
-
-Desde la raíz del repo:
+### Instalación
 
 ```bash
-npm install --prefix Desarrollo_Proyecto/inducta-chile
+cd Desarrollo_Proyecto
+npm install --prefix inducta-chile
 ```
-
-Copia el entorno (Windows):
 
 ```powershell
-copy Desarrollo_Proyecto\inducta-chile\.env.example Desarrollo_Proyecto\inducta-chile\.env
+copy inducta-chile\.env.example inducta-chile\.env
 ```
 
-Edita `.env` con tus claves de Clerk y Supabase.
+Completa en `.env` las claves de Clerk y Supabase.
 
-## Arrancar (desarrollo)
-
-Desde la raíz:
+### Desarrollo local
 
 ```bash
-npm run dev
+npm run dev --prefix inducta-chile
 ```
 
-Queda en http://localhost:5173/
+Aplicación en [http://localhost:5173/](http://localhost:5173/)
 
-Otros scripts (desde la raíz o desde `inducta-chile`):
-
-```bash
-npm run build      # build de producción
-npm run preview    # servir el build
-```
-
-Dentro de `Desarrollo_Proyecto/inducta-chile`:
-
-```bash
-npm run lint       # ESLint
-npm run test       # pruebas unitarias (auth)
-```
-
-## Arrancar con Podman (contenedor)
+### Contenedor (Podman)
 
 ```powershell
-cd Desarrollo_Proyecto\inducta-chile
+cd inducta-chile
 podman compose up --build
 ```
 
-App en http://localhost:8080 — guía completa: [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md).
+Aplicación en [http://localhost:8080/](http://localhost:8080/)
+
+---
+
+## Arquitectura
+
+Diagramas con [Diagram Design](https://github.com/cathrynlavery/diagram-design).
+
+<p align="center">
+  <img src="assets/diagrams/arquitectura-inducta.png" alt="Arquitectura Inducta Chile" width="900">
+</p>
+
+<p align="center">
+  <sub>Modelo de datos actual</sub><br>
+  <img src="assets/diagrams/modelo-datos-inducta.png" alt="Modelo de datos Inducta Chile" width="900">
+</p>
+
+---
 
 ## Documentación
 
 | Documento | Contenido |
 |---|---|
-| [README de la app](Desarrollo_Proyecto/inducta-chile/README.md) | Setup local, estructura de `src/`, comandos |
-| [Instalación Podman](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md) | Contenedor en `http://localhost:8080` |
-| [Clerk Empresa/Empleado](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md) | Roles y organizaciones |
+| [README de la app](Desarrollo_Proyecto/inducta-chile/README.md) | Setup, estructura de `src/` y comandos |
+| [Instalación Podman](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md) | Contenedor paso a paso |
+| [Clerk Empresa / Empleado](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md) | Roles y organizaciones |
+
+---
+
+## Repositorio
+
+| Recurso | Enlace |
+|---|---|
+| Código fuente | [github.com/Poison-CL/proyecto-titulo-inducta](https://github.com/Poison-CL/proyecto-titulo-inducta) |
+| Contribuciones | [@Poison-CL](https://github.com/Poison-CL) · [@haelfert-ux](https://github.com/haelfert-ux) |
+
+---
+
+## Licencia y uso
+
+Proyecto de carácter **académico** (Portafolio de Título).  
+Uso restringido a fines formativos del equipo y de la asignatura Capstone.
