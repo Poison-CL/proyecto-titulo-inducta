@@ -4,88 +4,88 @@ Frontend React (Vite) con autenticación Clerk, datos en Supabase y pagos Transb
 
 ---
 
-## 1. Qué hay que instalar
+## 1. Qué hay que instalar (una vez)
 
-Hazlo **una vez** en el PC.
-
-| Programa | Para qué | Dónde bajarlo |
+| Programa | Para qué | Dónde |
 |---|---|---|
-| [Node.js 22 LTS](https://nodejs.org) | Corre la app sin Docker. Incluye `npm`. | https://nodejs.org |
-| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Levanta todo con un comando. | https://www.docker.com/products/docker-desktop/ |
-| [Git](https://git-scm.com/download/win) | Clonar el repositorio. | https://git-scm.com/download/win |
+| [Node.js 20+](https://nodejs.org) | Desarrollo local (`npm run dev`) | https://nodejs.org |
+| [Podman Desktop](https://podman-desktop.io/) | Demo / deploy en contenedor (`:8080`) | https://podman-desktop.io/ |
+| [Git](https://git-scm.com/download/win) | Clonar el repositorio | https://git-scm.com |
 
-Después de instalar Node, cierra y abre la terminal y comprueba:
+Comprueba en una terminal nueva:
 
 ```powershell
 node -v
 npm -v
+podman -v
 ```
 
-Después de instalar Docker Desktop, **ábrelo y espera** a que diga que está en marcha. Comprueba:
+Cuentas en la nube (no se instalan en el PC):
 
-```powershell
-docker -v
-docker compose version
-```
-
-También necesitas cuentas (son servicios en la nube, no se instalan):
-
-- [Clerk](https://dashboard.clerk.com) — login Empresa/Empleado (`docs/CLERK-EMPRESA-EMPLEADO.md`)
-- [Supabase](https://supabase.com/dashboard) — base de datos
+- [Clerk](https://dashboard.clerk.com) — publishable key
+- [Supabase](https://supabase.com/dashboard) — Project URL + anon key
 
 ---
 
 ## 2. Entrar al proyecto
 
+Desde la raíz del repo:
+
 ```powershell
-cd ruta\del\repo\inducta-chile
+cd Desarrollo_Proyecto\inducta-chile
 ```
 
-Tienes que estar en la carpeta que tiene `package.json` y `docker-compose.yml`.
+Esta carpeta debe tener `package.json`, `Containerfile` y `compose.yml`.
 
 ---
 
 ## 3. Variables de entorno
 
-Las claves van en la **raíz** (junto a `package.json`), nunca en `src/`.
-
 ```powershell
 copy .env.example .env
 ```
 
-Abre `.env` y pega tus claves:
+Edita `.env` (junto a `package.json`, nunca dentro de `src/`):
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-VITE_SUPABASE_ANON_KEY=sb_publishable_...
+VITE_SUPABASE_ANON_KEY=eyJ...
 ```
+
+En Clerk → Domains / Allowed origins, agrega:
+
+- `http://localhost:5173` (npm)
+- `http://localhost:8080` (Podman)
 
 ---
 
 ## 4. Levantar el proyecto
 
-Guía detallada por equipo (Docker Desktop, `.env`, verificación y problemas frecuentes): [docs/INSTALACION-DOCKER.md](docs/INSTALACION-DOCKER.md).
+### Opción A — Podman (demo / deploy)
 
-### Opción A — Docker (la que piden para compartir el proyecto)
-
-1. Abre Docker Desktop y espera a que inicie.
-2. En la carpeta del proyecto:
+1. Abre **Podman Desktop** y espera a que el motor esté en marcha.
+2. Si `podman` falla al conectar, arranca la máquina:
 
 ```powershell
-docker compose up --build
+podman machine start
 ```
 
-3. Abre el navegador en [http://localhost:8080](http://localhost:8080)
-
-Para parar: `Ctrl+C` en la terminal, o:
+3. Desde `inducta-chile`:
 
 ```powershell
-docker compose down
+podman compose up --build
 ```
 
-Clerk y Supabase siguen en la nube. El contenedor solo sirve la web.
+4. Abre [http://localhost:8080](http://localhost:8080)
+
+Para parar: `Ctrl+C`, o:
+
+```powershell
+podman compose down
+```
+
+Guía completa: [INSTALACION-PODMAN.md](../../Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md)
 
 ### Opción B — Local con Node (desarrollo)
 
@@ -96,17 +96,18 @@ npm run dev
 
 Abre [http://localhost:5173](http://localhost:5173)
 
-Si cambias el `.env`, para el servidor (`Ctrl+C`) y vuelve a correr `npm run dev`.
+Si cambias el `.env`, detén el servidor (`Ctrl+C`) y vuelve a correr `npm run dev`.
 
 ---
 
 ## 5. Otros comandos
 
 ```powershell
-npm run build      # genera la carpeta dist
+npm run test       # pruebas unitarias
+npm run build      # genera dist/
 npm run preview    # sirve el build en local
-npm run lint       # revisa el código
-docker compose down
+npm run lint
+podman compose down
 ```
 
 ---
@@ -115,33 +116,22 @@ docker compose down
 
 ```
 inducta-chile/
-├── docker/
-│   └── nginx.conf          # SPA routing en producción
-├── public/                 # estáticos públicos
+├── container/
+│   └── nginx.conf          # SPA routing en el contenedor
+├── public/
 ├── src/
-│   ├── app/                # shell de la app
-│   │   ├── App.jsx
-│   │   ├── providers.jsx   # Clerk + Saas UI
-│   │   └── router.jsx      # rutas
-│   ├── pages/              # pantallas por ruta
-│   │   ├── LandingPage.jsx
-│   │   └── DashboardPage.jsx
+│   ├── app/                # App, providers, router
+│   ├── pages/              # pantallas por dominio
 │   ├── components/
-│   │   └── landing/        # navbar, hero, footer
-│   ├── theme/              # paleta Saas UI
-│   ├── layouts/            # shells (sidebar, etc.)
-│   │   └── AdminLayout.jsx
-│   ├── features/           # lógica de negocio por dominio
-│   │   └── empresa/
-│   ├── hooks/              # hooks reutilizables
-│   ├── lib/                # clientes e infraestructura
-│   ├── services/           # integraciones externas (Transbank)
-│   ├── styles/
+│   ├── layouts/
+│   ├── lib/                # env, auth, supabase
 │   └── main.jsx
 ├── supabase/
-│   └── migrations/         # esquema SQL
-├── Dockerfile
-├── docker-compose.yml
+│   ├── migrations/
+│   └── functions/          # Edge Functions Transbank
+├── tests/
+├── Containerfile
+├── compose.yml
 ├── .env.example
 └── README.md
 ```
@@ -149,12 +139,8 @@ inducta-chile/
 | Carpeta | Qué va ahí |
 |---|---|
 | `src/app` | Arranque, providers y rutas |
-| `src/pages` | Landing, dashboard y pantallas |
-| `src/components/landing` | Navbar, hero, footer |
-| `src/theme` | Colores y tema Saas UI |
-| `src/layouts` | Marcos compartidos (sidebar) |
-| `src/features` | Reglas de negocio por dominio |
-| `src/lib` | Env, cliente Supabase |
-| `src/services` | APIs externas (Transbank) |
+| `src/pages` | Landing, acceso, dashboard |
+| `src/lib` | Env, Clerk helpers, cliente Supabase |
 | `supabase/migrations` | SQL versionado |
-| `docker/` | Config del contenedor |
+| `supabase/functions` | Pagos Transbank |
+| `container/` | Config nginx del contenedor |
