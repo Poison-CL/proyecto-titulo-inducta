@@ -50,13 +50,11 @@ export default function PagoResultadoPage() {
           spacing={5}
           align="stretch"
           bg="white"
-          borderRadius="xl"
+          borderRadius="2xl"
           borderWidth="1px"
           borderColor="blackAlpha.100"
-          borderTopWidth="4px"
-          borderTopColor={vista.color}
           p={{ base: 6, md: 10 }}
-          boxShadow="sm"
+          boxShadow="0 1px 3px rgba(13, 13, 13, 0.08)"
           textAlign="center"
         >
           <Icon as={vista.icon} boxSize={12} color={vista.color} mx="auto" />

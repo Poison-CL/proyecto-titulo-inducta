@@ -2,12 +2,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import RequireAuth from '../components/auth/RequireAuth'
 import RequireOrg from '../components/auth/RequireOrg'
 import AdminLayout from '../layouts/AdminLayout'
+import RecursosLayout from '../layouts/RecursosLayout'
 import SiteLayout from '../layouts/SiteLayout'
 import {
   AccesoRegistroPage,
   AccesoSinEmpresaPage,
   AccesoSinMembresiaPage,
 } from '../pages/auth/AccesoPages'
+import ArticuloPage from '../pages/public/ArticuloPage'
 import ContactoPage from '../pages/public/ContactoPage'
 import ContratarPage from '../pages/public/ContratarPage'
 import DashboardPage from '../pages/app/DashboardPage'
@@ -16,7 +18,9 @@ import HomePage from '../pages/public/HomePage'
 import NoEncontradaPage from '../pages/public/NoEncontradaPage'
 import PostLoginPage from '../pages/auth/PostLoginPage'
 import PreciosPage from '../pages/public/PreciosPage'
+import RecursoInfoPage from '../pages/public/RecursoInfoPage'
 import RecursosPage from '../pages/public/RecursosPage'
+import SoportePage from '../pages/public/SoportePage'
 import { RUTAS_AUTH } from '../lib/authCopy'
 import PagoResultadoPage from '../pages/public/PagoResultadoPage'
 
@@ -43,7 +47,13 @@ export function AppRouter() {
           <Route path="/pago/rechazado" element={<PagoResultadoPage />} />
           <Route path="/pago/anulado" element={<PagoResultadoPage />} />
           <Route path="/pago-exitoso" element={<Navigate to="/pago/exitoso" replace />} />
-          <Route path="/recursos" element={<RecursosPage />} />
+          <Route path="/recursos" element={<RecursosLayout />}>
+            <Route index element={<RecursosPage />} />
+            <Route path="capacitaciones" element={<RecursoInfoPage pagina="capacitaciones" />} />
+            <Route path="cumplimiento" element={<RecursoInfoPage pagina="cumplimiento" />} />
+            <Route path="soporte" element={<SoportePage />} />
+            <Route path=":slug" element={<ArticuloPage />} />
+          </Route>
           <Route path="/contacto" element={<ContactoPage />} />
           <Route path="*" element={<NoEncontradaPage />} />
         </Route>

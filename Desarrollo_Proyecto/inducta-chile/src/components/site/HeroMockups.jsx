@@ -11,10 +11,10 @@ import {
 
 // Los mockups del hero son solo decoracion, los datos que muestran son inventados.
 const iconTile = [
-  { label: 'Inducción', icon: ClipboardList, bg: '#E3F2FD', color: '#1565C0' },
-  { label: 'Seguridad', icon: ShieldCheck, bg: '#E8F5E9', color: '#2E7D32' },
-  { label: 'Documentos', icon: FileText, bg: '#FFF3E0', color: '#EF6C00' },
-  { label: 'Certificados', icon: Award, bg: '#F3E5F5', color: '#7B1FA2' },
+  { label: 'Inducción', icon: ClipboardList },
+  { label: 'Seguridad', icon: ShieldCheck },
+  { label: 'Documentos', icon: FileText },
+  { label: 'Certificados', icon: Award },
 ]
 
 export function PhoneMock() {
@@ -23,7 +23,6 @@ export function PhoneMock() {
       w={{ md: '210px', lg: '230px' }}
       bg="white"
       borderRadius="2xl"
-      boxShadow="0 8px 18px rgba(13, 13, 13, 0.16)"
       overflow="hidden"
       position="relative"
       zIndex={3}
@@ -97,17 +96,17 @@ export function PhoneMock() {
                 w="32px"
                 h="32px"
                 borderRadius="md"
-                bg={item.bg}
+                bg="brand.wash"
                 align="center"
                 justify="center"
                 flexShrink={0}
               >
-                <Icon as={item.icon} boxSize={4} color={item.color} />
+                <Icon as={item.icon} boxSize={4} color="brand.primary" />
               </Flex>
               <Text flex="1" fontSize="xs" fontWeight="semibold" color="brand.ink">
                 {item.label}
               </Text>
-              <Icon as={CheckCircle2} boxSize={4} color="green.400" opacity={0.85} />
+              <Icon as={CheckCircle2} boxSize={4} color="brand.accent" />
             </HStack>
           ))}
         </VStack>
@@ -123,7 +122,7 @@ const PL = 10
 export function DesktopMock() {
   return (
     <Box
-      w={{ md: '520px', lg: '560px', xl: '700px' }}
+      w="full"
       bg="white"
       borderRadius="xl"
       overflow="hidden"
@@ -142,10 +141,7 @@ export function DesktopMock() {
         borderBottomWidth="1px"
         borderColor="blackAlpha.100"
       >
-        <Box w="8px" h="8px" borderRadius="full" bg="#FF5F57" />
-        <Box w="8px" h="8px" borderRadius="full" bg="#FEBC2E" />
-        <Box w="8px" h="8px" borderRadius="full" bg="#28C840" />
-        <Text ml={2} fontSize="10px" color="blackAlpha.400" noOfLines={1}>
+        <Text fontSize="10px" color="blackAlpha.400" noOfLines={1}>
           panel.inductachile.cl
         </Text>
       </Flex>
@@ -259,36 +255,6 @@ export function DesktopMock() {
               </Text>
             </Box>
           </Flex>
-
-          <Box
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor="blackAlpha.100"
-            p={2.5}
-            bg="white"
-          >
-            <HStack mb={2} spacing={2}>
-              <Flex
-                w="28px"
-                h="28px"
-                borderRadius="full"
-                bg="#FFE8E8"
-                align="center"
-                justify="center"
-              >
-                <Icon as={Award} boxSize={3.5} color="brand.accent" />
-              </Flex>
-              <Text fontSize="10px" fontWeight="bold" color="brand.ink">
-                Reconocimiento
-              </Text>
-            </HStack>
-            <Text fontSize="10px" color="blackAlpha.600" lineHeight="1.4">
-              "Complete la inducción en 2 días. Todo claro y ordenado."
-            </Text>
-            <Text fontSize="9px" color="brand.primary" mt={1} fontWeight="semibold">
-              - Mateo M.
-            </Text>
-          </Box>
         </VStack>
       </Grid>
 

@@ -1,155 +1,151 @@
-import { Box, Button, Container, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Fragment } from 'react'
+import { Box, Button, Container, Flex, Heading, Link, Text } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
+import { ChevronRight } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
 import { DesktopMock, PhoneMock } from './HeroMockups'
 
-const fadeUp = keyframes`
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+const revelar = keyframes`
+  from { opacity: 0; transform: translateY(24px); filter: blur(12px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 `
 
+const entrada = (delay) => ({
+  animation: `${revelar} 0.9s cubic-bezier(0.32, 0.72, 0, 1) ${delay}s both`,
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+})
+
+const LINEAS = [
+  { palabras: ['Inducción', 'clara.'], color: 'brand.ink' },
+  { palabras: ['Equipo', 'listo.'], color: 'brand.primary' },
+]
+
 export default function Hero() {
+  let n = 0
   return (
     <Box
       as="section"
-      position="relative"
+      bg="white"
       overflow="hidden"
-      bgGradient={{
-        base: 'linear(to-b, white 0%, brand.wash 100%)',
-        md: 'linear(to-r, white 0%, white 45%, brand.wash 100%)',
-      }}
-      minH="100vh"
+      minH="100svh"
+      display="flex"
+      flexDirection="column"
       pt="var(--site-header-h, 72px)"
-      pb={{ base: 12, md: 0 }}
+      borderBottomWidth="1px"
+      borderColor="blackAlpha.100"
     >
-      <Container
-        maxW="7xl"
-        px={{ base: 5, md: 8 }}
-        position="relative"
-        zIndex={3}
-        minH="calc(100vh - var(--site-header-h, 72px))"
-        display="flex"
-        alignItems="center"
-        py={{ base: 10, md: 12 }}
-      >
-        <VStack
-          align={{ base: 'center', md: 'flex-start' }}
-          textAlign={{ base: 'center', md: 'left' }}
-          spacing={5}
-          maxW={{ base: '100%', md: '28rem', lg: '32rem', xl: '34rem' }}
-          w="full"
-          sx={{ animation: `${fadeUp} 0.5s ease both` }}
+      <Container maxW="7xl" px={{ base: 5, md: 10 }} flex="1" display="flex" flexDirection="column">
+        <Flex flex="1" align="center" py={{ base: 14, md: 12 }}>
+        <Box w="full" maxW="6xl" mx="auto">
+        <Flex
+          direction={{ base: 'column', xl: 'row' }}
+          align={{ base: 'flex-start', xl: 'center' }}
+          justify="space-between"
+          gap={{ base: 0, xl: 16 }}
         >
-          <Text
-            as="span"
-            display="inline-block"
-            fontSize="xs"
-            fontWeight="semibold"
-            color="brand.primary"
-            bg="brand.wash"
-            borderWidth="1px"
-            borderColor="brand.primary"
-            borderRadius="md"
-            px={3}
-            py={1}
-          >
-            Plataforma de inducción y capacitación
-          </Text>
-
           <Heading
             as="h1"
-            fontFamily="heading"
-            fontSize={{ base: '2.1rem', sm: '2.4rem', md: '2.6rem', lg: '3rem' }}
+            fontSize={{ base: '3rem', sm: '3.8rem', md: '5rem', lg: '6rem', xl: '7rem' }}
             fontWeight="semibold"
-            lineHeight="1.15"
-            letterSpacing="-0.03em"
-            sx={{ color: 'brand.ink' }}
+            lineHeight="1"
+            letterSpacing="-0.045em"
           >
-            Inducción clara.
-            <Box as="br" />
-            <Box as="span" color="brand.primary">
-              Equipo listo.
-            </Box>
+            {LINEAS.map((linea) => (
+              <Box as="span" display="block" whiteSpace="nowrap" color={linea.color} key={linea.palabras[0]}>
+                {linea.palabras.map((p, i) => (
+                  <Fragment key={p}>
+                    {i > 0 && ' '}
+                    <Box as="span" display="inline-block" sx={entrada(0.1 + 0.09 * n++)}>
+                      {p}
+                    </Box>
+                  </Fragment>
+                ))}
+              </Box>
+            ))}
           </Heading>
 
           <Text
-            fontSize={{ base: 'md', md: 'lg' }}
-            color="brand.ink"
-            lineHeight="1.65"
-            maxW="42ch"
-            opacity={0.75}
+            maxW={{ base: '44ch', xl: '23rem' }}
+            flexShrink={0}
+            mt={{ base: 5, md: 6, xl: 0 }}
+            fontSize={{ base: 'md', md: 'xl', xl: 'lg' }}
+            color="blackAlpha.700"
+            lineHeight="1.55"
+            sx={entrada(0.46)}
           >
             Organice inducciones y capacitaciones por cargo o área, siga el avance de cada
             colaborador y deje evidencia lista para auditorías.
           </Text>
-
-          <HStack
-            spacing={3}
-            flexWrap="wrap"
-            justify={{ base: 'center', md: 'flex-start' }}
-            pt={1}
-          >
-            <Button
-              as={RouterLink}
-              to="/precios"
-              size="md"
-              px={6}
-              borderRadius="full"
-              bg="brand.accent"
-              color="white"
-              fontWeight="bold"
-              _hover={{ bg: 'brand.accentDark' }}
-              _active={{ bg: 'brand.primaryDark' }}
-            >
-              Ver planes
-            </Button>
-            <Button
-              as={RouterLink}
-              to="/contacto"
-              size="md"
-              px={5}
-              borderRadius="full"
-              variant="outline"
-              borderWidth="1.5px"
-              borderColor="blackAlpha.300"
-              color="brand.ink"
-              bg="transparent"
-              _hover={{ bg: 'brand.soft', borderColor: 'brand.ink' }}
-            >
-              Agendar demo
-            </Button>
-          </HStack>
-        </VStack>
-      </Container>
-
-      {/* Anclados al borde derecho: el dashboard queda cortado a proposito */}
-      <Box
-        aria-hidden
-        display={{ base: 'none', md: 'block' }}
-        position="absolute"
-        zIndex={2}
-        pointerEvents="none"
-        top="var(--site-header-h, 72px)"
-        bottom={0}
-        left={{ md: '48%', lg: '46%', xl: '44%' }}
-        right={0}
-        sx={{ animation: `${fadeUp} 0.55s ease 0.08s both` }}
-      >
-        {/* drop-shadow sigue la silueta; filter:drop-shadow en caja recorta mal */}
-        <Flex
-          position="relative"
-          h="full"
-          align="center"
-          filter="drop-shadow(0 0 30px rgba(66, 96, 230, 0.8)) drop-shadow(0 20px 38px rgba(13, 13, 13, 0.16))"
-        >
-          <Box flexShrink={0} zIndex={3}>
-            <PhoneMock />
-          </Box>
-          <Box flexShrink={0} ml="-32px" zIndex={1}>
-            <DesktopMock />
-          </Box>
         </Flex>
-      </Box>
+
+            <Flex gap={7} wrap="wrap" align="center" mt={{ base: 7, md: 8, xl: 10 }} sx={entrada(0.55)}>
+              <Button
+                as={RouterLink}
+                to="/precios"
+                h="46px"
+                px={7}
+                borderRadius="full"
+                bg="brand.accent"
+                color="white"
+                fontWeight="medium"
+                fontSize="md"
+                _hover={{ bg: 'brand.accentDark' }}
+              >
+                Ver planes
+              </Button>
+              <Link
+                as={RouterLink}
+                to="/contacto"
+                display="inline-flex"
+                alignItems="center"
+                gap={1}
+                fontSize="md"
+                fontWeight="medium"
+                color="brand.accent"
+                role="group"
+                _hover={{ color: 'brand.accentDark', textDecoration: 'none' }}
+              >
+                Agendar demo
+                <Box
+                  as="span"
+                  display="inline-flex"
+                  transition="transform 200ms cubic-bezier(0.32, 0.72, 0, 1)"
+                  _groupHover={{ transform: 'translateX(3px)' }}
+                >
+                  <ChevronRight size={18} aria-hidden />
+                </Box>
+              </Link>
+            </Flex>
+        </Box>
+        </Flex>
+
+        {/* Decorativo: los datos del mockup son de ejemplo. El borde inferior de la seccion lo recorta. */}
+        <Box
+          aria-hidden
+          display={{ base: 'none', md: 'block' }}
+          pointerEvents="none"
+          w="full"
+          maxW="6xl"
+          mx="auto"
+          flexShrink={0}
+          h={{ md: '240px', lg: '300px' }}
+          sx={entrada(0.64)}
+        >
+          <Box position="relative" ml={{ md: '180px', lg: '200px' }}>
+            <Box filter="drop-shadow(0 18px 40px rgba(13, 13, 13, 0.12))">
+              <DesktopMock />
+            </Box>
+            <Box
+              position="absolute"
+              left={{ md: '-180px', lg: '-200px' }}
+              top={{ md: '48px', lg: '56px' }}
+              filter="drop-shadow(0 18px 36px rgba(13, 13, 13, 0.18))"
+            >
+              <PhoneMock />
+            </Box>
+          </Box>
+        </Box>
+      </Container>
     </Box>
   )
 }

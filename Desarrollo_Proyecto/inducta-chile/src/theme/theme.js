@@ -34,18 +34,21 @@ export const theme = extendTheme(
         baseStyle: {
           fontWeight: 'semibold',
           borderRadius: 'md',
+          transition: 'transform 100ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         },
         variants: {
           solid: {
             bg: 'brand.primary',
             color: 'white',
             _hover: { bg: 'brand.primaryDark' },
+            _active: { transform: 'scale(0.97)' },
           },
           outline: {
             borderColor: 'blackAlpha.200',
             color: 'brand.ink',
             bg: 'white',
             _hover: { bg: 'brand.soft' },
+            _active: { transform: 'scale(0.97)' },
           },
           ghost: {
             color: 'brand.ink',

@@ -13,13 +13,11 @@ function AccesoCard({ title, body, actions }) {
           spacing={5}
           align="stretch"
           bg="white"
-          borderRadius="xl"
+          borderRadius="2xl"
           borderWidth="1px"
           borderColor="blackAlpha.100"
-          borderTopWidth="4px"
-          borderTopColor="brand.primary"
           p={{ base: 6, md: 10 }}
-          boxShadow="sm"
+          boxShadow="0 1px 3px rgba(13, 13, 13, 0.08)"
         >
           <Heading as="h1" size="lg" color="brand.ink">
             {title}
