@@ -3,38 +3,51 @@ import {
   Box,
   Button,
   Container,
-  Divider,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Grid,
   Heading,
-  HStack,
-  Icon,
   IconButton,
   Input,
   InputGroup,
   InputLeftAddon,
-  List,
-  ListIcon,
-  ListItem,
-  SimpleGrid,
+  Link,
   Text,
   Tooltip,
   VStack,
 } from '@chakra-ui/react'
-import { AnimatePresence, motion } from 'motion/react'
-import { Check, CircleHelp, Lock } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { ArrowLeft, Check, CircleHelp } from 'lucide-react'
 import { Link as RouterLink, Navigate, useSearchParams } from 'react-router-dom'
 import { useUfHoy } from '../../hooks/useUfHoy'
 import { formateaRut, formateaTel, mascaraTel, rutValido, telefonoValido } from '../../lib/chile'
-import { clp, getPlan, montoPlan, precioFinalClp, uf } from '../../lib/planes'
+import { IVA_CHILE, clp, getPlan, montoPlan, precioFinalClp, uf } from '../../lib/planes'
 import { iniciarPagoTransbank } from '../../services/transbank'
 
 const MotionBox = motion.create(Box)
+const ease = [0.32, 0.72, 0, 1]
+
+const inputProps = {
+  bg: 'white',
+  borderColor: 'blackAlpha.200',
+  _hover: { borderColor: 'blackAlpha.300' },
+  _focusVisible: { borderColor: 'brand.primary', boxShadow: '0 0 0 1px #1B22A7' },
+}
 
 function LabelAyuda({ children, ayuda }) {
   return (
-    <FormLabel requiredIndicator={null} display="flex" alignItems="center" gap={1} mb={2}>
+    <FormLabel
+      requiredIndicator={null}
+      display="flex"
+      alignItems="center"
+      gap={1}
+      mb={1.5}
+      fontSize="sm"
+      fontWeight="semibold"
+      color="brand.ink"
+    >
       {children}
       <Tooltip label={ayuda} hasArrow placement="top" openDelay={200}>
         <IconButton
@@ -52,6 +65,63 @@ function LabelAyuda({ children, ayuda }) {
   )
 }
 
+const PASOS = ['Datos de facturación', 'Confirmación', 'Pago en Webpay']
+
+function Pasos({ actual }) {
+  return (
+    <Flex as="ol" listStyleType="none" gap={{ base: 4, md: 8 }} wrap="wrap" fontSize="sm">
+      {PASOS.map((p, i) => {
+        const hecho = i < actual
+        const activo = i === actual
+        return (
+          <Flex
+            as="li"
+            key={p}
+            align="center"
+            gap={2}
+            color={activo ? 'brand.ink' : 'blackAlpha.500'}
+            fontWeight={activo ? 'semibold' : 'medium'}
+            aria-current={activo ? 'step' : undefined}
+          >
+            <Flex
+              boxSize="22px"
+              borderRadius="full"
+              align="center"
+              justify="center"
+              fontSize="xs"
+              fontWeight="semibold"
+              bg={activo || hecho ? 'brand.primary' : 'transparent'}
+              color={activo || hecho ? 'white' : 'blackAlpha.500'}
+              borderWidth={activo || hecho ? 0 : '1px'}
+              borderColor="blackAlpha.300"
+            >
+              {hecho ? <Check size={13} aria-hidden /> : i + 1}
+            </Flex>
+            {p}
+          </Flex>
+        )
+      })}
+    </Flex>
+  )
+}
+
+function Linea({ label, valor, fuerte }) {
+  return (
+    <Flex justify="space-between" gap={4} fontSize={fuerte ? 'md' : 'sm'}>
+      <Text color={fuerte ? 'brand.ink' : 'blackAlpha.600'} fontWeight={fuerte ? 'semibold' : 'normal'}>
+        {label}
+      </Text>
+      <Text
+        color="brand.ink"
+        fontWeight={fuerte ? 'semibold' : 'medium'}
+        sx={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {valor}
+      </Text>
+    </Flex>
+  )
+}
+
 const VACIO = {
   email: '',
   titular: '',
@@ -63,21 +133,21 @@ const VACIO = {
 
 export default function ContratarPage() {
   const [params] = useSearchParams()
-  
+  const ufClp = useUfHoy()
+  const reducir = useReducedMotion()
+  const [documento, setDocumento] = useState('factura')
+  const [datos, setDatos] = useState(VACIO)
+  const [errores, setErrores] = useState({})
+  const [listo, setListo] = useState(false)
+  const [procesandoPago, setProcesandoPago] = useState(false)
 
   const errorPago = params.get('error')
   if (errorPago === 'pago_fallido' || errorPago === 'servidor') {
     return <Navigate to="/pago/rechazado" replace />
   }
 
-  const ufClp = useUfHoy()
   const plan = getPlan(params.get('plan'))
   const periodo = params.get('periodo') === 'anual' ? 'anual' : 'mensual'
-  const [documento, setDocumento] = useState('factura')
-  const [datos, setDatos] = useState(VACIO)
-  const [errores, setErrores] = useState({})
-  const [listo, setListo] = useState(false)
-  const [procesandoPago, setProcesandoPago] = useState(false) 
   const esFactura = documento === 'factura'
 
   if (!plan?.contratable) {
@@ -85,7 +155,8 @@ export default function ContratarPage() {
   }
 
   const monto = montoPlan(plan, periodo)
-  const beneficios = plan.features.filter((f) => f.ok).slice(0, 3)
+  const neto = ufClp ? Math.round(monto * ufClp) : null
+  const beneficios = plan.features.filter((f) => f.ok)
   const set = (campo) => (e) => {
     setDatos((d) => ({ ...d, [campo]: e.target.value }))
     if (errores[campo]) setErrores((err) => ({ ...err, [campo]: '' }))
@@ -109,7 +180,6 @@ export default function ContratarPage() {
     }))
     setListo(true)
   }
-
 
   const handleIniciarPago = async () => {
     setProcesandoPago(true)
@@ -143,76 +213,63 @@ export default function ContratarPage() {
     }
   }
 
-  return (
-    <Box bg="brand.soft" py={{ base: 10, md: 16 }}>
-      <Container maxW="6xl" px={{ base: 5, md: 8 }}>
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} alignItems="start">
-          <MotionBox
-            bg="white"
-            borderRadius="xl"
-            p={{ base: 6, md: 8 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-          >
-            <Heading as="h1" size="lg" color="brand.ink" mb={3}>
-              Plan {plan.nombre}
-            </Heading>
-            <Text fontSize="2xl" fontWeight="bold" color="brand.primary">
-              {uf(monto)} / {periodo === 'anual' ? 'año' : 'mes'}
-            </Text>
-            <Text fontSize="sm" color="blackAlpha.500" mb={6}>
-              + 19% IVA
-            </Text>
-            <List spacing={3}>
-              {beneficios.map((f) => (
-                <ListItem key={f.text} color="brand.ink">
-                  <ListIcon as={Check} color="brand.accent" />
-                  {f.text}
-                </ListItem>
-              ))}
-            </List>
-            <AnimatePresence>
-              {ufClp ? (
-                <MotionBox
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  <Divider my={6} borderColor="blackAlpha.200" />
-                  <Text fontSize="sm" color="blackAlpha.500">
-                    Precio final
-                  </Text>
-                  <Text fontSize="xl" fontWeight="bold" color="brand.ink">
-                    {clp(precioFinalClp(monto, ufClp))}
-                  </Text>
-                  <Text fontSize="xs" color="blackAlpha.400" mt={1}>
-                    UF del día convertida a pesos, más IVA. Referencial hasta facturar.
-                  </Text>
-                </MotionBox>
-              ) : null}
-            </AnimatePresence>
-          </MotionBox>
+  const paso = {
+    initial: reducir ? { opacity: 0 } : { opacity: 0, x: 12 },
+    animate: { opacity: 1, x: 0 },
+    exit: reducir ? { opacity: 0 } : { opacity: 0, x: -12 },
+    transition: { duration: 0.25, ease },
+  }
 
-          <AnimatePresence mode="wait">
+  return (
+    <Box bg="white" py={{ base: 8, md: 12 }}>
+      <Container maxW="6xl" px={{ base: 5, md: 8 }}>
+        <Link
+          as={RouterLink}
+          to="/precios"
+          display="inline-flex"
+          alignItems="center"
+          gap={1.5}
+          fontSize="sm"
+          fontWeight="medium"
+          color="blackAlpha.700"
+          mb={6}
+        >
+          <ArrowLeft size={16} aria-hidden />
+          Volver a planes
+        </Link>
+
+        <Heading
+          as="h1"
+          fontSize={{ base: '1.8rem', md: '2.2rem' }}
+          lineHeight="1.1"
+          letterSpacing="-0.03em"
+          color="brand.ink"
+          mb={5}
+        >
+          Contratar {plan.nombre}
+        </Heading>
+
+        <Box pb={8} mb={{ base: 8, md: 10 }} borderBottomWidth="1px" borderColor="blackAlpha.100">
+          <Pasos actual={listo ? 1 : 0} />
+        </Box>
+
+        <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 7fr) minmax(0, 5fr)' }} gap={{ base: 10, lg: 16 }} alignItems="start">
+          <AnimatePresence mode="wait" initial={false}>
             {listo ? (
-              <MotionBox
-                key="ok"
-                bg="white"
-                borderRadius="xl"
-                p={{ base: 6, md: 8 }}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-              >
-                <Heading as="h2" size="md" mb={1}>
-                  Confirme sus datos
-                </Heading>
-                <Text fontSize="sm" color="blackAlpha.500" mb={6}>
-                  Revise la información de facturación antes de continuar.
+              <MotionBox key="ok" {...paso}>
+                <Flex justify="space-between" align="baseline" mb={1}>
+                  <Heading as="h2" fontSize="lg" color="brand.ink">
+                    Confirme sus datos
+                  </Heading>
+                  <Button type="button" variant="link" size="sm" color="brand.primary" onClick={() => setListo(false)}>
+                    Editar
+                  </Button>
+                </Flex>
+                <Text fontSize="sm" color="blackAlpha.600" mb={6}>
+                  Revise la información de facturación antes de pagar.
                 </Text>
-                <VStack align="stretch" spacing={0} divider={<Divider borderColor="blackAlpha.100" />}>
+
+                <Box as="dl" borderTopWidth="1px" borderColor="blackAlpha.100">
                   {[
                     ['Documento', esFactura ? 'Factura' : 'Boleta'],
                     [esFactura ? 'Razón Social' : 'Nombre', datos.titular],
@@ -222,87 +279,80 @@ export default function ContratarPage() {
                     ['Teléfono', formateaTel(datos.telefono)],
                     ['Dirección', datos.direccion],
                   ].map(([label, valor]) => (
-                    <Box key={label} py={3}>
-                      <Text fontSize="xs" color="blackAlpha.500" mb={0.5}>
+                    <Grid
+                      key={label}
+                      templateColumns={{ base: '1fr', sm: '160px 1fr' }}
+                      gap={{ base: 0.5, sm: 4 }}
+                      py={3}
+                      borderBottomWidth="1px"
+                      borderColor="blackAlpha.100"
+                      fontSize="sm"
+                    >
+                      <Text as="dt" color="blackAlpha.600">
                         {label}
                       </Text>
-                      <Text fontWeight="semibold" color="brand.ink">
+                      <Text as="dd" fontWeight="medium" color="brand.ink" overflowWrap="anywhere">
                         {valor}
                       </Text>
-                    </Box>
+                    </Grid>
                   ))}
-                </VStack>
-                <Text fontSize="sm" color="blackAlpha.500" mt={6} mb={3}>
-                  El pago seguro se habilita en el siguiente paso.
-                </Text>
-                
-                {/* 4. El botón ahora está seguro adentro del diseño */}
-                <Button 
-                  size="lg" 
-                  width="full" 
+                </Box>
+
+                <Button
+                  mt={8}
+                  h="48px"
+                  width="full"
+                  borderRadius="lg"
                   onClick={handleIniciarPago}
                   isLoading={procesandoPago}
+                  isDisabled={!ufClp}
                   loadingText="Conectando con Webpay..."
                   bg="brand.primary"
                   color="white"
                   _hover={{ bg: 'brand.primaryDark' }}
                 >
-                  Ir a facturación segura
+                  {ufClp ? `Pagar ${clp(precioFinalClp(monto, ufClp))} en Webpay` : 'Calculando el monto...'}
                 </Button>
-
-                <Button type="button" variant="ghost" width="full" mt={2} onClick={() => setListo(false)}>
-                  Corregir datos
-                </Button>
-                <Text textAlign="center" mt={2}>
-                  <Button as={RouterLink} to="/precios" variant="link" fontSize="sm" color="blackAlpha.500">
-                    Volver a planes
-                  </Button>
+                <Text fontSize="sm" color="blackAlpha.600" mt={3}>
+                  Será redirigido al sitio de Webpay (Transbank) para completar el pago.
                 </Text>
               </MotionBox>
             ) : (
-              <MotionBox
-                key="form"
-                as="form"
-                onSubmit={onSubmit}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
-              >
-                <VStack spacing={4} align="stretch">
+              <MotionBox key="form" as="form" onSubmit={onSubmit} {...paso}>
+                <Heading as="h2" fontSize="lg" color="brand.ink" mb={6}>
+                  Datos de facturación
+                </Heading>
+                <VStack spacing={5} align="stretch">
                   <FormControl>
                     <LabelAyuda ayuda="Boleta si factura a su nombre. Factura si es empresa o pyme con giro.">
                       Documento tributario
                     </LabelAyuda>
-                    <HStack
-                      bg="brand.wash"
-                      borderRadius="full"
-                      p={1}
-                      spacing={0}
-                      display="inline-flex"
-                    >
+                    <Flex bg="blackAlpha.50" borderRadius="lg" p={1} gap={1} maxW="280px">
                       {[
                         ['boleta', 'Boleta'],
                         ['factura', 'Factura'],
-                      ].map(([tipo, label]) => (
-                        <Button
-                          key={tipo}
-                          type="button"
-                          size="sm"
-                          borderRadius="full"
-                          px={5}
-                          aria-pressed={documento === tipo}
-                          bg={documento === tipo ? 'brand.primary' : 'transparent'}
-                          color={documento === tipo ? 'white' : 'blackAlpha.700'}
-                          _hover={{
-                            bg: documento === tipo ? 'brand.primaryDark' : 'blackAlpha.50',
-                          }}
-                          onClick={() => setDocumento(tipo)}
-                        >
-                          {label}
-                        </Button>
-                      ))}
-                    </HStack>
+                      ].map(([tipo, label]) => {
+                        const activo = documento === tipo
+                        return (
+                          <Button
+                            key={tipo}
+                            type="button"
+                            flex="1"
+                            size="sm"
+                            h="36px"
+                            borderRadius="md"
+                            aria-pressed={activo}
+                            bg={activo ? 'white' : 'transparent'}
+                            color={activo ? 'brand.primary' : 'blackAlpha.700'}
+                            boxShadow={activo ? '0 1px 3px rgba(13, 13, 13, 0.12)' : 'none'}
+                            _hover={{ bg: activo ? 'white' : 'blackAlpha.50' }}
+                            onClick={() => setDocumento(tipo)}
+                          >
+                            {label}
+                          </Button>
+                        )
+                      })}
+                    </Flex>
                   </FormControl>
 
                   <FormControl isRequired>
@@ -310,6 +360,7 @@ export default function ContratarPage() {
                       Correo corporativo
                     </LabelAyuda>
                     <Input
+                      {...inputProps}
                       type="email"
                       autoComplete="email"
                       placeholder="nombre@empresa.cl"
@@ -318,58 +369,52 @@ export default function ContratarPage() {
                     />
                   </FormControl>
 
-                  <AnimatePresence mode="wait">
-                    <MotionBox
-                      key={documento}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {esFactura ? (
-                        <VStack spacing={4} align="stretch">
-                          <FormControl isRequired>
-                            <LabelAyuda ayuda="Nombre legal de la empresa. Ejemplo: Inducta Chile SpA.">
-                              Razón Social
-                            </LabelAyuda>
-                            <Input
-                              autoComplete="organization"
-                              value={datos.titular}
-                              onChange={set('titular')}
-                            />
-                          </FormControl>
-                          <FormControl isRequired>
-                            <LabelAyuda ayuda="Actividad económica del SII. Ejemplo: Servicios de capacitación.">
-                              Giro comercial
-                            </LabelAyuda>
-                            <Input
-                              placeholder="Ej: Servicios de capacitación"
-                              value={datos.giro}
-                              onChange={set('giro')}
-                            />
-                          </FormControl>
-                        </VStack>
-                      ) : (
-                        <FormControl isRequired>
-                          <LabelAyuda ayuda="Nombre y apellidos de quien recibe la boleta. Ejemplo: Ana Pérez Soto.">
-                            Nombre completo
-                          </LabelAyuda>
-                          <Input
-                            autoComplete="name"
-                            value={datos.titular}
-                            onChange={set('titular')}
-                          />
-                        </FormControl>
-                      )}
-                    </MotionBox>
-                  </AnimatePresence>
+                  {esFactura ? (
+                    <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={5}>
+                      <FormControl isRequired>
+                        <LabelAyuda ayuda="Nombre legal de la empresa. Ejemplo: Inducta Chile SpA.">
+                          Razón Social
+                        </LabelAyuda>
+                        <Input
+                          {...inputProps}
+                          autoComplete="organization"
+                          value={datos.titular}
+                          onChange={set('titular')}
+                        />
+                      </FormControl>
+                      <FormControl isRequired>
+                        <LabelAyuda ayuda="Actividad económica del SII. Ejemplo: Servicios de capacitación.">
+                          Giro comercial
+                        </LabelAyuda>
+                        <Input
+                          {...inputProps}
+                          placeholder="Ej: Servicios de capacitación"
+                          value={datos.giro}
+                          onChange={set('giro')}
+                        />
+                      </FormControl>
+                    </Grid>
+                  ) : (
+                    <FormControl isRequired>
+                      <LabelAyuda ayuda="Nombre y apellidos de quien recibe la boleta. Ejemplo: Ana Pérez Soto.">
+                        Nombre completo
+                      </LabelAyuda>
+                      <Input
+                        {...inputProps}
+                        autoComplete="name"
+                        value={datos.titular}
+                        onChange={set('titular')}
+                      />
+                    </FormControl>
+                  )}
 
-                  <HStack spacing={4} align="start">
+                  <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={5}>
                     <FormControl isRequired isInvalid={Boolean(errores.rut)}>
                       <LabelAyuda ayuda="RUT chileno con dígito verificador. Ejemplo: 76.355.934-3.">
                         RUT
                       </LabelAyuda>
                       <Input
+                        {...inputProps}
                         placeholder="76.355.934-3"
                         value={datos.rut}
                         onChange={set('rut')}
@@ -384,10 +429,11 @@ export default function ContratarPage() {
                         Teléfono
                       </LabelAyuda>
                       <InputGroup>
-                        <InputLeftAddon bg="brand.wash" color="brand.ink" fontWeight="semibold">
+                        <InputLeftAddon bg="blackAlpha.50" borderColor="blackAlpha.200" color="blackAlpha.700" fontSize="sm">
                           +56
                         </InputLeftAddon>
                         <Input
+                          {...inputProps}
                           type="tel"
                           autoComplete="tel"
                           inputMode="numeric"
@@ -401,13 +447,14 @@ export default function ContratarPage() {
                       </InputGroup>
                       <FormErrorMessage>{errores.telefono}</FormErrorMessage>
                     </FormControl>
-                  </HStack>
+                  </Grid>
 
                   <FormControl isRequired>
                     <LabelAyuda ayuda="Calle, número y comuna en Chile. Ejemplo: Av. Providencia 1234, Providencia.">
                       Dirección de facturación
                     </LabelAyuda>
                     <Input
+                      {...inputProps}
                       autoComplete="street-address"
                       placeholder="Calle, número, comuna"
                       value={datos.direccion}
@@ -415,20 +462,82 @@ export default function ContratarPage() {
                     />
                   </FormControl>
 
-                  <Button type="submit" size="lg" width="full" bg="brand.primary" color="white" _hover={{ bg: 'brand.primaryDark' }}>
-                    Ir a facturación segura
+                  <Button
+                    type="submit"
+                    mt={3}
+                    h="48px"
+                    width="full"
+                    borderRadius="lg"
+                    bg="brand.primary"
+                    color="white"
+                    _hover={{ bg: 'brand.primaryDark' }}
+                  >
+                    Revisar y continuar
                   </Button>
-                  <HStack justify="center" spacing={2}>
-                    <Icon as={Lock} boxSize={3.5} color="brand.accent" />
-                    <Text fontSize="sm" color="blackAlpha.500">
-                      Transacción segura y encriptada
-                    </Text>
-                  </HStack>
                 </VStack>
               </MotionBox>
             )}
           </AnimatePresence>
-        </SimpleGrid>
+
+          <Box
+            as="aside"
+            aria-label="Resumen del pedido"
+            position={{ lg: 'sticky' }}
+            top={{ lg: '96px' }}
+            bg="brand.soft"
+            borderWidth="1px"
+            borderColor="blackAlpha.100"
+            borderRadius="xl"
+            p={{ base: 5, md: 7 }}
+          >
+            <Text fontSize="sm" fontWeight="semibold" color="blackAlpha.600" mb={4}>
+              Resumen
+            </Text>
+            <Flex justify="space-between" align="start" gap={4}>
+              <Box>
+                <Text fontWeight="semibold" fontSize="lg" color="brand.ink" lineHeight="1.3">
+                  {plan.nombre}
+                </Text>
+                <Text fontSize="sm" color="blackAlpha.600">
+                  Pago {periodo}
+                </Text>
+              </Box>
+              <Link as={RouterLink} to="/precios" fontSize="sm" fontWeight="medium" color="brand.primary">
+                Cambiar
+              </Link>
+            </Flex>
+
+            <Box as="ul" listStyleType="none" mt={5} pt={5} borderTopWidth="1px" borderColor="blackAlpha.100">
+              {beneficios.map((f) => (
+                <Flex as="li" key={f.text} gap={2.5} align="center" fontSize="sm" color="brand.ink" py={1}>
+                  <Check size={15} color="#4260E6" aria-hidden />
+                  {f.text}
+                </Flex>
+              ))}
+            </Box>
+
+            <VStack align="stretch" spacing={2.5} mt={5} pt={5} borderTopWidth="1px" borderColor="blackAlpha.100">
+              <Linea label={`Plan ${periodo}`} valor={uf(monto)} />
+              {neto ? (
+                <>
+                  <Linea label={`Neto (UF a ${clp(ufClp)})`} valor={clp(neto)} />
+                  <Linea label={`IVA ${Math.round(IVA_CHILE * 100)}%`} valor={clp(Math.round(neto * IVA_CHILE))} />
+                </>
+              ) : (
+                <Text fontSize="sm" color="blackAlpha.600">
+                  Calculando el valor de la UF del día...
+                </Text>
+              )}
+            </VStack>
+
+            <Box mt={5} pt={5} borderTopWidth="1px" borderColor="blackAlpha.200">
+              <Linea fuerte label="Total" valor={neto ? clp(precioFinalClp(monto, ufClp)) : '—'} />
+              <Text fontSize="xs" color="blackAlpha.600" mt={2} lineHeight="1.5">
+                Monto referencial hasta emitir el documento. Si el pago no se completa, no se realiza ningún cargo.
+              </Text>
+            </Box>
+          </Box>
+        </Grid>
       </Container>
     </Box>
   )

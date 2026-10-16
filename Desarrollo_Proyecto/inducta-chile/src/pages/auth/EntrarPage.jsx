@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   Flex,
   FormControl,
   FormLabel,
@@ -36,8 +35,6 @@ const COPY = {
   },
 }
 
-const ease = [0.22, 1, 0.36, 1]
-
 function RolToggle({ rol, onChange, disabled }) {
   const esEmpresa = rol === ROL.EMPRESA
 
@@ -46,12 +43,12 @@ function RolToggle({ rol, onChange, disabled }) {
       position="relative"
       w="full"
       bg="brand.soft"
-      borderRadius="full"
+      borderRadius="lg"
       p="4px"
-      h="52px"
+      h="44px"
       borderWidth="1px"
       borderColor="blackAlpha.100"
-      opacity={disabled ? 0.7 : 1}
+      opacity={disabled ? 0.6 : 1}
       pointerEvents={disabled ? 'none' : 'auto'}
     >
       <MotionBox
@@ -61,12 +58,10 @@ function RolToggle({ rol, onChange, disabled }) {
         left="4px"
         w="calc(50% - 4px)"
         bg="white"
-        borderRadius="full"
-        boxShadow="md"
-        borderWidth="1px"
-        borderColor="brand.primary"
+        borderRadius="md"
+        boxShadow="0 1px 3px rgba(13, 13, 13, 0.12)"
         animate={{ x: esEmpresa ? 0 : '100%' }}
-        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
         zIndex={0}
       />
 
@@ -112,9 +107,12 @@ function RolToggle({ rol, onChange, disabled }) {
   )
 }
 
-function Field({ icon, children }) {
+function Field({ icon, label, children }) {
   return (
     <FormControl>
+      <FormLabel fontSize="sm" fontWeight="semibold" color="brand.ink" mb={1.5}>
+        {label}
+      </FormLabel>
       <InputGroup>
         <InputLeftElement h="48px" pointerEvents="none" color="gray.400">
           <Icon as={icon} boxSize={4} />
@@ -126,18 +124,25 @@ function Field({ icon, children }) {
 }
 
 const inputProps = {
-  bg: 'brand.soft',
+  bg: 'white',
   borderRadius: 'lg',
-  borderColor: 'transparent',
+  borderColor: 'blackAlpha.200',
   h: '48px',
   pl: 10,
   _placeholder: { color: 'gray.400' },
-  _hover: { bg: 'blackAlpha.50' },
+  _hover: { borderColor: 'blackAlpha.300' },
   _focus: {
-    bg: 'white',
     borderColor: 'brand.primary',
     boxShadow: '0 0 0 1px #1B22A7',
   },
+}
+
+const primario = {
+  h: '48px',
+  borderRadius: 'lg',
+  bg: 'brand.primary',
+  color: 'white',
+  _hover: { bg: 'brand.primaryDark' },
 }
 
 function LoginCard() {
@@ -329,30 +334,16 @@ function LoginCard() {
   }
 
   return (
-    <MotionBox
-      w="full"
-      maxW="440px"
-      mx="auto"
-      bg="white"
-      borderRadius="2xl"
-      borderWidth="1px"
-      borderColor="blackAlpha.100"
-      borderTopWidth="4px"
-      borderTopColor="brand.primary"
-      boxShadow="lg"
-      px={{ base: 6, md: 8 }}
-      py={{ base: 8, md: 10 }}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease }}
-    >
+    <Box w="full" maxW="400px">
       <VStack spacing={6} align="stretch">
-        <VStack spacing={3} textAlign="center">
-          <Image src="/logo-azul-oscuro.png" alt="Inducta Chile" h="32px" w="auto" />
-          <Text fontSize="sm" color="gray.500">
-            Entrar al sistema
+        <Box>
+          <Heading as="h1" fontSize={{ base: '1.75rem', md: '2rem' }} fontWeight="semibold" letterSpacing="-0.03em" lineHeight="1.1" color="brand.ink">
+            Ingresar
+          </Heading>
+          <Text fontSize="sm" color="blackAlpha.600" mt={1.5}>
+            Elija cómo entra a Inducta Chile.
           </Text>
-        </VStack>
+        </Box>
 
         <RolToggle rol={rol} onChange={setRol} disabled={step !== 'email'} />
 
@@ -371,30 +362,20 @@ function LoginCard() {
               transition={{ duration: 0.22 }}
             >
               <VStack spacing={4} align="stretch">
-                <Text fontSize="sm" color="gray.600" textAlign="center">
-                  Ingresa tu correo. Luego podrás verificar con código o contraseña.
-                </Text>
-                <Field icon={Mail}>
-                  <FormLabel srOnly>Correo</FormLabel>
+                <Field icon={Mail} label="Correo">
                   <Input
                     type="email"
                     autoComplete="username"
-                    placeholder="Correo electrónico"
+                    placeholder="nombre@empresa.cl"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     {...inputProps}
                   />
                 </Field>
-                <Button
-                  type="submit"
-                  h="48px"
-                  borderRadius="full"
-                  bg="brand.primary"
-                  color="white"
-                  isLoading={loading}
-                  loadingText="Continuando…"
-                  _hover={{ bg: 'brand.primaryDark' }}
-                >
+                <Text fontSize="sm" color="blackAlpha.600" mt={-1}>
+                  Luego podrá verificar con un código o con su contraseña.
+                </Text>
+                <Button type="submit" {...primario} isLoading={loading} loadingText="Continuando…">
                   Continuar
                 </Button>
               </VStack>
@@ -420,30 +401,19 @@ function LoginCard() {
                 >
                   Cambiar correo
                 </Button>
-                <Text fontSize="sm" color="gray.600" textAlign="center">
+                <Text fontSize="sm" color="gray.600">
                   Elige cómo quieres entrar con <Text as="span" fontWeight="semibold">{email}</Text>
                 </Text>
                 {canEmailCode ? (
-                  <Button
-                    h="48px"
-                    borderRadius="full"
-                    bg="brand.primary"
-                    color="white"
-                    leftIcon={<KeyRound size={16} />}
-                    onClick={onChooseCode}
-                    isLoading={loading}
-                    _hover={{ bg: 'brand.primaryDark' }}
-                  >
+                  <Button {...primario} leftIcon={<KeyRound size={16} />} onClick={onChooseCode} isLoading={loading}>
                     Código de verificación
                   </Button>
                 ) : null}
                 {canPassword ? (
                   <Button
                     h="48px"
-                    borderRadius="full"
+                    borderRadius="lg"
                     variant="outline"
-                    borderWidth="2px"
-                    borderColor="brand.ink"
                     leftIcon={<Lock size={16} />}
                     onClick={onChoosePassword}
                   >
@@ -479,14 +449,13 @@ function LoginCard() {
                 >
                   Volver
                 </Button>
-                <Text fontSize="sm" color="gray.600" textAlign="center">
+                <Text fontSize="sm" color="gray.600">
                   Escribe el código que enviamos a{' '}
                   <Text as="span" fontWeight="semibold">
                     {email}
                   </Text>
                 </Text>
-                <Field icon={KeyRound}>
-                  <FormLabel srOnly>Código</FormLabel>
+                <Field icon={KeyRound} label="Código">
                   <Input
                     type="text"
                     inputMode="numeric"
@@ -497,16 +466,7 @@ function LoginCard() {
                     {...inputProps}
                   />
                 </Field>
-                <Button
-                  type="submit"
-                  h="48px"
-                  borderRadius="full"
-                  bg="brand.primary"
-                  color="white"
-                  isLoading={loading}
-                  loadingText="Verificando…"
-                  _hover={{ bg: 'brand.primaryDark' }}
-                >
+                <Button type="submit" {...primario} isLoading={loading} loadingText="Verificando…">
                   Verificar e ingresar
                 </Button>
                 <Button
@@ -555,14 +515,13 @@ function LoginCard() {
                 >
                   Volver
                 </Button>
-                <Text fontSize="sm" color="gray.600" textAlign="center">
+                <Text fontSize="sm" color="gray.600">
                   Ingresa la contraseña de{' '}
                   <Text as="span" fontWeight="semibold">
                     {email}
                   </Text>
                 </Text>
-                <Field icon={Lock}>
-                  <FormLabel srOnly>Contraseña</FormLabel>
+                <Field icon={Lock} label="Contraseña">
                   <Input
                     type="password"
                     autoComplete="current-password"
@@ -572,16 +531,7 @@ function LoginCard() {
                     {...inputProps}
                   />
                 </Field>
-                <Button
-                  type="submit"
-                  h="48px"
-                  borderRadius="full"
-                  bg="brand.primary"
-                  color="white"
-                  isLoading={loading}
-                  loadingText="Ingresando…"
-                  _hover={{ bg: 'brand.primaryDark' }}
-                >
+                <Button type="submit" {...primario} isLoading={loading} loadingText="Ingresando…">
                   Iniciar sesión
                 </Button>
                 {canEmailCode ? (
@@ -595,7 +545,7 @@ function LoginCard() {
         </AnimatePresence>
 
         {info ? (
-          <Text fontSize="sm" color="brand.primary" textAlign="center" lineHeight="1.5">
+          <Text fontSize="sm" color="brand.primary" lineHeight="1.5">
             {info}
           </Text>
         ) : null}
@@ -623,7 +573,7 @@ function LoginCard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Text fontSize="sm" color="gray.500" textAlign="center" lineHeight="1.55">
+              <Text fontSize="sm" color="blackAlpha.600" lineHeight="1.55" pt={5} borderTopWidth="1px" borderColor="blackAlpha.100">
                 {copy.ayuda}
                 {/* Solo la empresa tiene algo que hacer aca; al colaborador lo
                     resuelve su administrador, no nosotros */}
@@ -645,28 +595,12 @@ function LoginCard() {
           </AnimatePresence>
         ) : null}
 
-        <VStack spacing={3}>
-          <Button
-            as={RouterLink}
-            to={RUTAS_AUTH.inicio}
-            variant="outline"
-            size="sm"
-            leftIcon={<ArrowLeft size={16} />}
-            color="gray.600"
-            borderColor="blackAlpha.200"
-            fontWeight="medium"
-            _hover={{ bg: 'brand.soft', borderColor: 'blackAlpha.300' }}
-          >
-            Volver al inicio
-          </Button>
-          <Link as={RouterLink} to={RUTAS_AUTH.contacto} fontSize="sm" color="gray.400">
-            Contacto
-          </Link>
-        </VStack>
       </VStack>
-    </MotionBox>
+    </Box>
   )
 }
+
+const PILARES = ['Programas por cargo o área', 'Avance de cada colaborador', 'Evidencia lista para auditorías']
 
 export default function EntrarPage() {
   return (
@@ -675,65 +609,66 @@ export default function EntrarPage() {
         <Navigate to={RUTAS_AUTH.postLogin} replace />
       </SignedIn>
       <SignedOut>
-        <Box
-          minH="100vh"
-          bgGradient="linear(to-b, white 0%, brand.wash 100%)"
-          display="flex"
-          alignItems="center"
-          py={12}
-          px={4}
-        >
-          <Container maxW="5xl">
-            <SimpleGrid
-              columns={{ base: 1, md: 2 }}
-              spacing={{ base: 10, md: 14 }}
-              alignItems="center"
-            >
-              <VStack
-                align={{ base: 'center', md: 'flex-start' }}
-                textAlign={{ base: 'center', md: 'left' }}
-                spacing={5}
-              >
-                <Heading
-                  as="h1"
-                  fontSize={{ base: '1.8rem', md: '2rem', lg: '2.4rem' }}
-                  lineHeight="1.15"
-                  letterSpacing="-0.03em"
-                  color="brand.ink"
-                >
-                  Inducción clara.
-                  <Box as="br" />
-                  <Box as="span" color="brand.primary">
-                    Equipo listo.
-                  </Box>
-                </Heading>
-                <Text color="brand.ink" opacity={0.7} maxW="38ch" lineHeight="1.65">
-                  Programas por cargo, avance del equipo y evidencia lista para auditorías.
-                </Text>
-                <Box
-                  display={{ base: 'none', md: 'block' }}
-                  bg="#4260e615"
-                  borderRadius="3xl"
-                  maxW="md"
-                  w="full"
-                  overflow="hidden"
-                  pt={8}
-                >
-                  {/* La ilustracion es decorativa, por eso el alt va vacio */}
-                  <Image
-                    src="/illustrations/undraw_thumbs-up.svg"
-                    alt=""
-                    w="70%"
-                    mx="auto"
-                    display="block"
-                  />
+        <SimpleGrid minH="100vh" columns={{ base: 1, lg: 2 }} bg="white">
+          <Flex
+            display={{ base: 'none', lg: 'flex' }}
+            direction="column"
+            justify="space-between"
+            bg="brand.ink"
+            color="white"
+            px={16}
+            py={12}
+          >
+            <Link as={RouterLink} to={RUTAS_AUTH.inicio} alignSelf="flex-start" _hover={{ opacity: 0.85 }}>
+              <Image src="/logo-azul.png" alt="Inducta Chile, volver al inicio" h="34px" w="auto" />
+            </Link>
+            <Box maxW="30rem">
+              <Text fontSize="2.4rem" fontWeight="semibold" lineHeight="1.1" letterSpacing="-0.03em" mb={8}>
+                Todo el ingreso de su equipo,{' '}
+                <Box as="span" color="brand.accent">
+                  en un solo lugar.
                 </Box>
-              </VStack>
+              </Text>
+              <Box as="ol" listStyleType="none">
+                {PILARES.map((p, i) => (
+                  <Flex as="li" key={p} gap={4} py={3.5} borderTopWidth="1px" borderColor="whiteAlpha.200" color="whiteAlpha.900">
+                    <Text as="span" color="brand.accent" fontWeight="semibold" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {`0${i + 1}`}
+                    </Text>
+                    {p}
+                  </Flex>
+                ))}
+              </Box>
+            </Box>
+            <Text fontSize="sm" color="whiteAlpha.600">
+              © {new Date().getFullYear()} Inducta Chile SpA
+            </Text>
+          </Flex>
 
+          <Flex direction="column" px={{ base: 5, md: 12 }} py={{ base: 6, md: 10 }}>
+            <Flex justify="space-between" align="center" mb={{ base: 10, lg: 0 }}>
+              <Link
+                as={RouterLink}
+                to={RUTAS_AUTH.inicio}
+                display="inline-flex"
+                alignItems="center"
+                gap={1.5}
+                fontSize="sm"
+                fontWeight="medium"
+                color="blackAlpha.700"
+              >
+                <Icon as={ArrowLeft} boxSize={4} />
+                Volver al inicio
+              </Link>
+              <Link as={RouterLink} to={RUTAS_AUTH.contacto} fontSize="sm" fontWeight="medium" color="blackAlpha.700">
+                Contacto
+              </Link>
+            </Flex>
+            <Flex flex="1" align="center" justify="center">
               <LoginCard />
-            </SimpleGrid>
-          </Container>
-        </Box>
+            </Flex>
+          </Flex>
+        </SimpleGrid>
       </SignedOut>
     </>
   )

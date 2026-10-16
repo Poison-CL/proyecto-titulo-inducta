@@ -5,10 +5,10 @@ export default function NoEncontradaPage() {
   return (
     <Box as="section" bg="white" py={{ base: 20, md: 28 }}>
       <Container maxW="3xl" px={{ base: 5, md: 8 }} textAlign="center">
-        <Text fontSize="sm" fontWeight="bold" color="brand.primary" letterSpacing="0.08em">
+        <Text fontSize="sm" fontWeight="bold" color="brand.primary" letterSpacing="0.02em">
           ERROR 404
         </Text>
-        <Heading as="h1" size="xl" color="brand.ink" mt={3} mb={4}>
+        <Heading as="h1" size="xl" color="brand.ink" lineHeight="1.1" mt={2} mb={4}>
           No encontramos esta página
         </Heading>
         <Text color="blackAlpha.700" fontSize="md" maxW="46ch" mx="auto" lineHeight="1.7">

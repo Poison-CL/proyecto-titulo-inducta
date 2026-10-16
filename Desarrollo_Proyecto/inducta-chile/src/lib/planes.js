@@ -2,6 +2,7 @@ export const PLANES = [
   {
     id: 'demo',
     nombre: 'Demostración',
+    para: 'Para probar la plataforma con un equipo pequeño.',
     cta: 'Agendar demostración',
     contratable: false,
     ufMensual: 0,
@@ -18,6 +19,7 @@ export const PLANES = [
   {
     id: 'basico',
     nombre: 'Empresa Básico',
+    para: 'Para empresas de hasta 50 colaboradores.',
     cta: 'Contratar',
     contratable: true,
     ufMensual: 1.5,
@@ -34,6 +36,7 @@ export const PLANES = [
   {
     id: 'plus',
     nombre: 'Empresa Plus',
+    para: 'Para empresas con varias áreas, hasta 250 colaboradores.',
     cta: 'Contratar',
     contratable: true,
     destacado: true,
@@ -51,6 +54,7 @@ export const PLANES = [
   {
     id: 'plusplus',
     nombre: 'Empresa Plus+',
+    para: 'Para organizaciones grandes, sin límite de colaboradores.',
     cta: 'Contratar',
     contratable: true,
     ufMensual: 10,
