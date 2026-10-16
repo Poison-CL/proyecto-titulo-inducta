@@ -1,4 +1,4 @@
-import { Box, Button, Heading, HStack, SimpleGrid, Text } from '@chakra-ui/react'
+import { Box, Button, Grid, Heading, HStack, Text } from '@chakra-ui/react'
 import { Link as RouterLink } from 'react-router-dom'
 import { EncabezadoRecurso } from '../../layouts/RecursosLayout'
 
@@ -85,28 +85,33 @@ export default function RecursoInfoPage({ pagina }) {
           <Heading as="h2" fontSize="lg" fontWeight="semibold" letterSpacing="-0.01em" mb={4}>
             {s.titulo}
           </Heading>
-          <SimpleGrid
-            as={s.numerada ? 'ol' : 'ul'}
-            listStyleType="none"
-            columns={{ base: 1, md: 2, xl: s.items.length === 4 ? 4 : 3 }}
-            spacing={3}
-          >
+          <Box as={s.numerada ? 'ol' : 'ul'} listStyleType="none" borderTopWidth="1px" borderColor="blackAlpha.100">
             {s.items.map((item, i) => (
-              <Box as="li" key={item.t} borderWidth="1px" borderColor="blackAlpha.100" borderRadius="lg" p={5}>
-                {s.numerada && (
-                  <Text fontSize="sm" fontWeight="semibold" color="brand.primary" mb={3} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                    Paso {i + 1}
+              <Grid
+                as="li"
+                key={item.t}
+                templateColumns={{ base: '1fr', md: 'minmax(0, 18rem) minmax(0, 1fr)' }}
+                gap={{ base: 1, md: 8 }}
+                py={4}
+                borderBottomWidth="1px"
+                borderColor="blackAlpha.100"
+              >
+                <HStack spacing={3} align="baseline">
+                  {s.numerada && (
+                    <Text fontWeight="semibold" color="brand.primary" minW="1.25rem" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {i + 1}
+                    </Text>
+                  )}
+                  <Text fontWeight="semibold" color="brand.ink">
+                    {item.t}
                   </Text>
-                )}
-                <Text fontWeight="semibold" color="brand.ink">
-                  {item.t}
-                </Text>
-                <Text fontSize="sm" color="blackAlpha.700" lineHeight="1.6" mt={1}>
+                </HStack>
+                <Text color="blackAlpha.700" lineHeight="1.6" pl={{ base: s.numerada ? 8 : 0, md: 0 }}>
                   {item.d}
                 </Text>
-              </Box>
+              </Grid>
             ))}
-          </SimpleGrid>
+          </Box>
         </Box>
       ))}
 

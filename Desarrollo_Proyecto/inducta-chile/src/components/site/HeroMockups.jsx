@@ -47,7 +47,7 @@ export function PhoneMock() {
               </Text>
             </Box>
             <Box>
-              <Text fontSize="10px" color="blackAlpha.500" lineHeight="1.1">
+              <Text fontSize="11px" color="blackAlpha.600" lineHeight="1.1">
                 ¡Buen día!
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
@@ -57,16 +57,16 @@ export function PhoneMock() {
           </HStack>
           <HStack spacing={2}>
             <Icon as={Search} boxSize={3.5} color="blackAlpha.400" />
-            <Icon as={Bell} boxSize={3.5} color="blackAlpha.500" />
+            <Icon as={Bell} boxSize={3.5} color="blackAlpha.600" />
           </HStack>
         </Flex>
 
         <Box bg="brand.soft" borderRadius="lg" px={3} py={2.5} mb={3}>
           <Flex justify="space-between" align="center" mb={1}>
-            <Text fontSize="10px" fontWeight="semibold" color="brand.ink">
+            <Text fontSize="11px" fontWeight="semibold" color="brand.ink">
               Tu inducción
             </Text>
-            <Text fontSize="10px" fontWeight="bold" color="brand.primary">
+            <Text fontSize="11px" fontWeight="bold" color="brand.primary">
               62%
             </Text>
           </Flex>
@@ -141,7 +141,7 @@ export function DesktopMock() {
         borderBottomWidth="1px"
         borderColor="blackAlpha.100"
       >
-        <Text fontSize="10px" color="blackAlpha.400" noOfLines={1}>
+        <Text fontSize="11px" color="blackAlpha.400" noOfLines={1}>
           panel.inductachile.cl
         </Text>
       </Flex>
@@ -173,7 +173,7 @@ export function DesktopMock() {
 
       <Grid templateColumns="1.15fr 0.95fr" gap={3} pl={PL} pr={3.5} py={3.5}>
         <Box>
-          <Text fontSize="10px" color="blackAlpha.500" mb={2} fontWeight="medium">
+          <Text fontSize="11px" color="blackAlpha.600" mb={2} fontWeight="medium">
             Completados este mes
           </Text>
           {[
@@ -190,19 +190,19 @@ export function DesktopMock() {
               _last={{ mb: 0 }}
             >
               <Flex justify="space-between" mb={0.5}>
-                <Text fontSize="10px" color="brand.ink" fontWeight="semibold">
+                <Text fontSize="11px" color="brand.ink" fontWeight="semibold">
                   {row.name}
                 </Text>
-                <Text fontSize="10px" color="brand.primary" fontWeight="bold">
+                <Text fontSize="11px" color="brand.primary" fontWeight="bold">
                   {row.pct}%
                 </Text>
               </Flex>
-              <Text fontSize="9px" color="blackAlpha.500" mb={1}>
+              <Text fontSize="10px" color="blackAlpha.600" mb={1}>
                 {row.meta} colaboradores
               </Text>
               <Progress
                 value={row.pct}
-                size="xs"
+                size="sm"
                 borderRadius="full"
                 bg="blackAlpha.100"
                 sx={{ '& > div': { bg: 'brand.primary' } }}
@@ -244,13 +244,13 @@ export function DesktopMock() {
               </Flex>
             </Box>
             <Box>
-              <Text fontSize="10px" color="blackAlpha.500">
+              <Text fontSize="11px" color="blackAlpha.600">
                 Cumplimiento
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
                 Equipo al día
               </Text>
-              <Text fontSize="9px" color="blackAlpha.500">
+              <Text fontSize="10px" color="blackAlpha.600">
                 124 colaboradores
               </Text>
             </Box>

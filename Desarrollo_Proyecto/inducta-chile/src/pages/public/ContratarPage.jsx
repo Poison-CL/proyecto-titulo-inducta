@@ -140,6 +140,7 @@ export default function ContratarPage() {
   const [errores, setErrores] = useState({})
   const [listo, setListo] = useState(false)
   const [procesandoPago, setProcesandoPago] = useState(false)
+  const [errorWebpay, setErrorWebpay] = useState(false)
 
   const errorPago = params.get('error')
   if (errorPago === 'pago_fallido' || errorPago === 'servidor') {
@@ -182,6 +183,7 @@ export default function ContratarPage() {
   }
 
   const handleIniciarPago = async () => {
+    setErrorWebpay(false)
     setProcesandoPago(true)
     try {
       const montoPagar = precioFinalClp(monto, ufClp)
@@ -190,7 +192,8 @@ export default function ContratarPage() {
         nombre_comercial: datos.titular,
         email_contacto: datos.email,
         monto: Math.round(montoPagar),
-        plan_solicitado: plan.nombre.toLowerCase(),
+        plan_solicitado: plan.id,
+        periodo,
       })
 
       const form = document.createElement('form')
@@ -207,7 +210,7 @@ export default function ContratarPage() {
       form.submit()
     } catch (error) {
       console.error('Error al iniciar el pago:', error)
-      alert('Hubo un problema al contactar con Webpay. Por favor, intenta de nuevo.')
+      setErrorWebpay(true)
     } finally {
       setProcesandoPago(false)
     }
@@ -298,11 +301,18 @@ export default function ContratarPage() {
                   ))}
                 </Box>
 
+                {errorWebpay ? (
+                  <Box role="alert" mt={6} px={4} py={3} borderRadius="lg" bg="red.50" borderWidth="1px" borderColor="red.100">
+                    <Text fontSize="sm" color="red.700" lineHeight="1.5">
+                      No pudimos conectar con Webpay. No se realizó ningún cargo; intente de nuevo en unos minutos.
+                    </Text>
+                  </Box>
+                ) : null}
+
                 <Button
-                  mt={8}
+                  mt={errorWebpay ? 4 : 8}
                   h="48px"
                   width="full"
-                  borderRadius="lg"
                   onClick={handleIniciarPago}
                   isLoading={procesandoPago}
                   isDisabled={!ufClp}
@@ -327,7 +337,7 @@ export default function ContratarPage() {
                     <LabelAyuda ayuda="Boleta si factura a su nombre. Factura si es empresa o pyme con giro.">
                       Documento tributario
                     </LabelAyuda>
-                    <Flex bg="blackAlpha.50" borderRadius="lg" p={1} gap={1} maxW="280px">
+                    <Flex bg="blackAlpha.50" borderRadius="full" p={1} gap={1} maxW="280px">
                       {[
                         ['boleta', 'Boleta'],
                         ['factura', 'Factura'],
@@ -340,7 +350,6 @@ export default function ContratarPage() {
                             flex="1"
                             size="sm"
                             h="36px"
-                            borderRadius="md"
                             aria-pressed={activo}
                             bg={activo ? 'white' : 'transparent'}
                             color={activo ? 'brand.primary' : 'blackAlpha.700'}
@@ -467,7 +476,6 @@ export default function ContratarPage() {
                     mt={3}
                     h="48px"
                     width="full"
-                    borderRadius="lg"
                     bg="brand.primary"
                     color="white"
                     _hover={{ bg: 'brand.primaryDark' }}

@@ -1,8 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-import { env } from '../lib/env'
-
-// Creamos un cliente público para invocar la Edge Function sin depender de Clerk
-const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey)
+import { supabasePublico as supabase } from '../lib/supabase'
 
 export const iniciarPagoTransbank = async (datosPago) => {
   const { data, error } = await supabase.functions.invoke('tbk-iniciar', {

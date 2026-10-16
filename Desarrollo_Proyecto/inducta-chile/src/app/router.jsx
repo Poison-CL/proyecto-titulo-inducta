@@ -1,9 +1,17 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import RequireAuth from '../components/auth/RequireAuth'
+import RequireAdminPlataforma from '../components/auth/RequireAdminPlataforma'
 import RequireOrg from '../components/auth/RequireOrg'
 import AdminLayout from '../layouts/AdminLayout'
+import SoporteAdminLayout from '../layouts/SoporteAdminLayout'
 import RecursosLayout from '../layouts/RecursosLayout'
 import SiteLayout from '../layouts/SiteLayout'
+import AdminResumenPage from '../pages/admin/AdminResumenPage'
+import AdminSoportePage from '../pages/admin/AdminSoportePage'
+import AdminTicketsPage from '../pages/admin/AdminTicketsPage'
+import AdminEmpresasPage from '../pages/admin/AdminEmpresasPage'
+import AdminPagosPage from '../pages/admin/AdminPagosPage'
+import AdminUsuariosPage from '../pages/admin/AdminUsuariosPage'
 import {
   AccesoRegistroPage,
   AccesoSinEmpresaPage,
@@ -13,6 +21,9 @@ import ArticuloPage from '../pages/public/ArticuloPage'
 import ContactoPage from '../pages/public/ContactoPage'
 import ContratarPage from '../pages/public/ContratarPage'
 import DashboardPage from '../pages/app/DashboardPage'
+import ConfiguracionPage from '../pages/app/ConfiguracionPage'
+import EquipoPage from '../pages/app/EquipoPage'
+import CuentaDeshabilitadaPage from '../pages/CuentaDeshabilitadaPage'
 import EntrarPage from '../pages/auth/EntrarPage'
 import HomePage from '../pages/public/HomePage'
 import NoEncontradaPage from '../pages/public/NoEncontradaPage'
@@ -30,6 +41,18 @@ function ProtectedApp() {
     <RequireAuth>
       <RequireOrg>
         <AdminLayout />
+      </RequireOrg>
+    </RequireAuth>
+  )
+}
+
+function ProtectedAdminPlataforma() {
+  return (
+    <RequireAuth>
+      <RequireOrg>
+        <RequireAdminPlataforma>
+          <SoporteAdminLayout />
+        </RequireAdminPlataforma>
       </RequireOrg>
     </RequireAuth>
   )
@@ -73,6 +96,14 @@ export function AppRouter() {
         <Route path={RUTAS_AUTH.sinEmpresa} element={<AccesoSinEmpresaPage />} />
         <Route path={RUTAS_AUTH.sinMembresia} element={<AccesoSinMembresiaPage />} />
         <Route path={RUTAS_AUTH.registroBloqueado} element={<AccesoRegistroPage />} />
+        <Route
+          path="/cuenta-deshabilitada"
+          element={
+            <RequireAuth>
+              <CuentaDeshabilitadaPage />
+            </RequireAuth>
+          }
+        />
 
         {/* Rutas viejas que dejamos redirigiendo para no romper links guardados */}
         <Route path="/sign-in/*" element={<Navigate to={RUTAS_AUTH.entrar} replace />} />
@@ -87,6 +118,17 @@ export function AppRouter() {
 
         <Route path="/dashboard" element={<ProtectedApp />}>
           <Route index element={<DashboardPage />} />
+          <Route path="equipo" element={<EquipoPage />} />
+          <Route path="configuracion" element={<ConfiguracionPage />} />
+        </Route>
+
+        <Route path="/admin" element={<ProtectedAdminPlataforma />}>
+          <Route index element={<AdminResumenPage />} />
+          <Route path="soporte" element={<AdminSoportePage />} />
+          <Route path="tickets" element={<AdminTicketsPage />} />
+          <Route path="empresas" element={<AdminEmpresasPage />} />
+          <Route path="pagos" element={<AdminPagosPage />} />
+          <Route path="usuarios" element={<AdminUsuariosPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

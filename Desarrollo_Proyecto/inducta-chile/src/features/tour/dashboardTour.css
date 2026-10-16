@@ -1,0 +1,54 @@
+/* Colores solo de theme brand: primary #1B22A7, wash #EEF0FC, ink #0D0D0D, soft #FAFAFA */
+.inducta-intro {
+  font-family: 'Inter', sans-serif;
+  border-radius: 12px;
+  max-width: 360px;
+  min-width: 280px;
+  color: #0d0d0d;
+  background: #fafafa;
+  /* Dejar aire a la derecha para que «Omitir» no se parta */
+  padding-right: 4px;
+}
+
+.inducta-intro .introjs-tooltip-header {
+  padding-right: 4.5rem;
+}
+
+.inducta-intro .introjs-tooltip-title {
+  color: #1b22a7;
+  font-weight: 600;
+}
+
+.inducta-intro .introjs-button {
+  border-radius: 999px;
+  text-shadow: none;
+  border: none;
+  padding: 6px 14px;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.inducta-intro .introjs-nextbutton,
+.inducta-intro .introjs-donebutton {
+  background: #1b22a7;
+  color: #fafafa;
+}
+
+.inducta-intro .introjs-prevbutton {
+  background: #eef0fc;
+  color: #1b22a7;
+}
+
+.inducta-intro .introjs-skipbutton {
+  color: #0d0d0d;
+  opacity: 0.55;
+  white-space: nowrap;
+  width: auto;
+  min-width: max-content;
+  padding: 4px 8px;
+  font-size: 0.8125rem;
+}
+
+.inducta-intro .introjs-progressbar {
+  background: #1b22a7;
+}

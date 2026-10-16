@@ -17,8 +17,8 @@ export const theme = extendTheme(
   {
     colors,
     fonts: {
-      heading: `'Inter', 'Segoe UI', sans-serif`,
-      body: `'Inter', 'Segoe UI', sans-serif`,
+      heading: `'Inter', sans-serif`,
+      body: `'Inter', sans-serif`,
     },
     styles: {
       global: {
@@ -33,7 +33,7 @@ export const theme = extendTheme(
       Button: {
         baseStyle: {
           fontWeight: 'semibold',
-          borderRadius: 'md',
+          borderRadius: 'full',
           transition: 'transform 100ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         },
         variants: {

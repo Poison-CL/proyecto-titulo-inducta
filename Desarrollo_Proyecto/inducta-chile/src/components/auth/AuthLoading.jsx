@@ -6,7 +6,7 @@ export default function AuthLoading({ mensaje = AUTH_COPY.loading.sesion }) {
     <Box minH="100vh" bg="brand.soft" display="flex" alignItems="center" justifyContent="center">
       <VStack spacing={4}>
         <Spinner size="lg" color="brand.primary" thickness="3px" />
-        <Text color="gray.600" fontSize="sm">
+        <Text color="blackAlpha.700" fontSize="sm">
           {mensaje}
         </Text>
       </VStack>

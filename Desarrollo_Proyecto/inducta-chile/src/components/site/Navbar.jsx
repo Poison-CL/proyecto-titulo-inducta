@@ -35,31 +35,31 @@ const MotionPanel = motion.create(Box)
 const recursos = [
   {
     title: 'Guías de inducción',
-    desc: 'Documentación para procesos de ingreso',
+    desc: 'Cómo planificar el primer día y el primer mes',
     icon: BookOpen,
     href: '/recursos?tipo=guias',
   },
   {
     title: 'Capacitaciones',
-    desc: 'Programas por área y cargo',
+    desc: 'Cree sus propios cursos y pruebas',
     icon: Layers,
     href: '/recursos/capacitaciones',
   },
   {
     title: 'Cumplimiento',
-    desc: 'Registro y trazabilidad',
+    desc: 'Qué queda registrado para auditorías',
     icon: ShieldCheck,
     href: '/recursos/cumplimiento',
   },
   {
     title: 'Documentación',
-    desc: 'Manuales institucionales',
+    desc: 'Artículos sobre cómo usar la plataforma',
     icon: FileText,
     href: '/recursos?tipo=documentacion',
   },
   {
     title: 'Soporte',
-    desc: 'Canal de ayuda corporativo',
+    desc: 'Preguntas frecuentes y contacto',
     icon: HelpCircle,
     href: '/recursos/soporte',
   },
@@ -319,7 +319,7 @@ export default function Navbar() {
             bg="white"
             borderBottomWidth="1px"
             borderColor="blackAlpha.100"
-            boxShadow="lg"
+            boxShadow="0 12px 24px -12px rgba(13, 13, 13, 0.12)"
             zIndex={51}
           >
             <Box maxW="6xl" mx="auto" px={{ base: 4, md: 8 }} py={8}>
@@ -342,7 +342,7 @@ export default function Navbar() {
                         <Text fontWeight="semibold" color="brand.ink">
                           {item.title}
                         </Text>
-                        <Text fontSize="sm" color="gray.600" mt={1} maxW="28ch">
+                        <Text fontSize="sm" color="blackAlpha.700" mt={1} maxW="28ch">
                           {item.desc}
                         </Text>
                       </Box>

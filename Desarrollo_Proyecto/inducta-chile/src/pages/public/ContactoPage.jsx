@@ -17,8 +17,9 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react'
-import { CalendarCheck, CircleHelp, Mail, MapPin, MessageSquare, Phone, Tags } from 'lucide-react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Mail, MapPin, Phone } from 'lucide-react'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
+import { supabasePublico } from '../../lib/supabase'
 
 const CORREO = 'contacto@inductachile.cl'
 
@@ -26,28 +27,28 @@ const MOTIVOS = [
   {
     value: 'demo',
     label: 'Agendar una demo',
-    icon: CalendarCheck,
+    corto: 'Demo',
     placeholder: 'Cuántas personas ingresan al año, en qué áreas, cómo lo hacen hoy…',
     cta: 'Solicitar demo',
   },
   {
     value: 'planes',
     label: 'Planes y precios',
-    icon: Tags,
+    corto: 'Planes',
     placeholder: 'Cuántos colaboradores tiene su empresa y qué plan está evaluando…',
     cta: 'Consultar planes',
   },
   {
     value: 'soporte',
     label: 'Soporte',
-    icon: CircleHelp,
+    corto: 'Soporte',
     placeholder: 'Qué intentaba hacer, qué pasó y desde qué cuenta…',
     cta: 'Enviar a soporte',
   },
   {
     value: 'otro',
     label: 'Otra consulta',
-    icon: MessageSquare,
+    corto: 'Otro',
     placeholder: 'Cuéntenos en qué le podemos ayudar…',
     cta: 'Enviar mensaje',
   },
@@ -76,10 +77,16 @@ if (import.meta.env.DEV) {
   if (Object.keys(bueno).length) throw new Error('contacto: validación ok')
 }
 
+const motivoDeUrl = (v) => (MOTIVOS.some((m) => m.value === v) ? v : 'demo')
+
 export default function ContactoPage() {
-  const [datos, setDatos] = useState(VACIO)
+  const [params] = useSearchParams()
+  const [datos, setDatos] = useState(() => ({ ...VACIO, motivo: motivoDeUrl(params.get('motivo')) }))
   const [errores, setErrores] = useState({})
   const [enviado, setEnviado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [errorEnvio, setErrorEnvio] = useState(false)
+  const [trampa, setTrampa] = useState('')
   const motivo = MOTIVOS.find((m) => m.value === datos.motivo)
 
   function setCampo(campo, valor) {
@@ -87,20 +94,38 @@ export default function ContactoPage() {
     setErrores((prev) => ({ ...prev, [campo]: undefined }))
   }
 
-  function enviar(ev) {
+  const mailtoRespaldo = () => {
+    const cuerpo = [`Nombre: ${datos.nombre.trim()}`, `Empresa: ${datos.empresa.trim() || '—'}`, '', datos.mensaje.trim()].join('\n')
+    return `mailto:${CORREO}?subject=${encodeURIComponent(`Inducta Chile — ${motivo.label}`)}&body=${encodeURIComponent(cuerpo)}`
+  }
+
+  async function enviar(ev) {
     ev.preventDefault()
     const next = erroresDe(datos)
     setErrores(next)
     if (Object.keys(next).length) return
-    const cuerpo = [
-      `Nombre: ${datos.nombre.trim()}`,
-      `Empresa: ${datos.empresa.trim() || '—'}`,
-      `Correo: ${datos.email.trim()}`,
-      '',
-      datos.mensaje.trim(),
-    ].join('\n')
-    window.location.href = `mailto:${CORREO}?subject=${encodeURIComponent(`Inducta Chile — ${motivo.label}`)}&body=${encodeURIComponent(cuerpo)}`
+    // ponytail: honeypot contra bots simples; si llega spam real, agregar captcha (Turnstile) o rate limit en una Edge Function.
+    if (trampa) return setEnviado(true)
+    setEnviando(true)
+    setErrorEnvio(false)
+    const { error } = await supabasePublico.from('contactos').insert({
+      motivo: datos.motivo,
+      nombre: datos.nombre.trim(),
+      empresa: datos.empresa.trim() || null,
+      email: datos.email.trim(),
+      mensaje: datos.mensaje.trim(),
+    })
+    setEnviando(false)
+    if (error) {
+      console.error('Error al guardar contacto:', error)
+      return setErrorEnvio(true)
+    }
     setEnviado(true)
+  }
+
+  function otroMensaje() {
+    setDatos((prev) => ({ ...VACIO, motivo: prev.motivo }))
+    setEnviado(false)
   }
 
   return (
@@ -184,12 +209,12 @@ export default function ContactoPage() {
             {enviado ? (
               <VStack align="start" spacing={4} py={{ md: 10 }}>
                 <Heading as="h2" fontSize="2xl" fontWeight="semibold" letterSpacing="-0.02em" color="brand.primary">
-                  Su correo está listo
+                  Mensaje enviado
                 </Heading>
                 <Text color="blackAlpha.700" lineHeight="1.7" maxW="48ch">
-                  Abrimos un mensaje para {CORREO}. Si no se abrió, escríbanos directo a esa dirección.
+                  Gracias, {datos.nombre.trim().split(' ')[0]}. Le responderemos a {datos.email.trim()} en días hábiles.
                 </Text>
-                <Button type="button" variant="outline" onClick={() => setEnviado(false)}>
+                <Button type="button" variant="outline" onClick={otroMensaje}>
                   Escribir otro mensaje
                 </Button>
               </VStack>
@@ -199,7 +224,17 @@ export default function ContactoPage() {
                   <Text id="motivo-label" fontWeight="semibold" color="brand.ink" mb={3}>
                     ¿En qué le podemos ayudar?
                   </Text>
-                  <SimpleGrid role="radiogroup" aria-labelledby="motivo-label" columns={{ base: 2, md: 4 }} spacing={2}>
+                  <SimpleGrid
+                    role="radiogroup"
+                    aria-labelledby="motivo-label"
+                    columns={4}
+                    spacing={0}
+                    p={1}
+                    bg="brand.soft"
+                    borderWidth="1px"
+                    borderColor="blackAlpha.100"
+                    borderRadius="full"
+                  >
                     {MOTIVOS.map((m) => {
                       const activo = datos.motivo === m.value
                       return (
@@ -208,26 +243,18 @@ export default function ContactoPage() {
                           type="button"
                           role="radio"
                           aria-checked={activo}
+                          aria-label={m.label}
                           onClick={() => setCampo('motivo', m.value)}
-                          variant="outline"
-                          h="auto"
-                          py={3.5}
-                          px={3}
-                          flexDirection="column"
-                          alignItems="flex-start"
-                          gap={2}
-                          whiteSpace="normal"
-                          textAlign="left"
-                          fontSize="sm"
-                          borderRadius="lg"
-                          borderWidth={activo ? '2px' : '1px'}
-                          borderColor={activo ? 'brand.primary' : 'blackAlpha.200'}
-                          bg={activo ? 'brand.wash' : 'white'}
-                          color={activo ? 'brand.primary' : 'brand.ink'}
-                          _hover={{ bg: activo ? 'brand.wash' : 'brand.soft' }}
+                          size="sm"
+                          h="36px"
+                          fontWeight={activo ? 'semibold' : 'medium'}
+                          bg={activo ? 'white' : 'transparent'}
+                          color={activo ? 'brand.primary' : 'blackAlpha.700'}
+                          boxShadow={activo ? '0 1px 3px rgba(13, 13, 13, 0.12)' : 'none'}
+                          _hover={{ bg: activo ? 'white' : 'blackAlpha.50' }}
+                          _active={{ bg: activo ? 'white' : 'blackAlpha.100' }}
                         >
-                          <Icon as={m.icon} boxSize={5} />
-                          {m.label}
+                          {m.corto}
                         </Button>
                       )
                     })}
@@ -270,11 +297,30 @@ export default function ContactoPage() {
                   <FormErrorMessage>{errores.mensaje}</FormErrorMessage>
                 </FormControl>
 
+                <Box position="absolute" left="-9999px" aria-hidden>
+                  <label>
+                    No completar
+                    <input tabIndex={-1} autoComplete="off" value={trampa} onChange={(e) => setTrampa(e.target.value)} />
+                  </label>
+                </Box>
+
+                {errorEnvio ? (
+                  <Box role="alert" px={4} py={3} borderRadius="lg" bg="red.50" borderWidth="1px" borderColor="red.100">
+                    <Text fontSize="sm" color="red.700" lineHeight="1.5">
+                      No pudimos enviar su mensaje. Inténtelo de nuevo o{' '}
+                      <Link href={mailtoRespaldo()} color="red.700" fontWeight="semibold" textDecoration="underline">
+                        escríbanos a {CORREO}
+                      </Link>
+                      .
+                    </Text>
+                  </Box>
+                ) : null}
+
                 <HStack justify="space-between" flexWrap="wrap" gap={3}>
                   <Text fontSize="sm" color="blackAlpha.600">
                     Respondemos en días hábiles.
                   </Text>
-                  <Button type="submit" px={8}>
+                  <Button type="submit" px={8} isLoading={enviando} loadingText="Enviando">
                     {motivo.cta}
                   </Button>
                 </HStack>

@@ -36,10 +36,10 @@ export default function AnnouncementBanner({ onClose }) {
             noOfLines={{ base: 2, md: 1 }}
           >
             <Text as="span" fontWeight="bold">
-              ¿Quieres probar el sitio sin costo?
+              ¿Quiere probar la plataforma sin costo?
             </Text>{' '}
             <Text as="span" fontWeight="normal" display={{ base: 'none', md: 'inline' }}>
-              Explora todo lo que Inducta Chile tiene para ti.
+              Agende una demo con nuestro equipo.
             </Text>
           </Text>
 
@@ -68,7 +68,7 @@ export default function AnnouncementBanner({ onClose }) {
           icon={<X size={16} />}
           size="sm"
           variant="ghost"
-          color="gray.500"
+          color="blackAlpha.600"
           minW="28px"
           h="28px"
           position="absolute"
