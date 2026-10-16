@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="inducta-arch-title inducta-arch-desc">
+      <title id="inducta-arch-title">Inducta Chile · arquitectura actual</title>
+      <desc id="inducta-arch-desc">Flujo Usuario a React a Clerk a Supabase, con Edge Functions hacia Transbank y Storage de certificados.</desc>
+      <defs>
+        <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+        <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="#2d3142" fill-opacity="0.10"/>
+        </pattern>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+      <rect width="100%" height="100%" fill="url(#dots)" opacity="0.55"/>
+
+      <!-- Zone: Supabase -->
+      <rect x="560" y="88" width="400" height="312" rx="8"
+            fill="#2d3142" fill-opacity="0.02" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+      <rect x="720" y="92" width="72" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="756" y="101" fill="#2d3142" fill-opacity="0.40" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.14em">SUPABASE</text>
+
+      <!-- Primary flow -->
+      <line x1="168" y1="200" x2="212" y2="200" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <line x1="372" y1="200" x2="416" y2="200" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <line x1="560" y1="200" x2="604" y2="200" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+
+      <!-- Supabase → Storage (right) -->
+      <line x1="780" y1="200" x2="808" y2="200" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Clerk → Edge (async payment path) -->
+      <path d="M 488,232 V 340 Q 488,348 496,348 H 604"
+            fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+      <!-- Edge → Transbank -->
+      <line x1="748" y1="348" x2="792" y2="348" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- Labels -->
+      <rect x="172" y="180" width="36" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="190" y="190" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">UI</text>
+      <rect x="376" y="180" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="396" y="190" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AUTH</text>
+      <rect x="564" y="180" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="584" y="190" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">JWT</text>
+      <rect x="500" y="300" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="528" y="310" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">org_id</text>
+      <rect x="782" y="180" width="28" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="796" y="190" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">FS</text>
+      <rect x="752" y="328" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="772" y="338" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+
+      <!-- Usuario -->
+      <rect x="40" y="168" width="128" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="40" y="168" width="128" height="64" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+      <rect x="48" y="176" width="28" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="62" y="185" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+      <text x="104" y="204" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Usuario</text>
+      <text x="104" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Empresa / empleado</text>
+
+      <!-- React -->
+      <rect x="212" y="168" width="160" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="212" y="168" width="160" height="64" rx="6" fill="#2d3142" fill-opacity="0.03" stroke="#2d3142" stroke-opacity="0.30" stroke-width="1"/>
+      <rect x="220" y="176" width="32" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.22" stroke-width="0.8"/>
+      <text x="236" y="185" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">APP</text>
+      <text x="364" y="228" fill="#2d3142" fill-opacity="0.06" font-size="32" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">01</text>
+      <text x="292" y="204" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">React · Vite</text>
+      <text x="292" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Chakra UI</text>
+
+      <!-- Clerk -->
+      <rect x="416" y="168" width="144" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="416" y="168" width="144" height="64" rx="6" fill="#2d3142" fill-opacity="0.03" stroke="#2d3142" stroke-opacity="0.30" stroke-width="1"/>
+      <rect x="424" y="176" width="36" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.22" stroke-width="0.8"/>
+      <text x="442" y="185" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AUTH</text>
+      <text x="488" y="204" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Clerk</text>
+      <text x="488" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">JWT · org_id</text>
+
+      <!-- Supabase focal -->
+      <rect x="604" y="168" width="176" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="604" y="168" width="176" height="64" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="612" y="176" width="36" height="12" rx="2" fill="none" stroke="#eb6c36" stroke-opacity="0.50" stroke-width="0.8"/>
+      <text x="630" y="185" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DATA</text>
+      <text x="772" y="228" fill="#eb6c36" fill-opacity="0.10" font-size="32" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">02</text>
+      <text x="692" y="204" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Supabase</text>
+      <text x="692" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">API · RLS · Postgres</text>
+
+      <!-- Storage -->
+      <rect x="808" y="168" width="136" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="808" y="168" width="136" height="64" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="816" y="176" width="40" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.50" stroke-width="0.8"/>
+      <text x="836" y="185" fill="#4f5d75" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+      <text x="876" y="204" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Storage</text>
+      <text x="876" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">cert. · logos</text>
+
+      <!-- Edge Functions -->
+      <rect x="604" y="316" width="144" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="604" y="316" width="144" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="612" y="324" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="626" y="333" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">FN</text>
+      <text x="676" y="352" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Edge Functions</text>
+      <text x="676" y="368" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">tbk-iniciar · confirmar</text>
+
+      <!-- Transbank -->
+      <rect x="792" y="316" width="144" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="792" y="316" width="144" height="64" rx="6" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+      <rect x="800" y="324" width="28" height="12" rx="2" fill="none" stroke="#7a8399" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="814" y="333" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+      <text x="864" y="352" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Transbank</text>
+      <text x="864" y="368" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Webpay Plus</text>
+
+      <!-- Legend -->
+      <line x1="40" y1="444" x2="960" y2="444" stroke="#2d3142" stroke-opacity="0.10" stroke-width="0.8"/>
+      <text x="40" y="460" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+      <rect x="40" y="476" width="14" height="10" rx="2" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-width="1"/>
+      <text x="60" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Focal / datos</text>
+      <rect x="168" y="476" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="188" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Funciones</text>
+      <rect x="276" y="476" width="14" height="10" rx="2" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-width="1"/>
+      <text x="296" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Storage</text>
+      <rect x="372" y="476" width="14" height="10" rx="2" fill="#2d3142" fill-opacity="0.03" stroke="#2d3142" stroke-opacity="0.30" stroke-width="1"/>
+      <text x="392" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">App / auth</text>
+      <rect x="484" y="476" width="14" height="10" rx="2" fill="#4f5d75" fill-opacity="0.10" stroke="#7a8399" stroke-width="1"/>
+      <text x="504" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Externo</text>
+      <line x1="584" y1="482" x2="612" y2="482" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <text x="620" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">HTTP / API</text>
+      <line x1="712" y1="482" x2="740" y2="482" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="748" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Flujo principal</text>
+      <line x1="864" y1="482" x2="892" y2="482" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <text x="900" y="484" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Async</text>
+    </svg>

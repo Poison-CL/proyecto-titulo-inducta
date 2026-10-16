@@ -1,198 +1,131 @@
 # Instalación Podman — Inducta CHILE
 
-Guía para dejar el proyecto corriendo en un equipo nuevo con Podman.
-Aplica a Windows, macOS y Linux. Al terminar, la app debe responder en `http://localhost:8080`.
+Guía para la **demo de deploy**. Al terminar, la app debe responder en `http://localhost:8080`.
+
+Clerk y Supabase viven en la nube. El contenedor solo sirve el frontend.
 
 ---
 
-## Objetivo
+## Antes del día de la demo (hazlo una vez)
 
-1. Tener Podman (con Compose) operativo.
-2. Configurar el archivo `.env` en la raíz del proyecto.
-3. Construir la imagen y levantar el contenedor `web`.
-4. Verificar que el login de Clerk carga en el navegador.
-
-Clerk y Supabase viven en la nube. No se levantan en el contenedor; solo se necesita la red y las claves del `.env`.
+1. Instalar [Podman Desktop](https://podman-desktop.io/) y abrirlo al menos una vez.
+2. Tener Node 20+ si también quieres `npm run dev`.
+3. Tener las 3 claves en un `.env` listo (Clerk + Supabase).
+4. En Clerk, permitir origen `http://localhost:8080`.
 
 ---
 
-## Requisitos previos
+## Script de la demo (orden exacto)
 
-| Herramienta | Uso | Notas |
-|---|---|---|
-| Git | Clonar el repositorio | https://git-scm.com |
-| Podman Desktop | Construir y ejecutar el contenedor | https://podman-desktop.io/ |
-| Cuenta Clerk | Autenticación | Dashboard → Publishable key |
-| Proyecto Supabase | Base de datos | URL + anon/publishable key |
+Abre **PowerShell** en el repo.
 
-En Windows, Podman Desktop instala una máquina virtual ligera.
+### 1. Ir a la app
 
----
-
-## 1. Clonar e ingresar al proyecto
-
-```bash
-git clone <url-del-repositorio>
-cd Desarrollo_Proyecto/inducta-chile
+```powershell
+cd Desarrollo_Proyecto\inducta-chile
 ```
 
-La carpeta de trabajo debe contener `package.json`, `Containerfile` y `compose.yml`.
+Debes ver `package.json`, `Containerfile` y `compose.yml`.
 
----
+### 2. Arrancar Podman
 
-## 2. Instalar y arrancar Podman
+Abre Podman Desktop. Luego:
 
-### Windows / macOS
-
-1. Instalar [Podman Desktop](https://podman-desktop.io/).
-2. Abrir Podman Desktop y esperar a que el motor quede en marcha (máquina Podman iniciada).
-3. En una terminal nueva, comprobar:
-
-```bash
+```powershell
+podman machine start
 podman -v
 podman compose version
 ```
 
-Si `podman compose` dice que no encuentra el proveedor, instala:
+Si `podman machine start` dice que ya está corriendo, sigue.
 
-```bash
+Si `podman compose` no existe:
+
+```powershell
 pip install podman-compose
 ```
 
-Cierra y reabre la terminal, o agrega al PATH la carpeta `Scripts` de Python (ej. `%LOCALAPPDATA%\Programs\Python\Python312\Scripts`).
+Cierra y reabre la terminal.
 
-Si el comando no se reconoce, cerrar y reabrir la terminal, o reiniciar el equipo después de la instalación.
+### 3. Variables de entorno
 
-### Linux
-
-```bash
-# Ejemplo Ubuntu/Debian — ajustar según la distro
-sudo apt-get update
-sudo apt-get install -y podman podman-compose
-```
-
-Luego:
-
-```bash
-podman -v
-podman compose version
-```
-
-Si `podman compose` no está disponible, usa `podman-compose` (mismo uso).
-
----
-
-## 3. Variables de entorno
-
-En la raíz del proyecto (junto a `package.json`), crear `.env` a partir del ejemplo:
-
-```bash
-# Windows PowerShell
+```powershell
 copy .env.example .env
-
-# macOS / Linux
-cp .env.example .env
+notepad .env
 ```
 
-Completar `.env` con valores reales:
+Deja exactamente estas 3 líneas con valores reales:
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-VITE_SUPABASE_ANON_KEY=sb_publishable_...
+VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
-Reglas:
+### 4. Build y deploy
 
-- El archivo se llama `.env` y vive en la raíz, nunca dentro de `src/`.
-- No subir `.env` a Git (ya está en `.gitignore`).
-- Las variables `VITE_*` se inyectan en el **build** de la imagen. Si cambian, hay que reconstruir.
-
-Opcional en desarrollo local (sin contenedor): también sirve `.env.local` con el mismo contenido; Vite lo lee al hacer `npm run dev`.
-
----
-
-## 4. Construir y levantar el contenedor
-
-Desde la raíz del proyecto (`inducta-chile`), con Podman en marcha:
-
-```bash
+```powershell
 podman compose up --build
 ```
 
-La primera vez descarga imágenes base (`node`, `nginx`) e instala dependencias; puede tardar varios minutos.
+La primera vez puede tardar varios minutos. Cuando termine, abre:
 
-Resultado esperado:
+[http://localhost:8080](http://localhost:8080)
 
-- Imagen local: `inducta-chile-web` (o similar)
-- Contenedor: `inducta-chile-web-1` (o similar)
-- Puerto publicado: `8080 → 80`
+Debes ver la landing. Entrar: [http://localhost:8080/entrar](http://localhost:8080/entrar)
 
-En segundo plano:
+### 5. Parar al final
 
-```bash
-podman compose up --build -d
-```
-
-Ver logs:
-
-```bash
-podman compose logs -f web
+```powershell
+podman compose down
 ```
 
 ---
 
-## 5. Verificar que funciona
+## Alternativa sin contenedor (desarrollo)
 
-1. Abrir [http://localhost:8080](http://localhost:8080).
-2. Debe redirigir a `/sign-in` y mostrar el formulario de Clerk.
-3. En Podman Desktop → **Containers**, el servicio `web` debe estar en marcha.
-4. Comprobación rápida por terminal:
-
-```bash
-podman compose ps
-curl -I http://localhost:8080
+```powershell
+cd Desarrollo_Proyecto\inducta-chile
+copy .env.example .env
+npm install
+npm run dev
 ```
 
-Si `curl` no existe en Windows, basta con abrir la URL en el navegador.
+URL: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 6. Comandos de mantenimiento
+## Comandos útiles
 
 | Acción | Comando |
 |---|---|
+| Estado | `podman compose ps` |
+| Logs | `podman compose logs -f web` |
+| Reconstruir tras cambiar `.env` | `podman compose up --build` |
+| Build limpio | `podman compose build --no-cache` y luego `podman compose up` |
 | Parar | `podman compose down` |
-| Reconstruir tras cambiar `.env` o código | `podman compose up --build` |
-| Reconstruir forzado | `podman compose build --no-cache` y luego `podman compose up` |
-| Ver contenedores | `podman compose ps` |
-| Limpiar contenedor e imagen del proyecto | `podman compose down --rmi local` |
 
 ---
 
-## 7. Problemas frecuentes
+## Si sale error en la demo
 
-| Síntoma | Qué revisar |
+| Síntoma | Qué hacer |
 |---|---|
-| `podman` no se reconoce | Podman Desktop cerrado o PATH sin actualizar; reiniciar terminal/PC |
-| Máquina Podman detenida | Abrir Podman Desktop e iniciar la máquina / el motor |
-| Puerto 8080 ocupado | Cambiar `"8080:80"` en `compose.yml` o liberar el puerto |
-| Pantalla en blanco / sin Clerk | `.env` vacío o mal ubicado; reconstruir con `podman compose up --build` |
-| Error al autenticarse en Clerk | En el dashboard de Clerk, permitir `http://localhost:8080` como origen |
-| Build falla en `npm ci` | Conexión a internet; borrar caché y `podman compose build --no-cache` |
-| Contenedor sale y se detiene | `podman compose logs web` y revisar `container/nginx.conf` |
+| `Cannot connect to Podman` | Abrir Podman Desktop + `podman machine start` |
+| `podman` no se reconoce | Cerrar terminal, abrir otra; o reiniciar PC |
+| Puerto 8080 ocupado | `podman compose down` o cambiar `"8080:80"` en `compose.yml` |
+| Pantalla en blanco / sin Clerk | Revisar `.env` y reconstruir: `podman compose up --build` |
+| Clerk rechaza el login | Agregar `http://localhost:8080` en orígenes permitidos de Clerk |
+| Build falla en `npm ci` | Internet activo; `podman compose build --no-cache` |
+| Contenedor se cae | `podman compose logs web` |
 
 ---
 
-## 8. Checklist por equipo
+## Checklist express (5 minutos antes)
 
-- [ ] Git instalado
-- [ ] Repositorio clonado
-- [ ] Podman Desktop / Podman instalado y en marcha
-- [ ] `podman -v` y `podman compose version` responden
-- [ ] Archivo `.env` creado en la raíz con las cuatro variables `VITE_*`
-- [ ] `podman compose up --build` termina sin error
-- [ ] [http://localhost:8080](http://localhost:8080) muestra el login de Clerk
-
-Cuando todos los ítems están marcados, el entorno Podman de ese equipo queda listo.
+1. Podman Desktop abierto
+2. `podman machine start` OK
+3. Estás en `Desarrollo_Proyecto\inducta-chile`
+4. `.env` con las 3 variables llenas
+5. `podman compose up --build` sin error
+6. [http://localhost:8080](http://localhost:8080) carga

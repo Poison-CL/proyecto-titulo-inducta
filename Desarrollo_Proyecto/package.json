@@ -1,0 +1,11 @@
+{
+  "name": "desarrollo-proyecto-inducta",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix inducta-chile",
+    "build": "npm run build --prefix inducta-chile",
+    "preview": "npm run preview --prefix inducta-chile",
+    "test": "npm run test --prefix inducta-chile",
+    "lint": "npm run lint --prefix inducta-chile"
+  }
+}
