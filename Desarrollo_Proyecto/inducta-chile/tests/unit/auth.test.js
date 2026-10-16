@@ -33,12 +33,12 @@ const noEncontrada = errorClerk('form_identifier_not_found')
 
 assert.match(
   clerkError(noEncontrada, 'fallback', ROL.EMPRESA),
-  /agenda una demo/,
+  /agende una demo/,
   'a la empresa la derivamos a la demo',
 )
 assert.match(
   clerkError(noEncontrada, 'fallback', ROL.EMPLEADO),
-  /tu administrador/,
+  /su administrador/,
   'al colaborador lo resuelve su empresa, nunca nosotros',
 )
 assert.doesNotMatch(

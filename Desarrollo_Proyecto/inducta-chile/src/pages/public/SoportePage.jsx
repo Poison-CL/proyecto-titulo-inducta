@@ -83,7 +83,7 @@ export default function SoportePage() {
             <Icon as={Clock} boxSize={4} color="brand.primary" />
             <Text color="brand.ink">Respondemos en días hábiles.</Text>
           </HStack>
-          <Button as={RouterLink} to="/contacto" size="sm" w="full">
+          <Button as={RouterLink} to="/contacto?motivo=soporte" size="sm" w="full">
             Escribir a soporte
           </Button>
         </Box>

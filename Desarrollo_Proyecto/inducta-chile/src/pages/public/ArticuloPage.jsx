@@ -1,7 +1,8 @@
-import { Box, Flex, Heading, HStack, Icon, Link, ListItem, Text, UnorderedList } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { Box, Flex, Heading, HStack, Icon, Link, LinkBox, LinkOverlay, ListItem, Text, UnorderedList } from '@chakra-ui/react'
 import { ChevronRight } from 'lucide-react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
-import { TIPOS, fechaLarga, getArticulo } from '../../lib/recursos'
+import { ARTICULOS, TIPOS, fechaLarga, getArticulo } from '../../lib/recursos'
 import NoEncontradaPage from './NoEncontradaPage'
 
 const anclaDe = (s) =>
@@ -12,12 +13,44 @@ const anclaDe = (s) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 
+const relacionadosDe = (a) =>
+  ARTICULOS.filter((x) => x.tipo === a.tipo && x.slug !== a.slug)
+    .sort((x, y) => (y.categoria === a.categoria) - (x.categoria === a.categoria))
+    .slice(0, 3)
+
+if (import.meta.env.DEV) {
+  const a = ARTICULOS[0]
+  const r = relacionadosDe(a)
+  if (r.some((x) => x.slug === a.slug || x.tipo !== a.tipo) || r.length > 3) throw new Error('articulo: relacionados')
+}
+
 export default function ArticuloPage() {
   const articulo = getArticulo(useParams().slug)
+  const subtitulos = articulo ? articulo.cuerpo.filter((b) => b.h).map((b) => b.h) : []
+  const [activo, setActivo] = useState(null)
+
+  useEffect(() => {
+    if (!subtitulos.length) return
+    // ponytail: recorre los h2 en cada scroll; con artículos de decenas de secciones conviene IntersectionObserver.
+    const alScroll = () => {
+      const tope = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-h')) || 72) + 40
+      let actual = null
+      for (const h of subtitulos) {
+        const el = document.getElementById(anclaDe(h))
+        if (el && el.getBoundingClientRect().top <= tope) actual = h
+      }
+      setActivo(actual)
+    }
+    alScroll()
+    window.addEventListener('scroll', alScroll, { passive: true })
+    return () => window.removeEventListener('scroll', alScroll)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articulo?.slug])
+
   if (!articulo) return <NoEncontradaPage />
 
   const tipo = TIPOS[articulo.tipo]
-  const subtitulos = articulo.cuerpo.filter((b) => b.h).map((b) => b.h)
+  const relacionados = relacionadosDe(articulo)
 
   return (
     <Flex gap={12} align="flex-start">
@@ -77,6 +110,57 @@ export default function ArticuloPage() {
             ),
           )}
         </Box>
+
+        <Box mt={14} pt={6} borderTopWidth="1px" borderColor="blackAlpha.100">
+          <Text fontWeight="semibold" color="brand.ink">
+            ¿No resolvió su duda?
+          </Text>
+          <Text fontSize="sm" color="blackAlpha.700" mt={1}>
+            Cuéntenos qué necesita y le respondemos en días hábiles.{' '}
+            <Link as={RouterLink} to="/contacto?motivo=soporte" color="brand.primary" fontWeight="semibold">
+              Escribir a soporte
+            </Link>
+          </Text>
+        </Box>
+
+        {relacionados.length > 0 && (
+          <Box as="section" mt={12}>
+            <Heading as="h2" fontSize="lg" fontWeight="semibold" letterSpacing="-0.01em" mb={2}>
+              Más en {tipo.titulo}
+            </Heading>
+            {relacionados.map((r) => (
+              <LinkBox
+                key={r.slug}
+                as="article"
+                display="flex"
+                alignItems="center"
+                gap={4}
+                py={4}
+                borderBottomWidth="1px"
+                borderColor="blackAlpha.100"
+                role="group"
+              >
+                <Box flex="1" minW={0}>
+                  <Text fontSize="sm" fontWeight="medium" color="brand.primary">
+                    {r.categoria}
+                  </Text>
+                  <Text as="h3" fontWeight="semibold" color="brand.ink" lineHeight="1.35">
+                    <LinkOverlay as={RouterLink} to={`/recursos/${r.slug}`}>
+                      {r.titulo}
+                    </LinkOverlay>
+                  </Text>
+                </Box>
+                <Box
+                  color="blackAlpha.500"
+                  transition="transform 200ms cubic-bezier(0.32, 0.72, 0, 1)"
+                  _groupHover={{ transform: 'translateX(3px)', color: 'brand.primary' }}
+                >
+                  <ChevronRight size={18} aria-hidden />
+                </Box>
+              </LinkBox>
+            ))}
+          </Box>
+        )}
       </Box>
 
       {subtitulos.length > 0 && (
@@ -92,11 +176,30 @@ export default function ArticuloPage() {
           <Text fontSize="xs" fontWeight="semibold" color="blackAlpha.600" mb={2}>
             En esta página
           </Text>
-          {subtitulos.map((h) => (
-            <Link key={h} href={`#${anclaDe(h)}`} display="block" fontSize="sm" color="blackAlpha.700" py={1}>
-              {h}
-            </Link>
-          ))}
+          <Box borderLeftWidth="1px" borderColor="blackAlpha.100">
+            {subtitulos.map((h) => {
+              const es = h === activo
+              return (
+                <Link
+                  key={h}
+                  href={`#${anclaDe(h)}`}
+                  aria-current={es ? 'location' : undefined}
+                  display="block"
+                  fontSize="sm"
+                  py={1}
+                  pl={3}
+                  ml="-1px"
+                  borderLeftWidth="2px"
+                  borderColor={es ? 'brand.primary' : 'transparent'}
+                  color={es ? 'brand.primary' : 'blackAlpha.700'}
+                  fontWeight={es ? 'semibold' : 'normal'}
+                  transition="color 150ms, border-color 150ms"
+                >
+                  {h}
+                </Link>
+              )
+            })}
+          </Box>
         </Box>
       )}
     </Flex>

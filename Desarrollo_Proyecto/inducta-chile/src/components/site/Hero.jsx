@@ -39,7 +39,7 @@ export default function Hero() {
         <Box w="full" maxW="6xl" mx="auto">
         <Flex
           direction={{ base: 'column', xl: 'row' }}
-          align={{ base: 'flex-start', xl: 'center' }}
+          align={{ base: 'flex-start', xl: 'flex-end' }}
           justify="space-between"
           gap={{ base: 0, xl: 16 }}
         >
@@ -68,8 +68,9 @@ export default function Hero() {
             maxW={{ base: '44ch', xl: '23rem' }}
             flexShrink={0}
             mt={{ base: 5, md: 6, xl: 0 }}
-            fontSize={{ base: 'md', md: 'xl', xl: 'lg' }}
-            color="blackAlpha.700"
+            fontSize={{ base: 'md', md: 'xl', xl: '1.1875rem' }}
+            color="blackAlpha.800"
+            pb={{ xl: '0.55rem' }}
             lineHeight="1.55"
             sx={entrada(0.46)}
           >
@@ -85,11 +86,11 @@ export default function Hero() {
                 h="46px"
                 px={7}
                 borderRadius="full"
-                bg="brand.accent"
+                bg="brand.primary"
                 color="white"
                 fontWeight="medium"
                 fontSize="md"
-                _hover={{ bg: 'brand.accentDark' }}
+                _hover={{ bg: 'brand.primaryDark' }}
               >
                 Ver planes
               </Button>

@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { env } from './env'
 
+export const supabasePublico = createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+})
+
 export function createSupabaseClient(getToken) {
   return createClient(env.supabaseUrl, env.supabaseAnonKey, {
     auth: {

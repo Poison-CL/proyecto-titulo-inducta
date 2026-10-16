@@ -40,7 +40,7 @@ export default function PreciosPage() {
               Planes y precios
             </Heading>
             <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.6" maxW="52ch">
-              Elige el plan que mejor se adapte al tamaño de tu empresa.
+              Elija el plan que mejor se adapte al tamaño de su empresa.
             </Text>
           </Box>
 
@@ -196,7 +196,7 @@ export default function PreciosPage() {
             </Text>
             <Text fontSize="sm" color="blackAlpha.700" lineHeight="1.6">
               Cuéntenos el tamaño de su equipo y le recomendamos uno.{' '}
-              <Link as={RouterLink} to="/contacto" color="brand.primary" fontWeight="semibold">
+              <Link as={RouterLink} to="/contacto?motivo=planes" color="brand.primary" fontWeight="semibold">
                 Hablemos
               </Link>
             </Text>

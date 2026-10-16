@@ -28,10 +28,10 @@ const MotionBox = motion.create(Box)
 
 const COPY = {
   [ROL.EMPRESA]: {
-    ayuda: 'Si tu empresa aún no tiene acceso, contrata un plan o agenda una demo.',
+    ayuda: 'Si su empresa aún no tiene acceso, contrate un plan o agende una demo.',
   },
   [ROL.EMPLEADO]: {
-    ayuda: 'Las cuentas de colaborador las crea tu empresa. Si no puedes entrar, pide a tu administrador que te agregue.',
+    ayuda: 'Las cuentas de colaborador las crea su empresa. Si no puede entrar, pida a su administrador que lo agregue.',
   },
 }
 
@@ -43,7 +43,7 @@ function RolToggle({ rol, onChange, disabled }) {
       position="relative"
       w="full"
       bg="brand.soft"
-      borderRadius="lg"
+      borderRadius="full"
       p="4px"
       h="44px"
       borderWidth="1px"
@@ -58,7 +58,7 @@ function RolToggle({ rol, onChange, disabled }) {
         left="4px"
         w="calc(50% - 4px)"
         bg="white"
-        borderRadius="md"
+        borderRadius="full"
         boxShadow="0 1px 3px rgba(13, 13, 13, 0.12)"
         animate={{ x: esEmpresa ? 0 : '100%' }}
         transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
@@ -78,7 +78,7 @@ function RolToggle({ rol, onChange, disabled }) {
           gap={2}
           fontWeight="semibold"
           fontSize="sm"
-          color={esEmpresa ? 'brand.primary' : 'gray.500'}
+          color={esEmpresa ? 'brand.primary' : 'blackAlpha.600'}
           onClick={() => onChange(ROL.EMPRESA)}
         >
           <Icon as={Building2} boxSize={4} />
@@ -96,7 +96,7 @@ function RolToggle({ rol, onChange, disabled }) {
           gap={2}
           fontWeight="semibold"
           fontSize="sm"
-          color={!esEmpresa ? 'brand.primary' : 'gray.500'}
+          color={!esEmpresa ? 'brand.primary' : 'blackAlpha.600'}
           onClick={() => onChange(ROL.EMPLEADO)}
         >
           <Icon as={UserRound} boxSize={4} />
@@ -114,7 +114,7 @@ function Field({ icon, label, children }) {
         {label}
       </FormLabel>
       <InputGroup>
-        <InputLeftElement h="48px" pointerEvents="none" color="gray.400">
+        <InputLeftElement h="48px" pointerEvents="none" color="blackAlpha.400">
           <Icon as={icon} boxSize={4} />
         </InputLeftElement>
         {children}
@@ -129,7 +129,7 @@ const inputProps = {
   borderColor: 'blackAlpha.200',
   h: '48px',
   pl: 10,
-  _placeholder: { color: 'gray.400' },
+  _placeholder: { color: 'blackAlpha.400' },
   _hover: { borderColor: 'blackAlpha.300' },
   _focus: {
     borderColor: 'brand.primary',
@@ -139,7 +139,6 @@ const inputProps = {
 
 const primario = {
   h: '48px',
-  borderRadius: 'lg',
   bg: 'brand.primary',
   color: 'white',
   _hover: { bg: 'brand.primaryDark' },
@@ -161,11 +160,15 @@ function LoginCard() {
   const [loading, setLoading] = useState(false)
   const [info, setInfo] = useState('')
   const [cooldown, setCooldown] = useState(0)
+  // true si el código es MFA (segundo factor), no primer factor
+  const [codeAsSecond, setCodeAsSecond] = useState(false)
 
   const copy = COPY[rol]
   const canPassword = Boolean(factorByStrategy(signIn, 'password'))
   const canEmailCode = Boolean(factorByStrategy(signIn, 'email_code'))
   const RESEND_SEGUNDOS = 60
+
+  const emailNormalizado = () => email.trim().toLowerCase()
 
   useEffect(() => {
     setRolPendiente(rol)
@@ -196,6 +199,7 @@ function LoginCard() {
     setError('')
     setInfo('')
     setCooldown(0)
+    setCodeAsSecond(false)
   }
 
   // Paso 1: solo correo → Clerk crea el intento y lista factores
@@ -203,10 +207,12 @@ function LoginCard() {
     e.preventDefault()
     setError('')
     setInfo('')
+    setCodeAsSecond(false)
 
     if (!isLoaded || !signIn) return
-    if (!email.trim()) {
-      setError('Ingresa tu correo.')
+    const identifier = emailNormalizado()
+    if (!identifier) {
+      setError('Ingrese su correo.')
       return
     }
 
@@ -214,7 +220,7 @@ function LoginCard() {
     setRolPendiente(rol)
 
     try {
-      const result = await signIn.create({ identifier: email.trim() })
+      const result = await signIn.create({ identifier })
 
       if (await finishIfComplete(result)) return
 
@@ -224,7 +230,7 @@ function LoginCard() {
         setError(
           rol === ROL.EMPRESA
             ? 'Esta cuenta no tiene un método de ingreso disponible. Escríbenos y lo revisamos.'
-            : 'Esta cuenta no tiene un método de ingreso disponible. Pide a tu administrador que revise tu acceso.',
+            : 'Esta cuenta no tiene un método de ingreso disponible. Pida a su administrador que revise su acceso.',
         )
         return
       }
@@ -235,34 +241,45 @@ function LoginCard() {
 
       setStep(siguiente)
     } catch (err) {
-      setError(clerkError(err, 'No pudimos continuar con ese correo. Intenta de nuevo.', rol))
+      setError(clerkError(err, 'No pudimos continuar con ese correo. Intente de nuevo.', rol))
     } finally {
       setLoading(false)
     }
   }
 
-  const sendEmailCode = async (si = signIn) => {
-    const factor = factorByStrategy(si, 'email_code')
-    if (!factor?.emailAddressId) {
-      throw new Error('No hay correo verificado para enviar el código.')
+  const sendEmailCode = async (si = signIn, asSecond = false) => {
+    if (asSecond) {
+      const factor = si?.supportedSecondFactors?.find((f) => f.strategy === 'email_code')
+      if (!factor?.emailAddressId) {
+        throw new Error('No hay correo verificado para el segundo factor.')
+      }
+      await si.prepareSecondFactor({
+        strategy: 'email_code',
+        emailAddressId: factor.emailAddressId,
+      })
+    } else {
+      const factor = factorByStrategy(si, 'email_code')
+      if (!factor?.emailAddressId) {
+        throw new Error('No hay correo verificado para enviar el código.')
+      }
+      await si.prepareFirstFactor({
+        strategy: 'email_code',
+        emailAddressId: factor.emailAddressId,
+      })
     }
-
-    await si.prepareFirstFactor({
-      strategy: 'email_code',
-      emailAddressId: factor.emailAddressId,
-    })
-    setInfo(`Enviamos un código a ${email.trim()}. Revisa tu bandeja de entrada.`)
+    setInfo(`Enviamos un código a ${emailNormalizado()}. Revise su bandeja de entrada.`)
     setCooldown(RESEND_SEGUNDOS)
   }
 
   const onChooseCode = async () => {
     setError('')
+    setCodeAsSecond(false)
     setLoading(true)
     try {
-      await sendEmailCode()
+      await sendEmailCode(signIn, false)
       setStep('code')
     } catch (err) {
-      setError(clerkError(err, 'No pudimos enviar el código. Intenta de nuevo.', rol))
+      setError(clerkError(err, 'No pudimos enviar el código. Intente de nuevo.', rol))
     } finally {
       setLoading(false)
     }
@@ -271,6 +288,7 @@ function LoginCard() {
   const onChoosePassword = () => {
     setError('')
     setInfo('')
+    setCodeAsSecond(false)
     setStep('password')
   }
 
@@ -278,18 +296,23 @@ function LoginCard() {
     e.preventDefault()
     setError('')
     if (!code.trim()) {
-      setError('Ingresa el código de verificación.')
+      setError('Ingrese el código de verificación.')
       return
     }
 
     setLoading(true)
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'email_code',
-        code: code.trim(),
-      })
+      const result = codeAsSecond
+        ? await signIn.attemptSecondFactor({
+            strategy: 'email_code',
+            code: code.trim(),
+          })
+        : await signIn.attemptFirstFactor({
+            strategy: 'email_code',
+            code: code.trim(),
+          })
       if (await finishIfComplete(result)) return
-      setError('Código incorrecto o incompleto. Intenta otra vez.')
+      setError('Código incorrecto o incompleto. Intente otra vez.')
     } catch (err) {
       setError(clerkError(err, 'Código incorrecto o expirado.', rol))
     } finally {
@@ -300,8 +323,10 @@ function LoginCard() {
   const onVerifyPassword = async (e) => {
     e.preventDefault()
     setError('')
-    if (!password) {
-      setError('Ingresa tu contraseña.')
+    // ponytail: trim solo bordes; el pegado desde el correo suele traer espacios/saltos
+    const clave = password.trim()
+    if (!clave) {
+      setError('Ingrese su contraseña.')
       return
     }
 
@@ -309,9 +334,23 @@ function LoginCard() {
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: 'password',
-        password,
+        password: clave,
       })
       if (await finishIfComplete(result)) return
+
+      // Contraseña correcta pero Clerk pide MFA (código al correo)
+      if (result.status === 'needs_second_factor') {
+        const tieneEmail = result.supportedSecondFactors?.some((f) => f.strategy === 'email_code')
+        if (tieneEmail) {
+          setCodeAsSecond(true)
+          await sendEmailCode(signIn, true)
+          setStep('code')
+          return
+        }
+        setError('Su cuenta requiere un segundo factor que no está disponible en este formulario.')
+        return
+      }
+
       setError('No pudimos completar el ingreso con contraseña.')
     } catch (err) {
       setError(clerkError(err, 'Contraseña incorrecta.', rol))
@@ -325,7 +364,7 @@ function LoginCard() {
     setError('')
     setLoading(true)
     try {
-      await sendEmailCode()
+      await sendEmailCode(signIn, codeAsSecond)
     } catch (err) {
       setError(clerkError(err, 'No pudimos reenviar el código.', rol))
     } finally {
@@ -401,8 +440,11 @@ function LoginCard() {
                 >
                   Cambiar correo
                 </Button>
-                <Text fontSize="sm" color="gray.600">
-                  Elige cómo quieres entrar con <Text as="span" fontWeight="semibold">{email}</Text>
+                <Text fontSize="sm" color="blackAlpha.700">
+                  Elija cómo quiere entrar con{' '}
+                  <Text as="span" fontWeight="semibold">
+                    {emailNormalizado() || email}
+                  </Text>
                 </Text>
                 {canEmailCode ? (
                   <Button {...primario} leftIcon={<KeyRound size={16} />} onClick={onChooseCode} isLoading={loading}>
@@ -412,7 +454,6 @@ function LoginCard() {
                 {canPassword ? (
                   <Button
                     h="48px"
-                    borderRadius="lg"
                     variant="outline"
                     leftIcon={<Lock size={16} />}
                     onClick={onChoosePassword}
@@ -444,15 +485,20 @@ function LoginCard() {
                   onClick={() => {
                     setCode('')
                     setError('')
+                    if (codeAsSecond) {
+                      setCodeAsSecond(false)
+                      setStep('password')
+                      return
+                    }
                     setStep(canPassword ? 'method' : 'email')
                   }}
                 >
                   Volver
                 </Button>
-                <Text fontSize="sm" color="gray.600">
+                <Text fontSize="sm" color="blackAlpha.700">
                   Escribe el código que enviamos a{' '}
                   <Text as="span" fontWeight="semibold">
-                    {email}
+                    {emailNormalizado() || email}
                   </Text>
                 </Text>
                 <Field icon={KeyRound} label="Código">
@@ -472,7 +518,7 @@ function LoginCard() {
                 <Button
                   type="button"
                   variant="link"
-                  color={cooldown > 0 ? 'gray.400' : 'brand.primary'}
+                  color={cooldown > 0 ? 'blackAlpha.400' : 'brand.primary'}
                   onClick={onResendCode}
                   isDisabled={cooldown > 0 || loading}
                   _hover={cooldown > 0 ? { textDecoration: 'none' } : undefined}
@@ -482,7 +528,7 @@ function LoginCard() {
                     : 'Reenviar código'}
                 </Button>
                 {canPassword ? (
-                  <Button type="button" variant="link" color="gray.500" onClick={onChoosePassword}>
+                  <Button type="button" variant="link" color="blackAlpha.600" onClick={onChoosePassword}>
                     Preferir contraseña
                   </Button>
                 ) : null}
@@ -515,10 +561,10 @@ function LoginCard() {
                 >
                   Volver
                 </Button>
-                <Text fontSize="sm" color="gray.600">
+                <Text fontSize="sm" color="blackAlpha.700">
                   Ingresa la contraseña de{' '}
                   <Text as="span" fontWeight="semibold">
-                    {email}
+                    {emailNormalizado() || email}
                   </Text>
                 </Text>
                 <Field icon={Lock} label="Contraseña">

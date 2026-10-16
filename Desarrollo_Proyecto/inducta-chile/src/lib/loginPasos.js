@@ -26,9 +26,9 @@ export function pasoSiguiente(signIn) {
 const ERRORES_PROPIOS = {
   form_identifier_not_found: (rol) =>
     rol === ROL.EMPRESA
-      ? 'No encontramos una cuenta con ese correo. Si tu empresa todavía no tiene acceso, agenda una demo.'
-      : 'No encontramos una cuenta con ese correo. Pide a tu administrador que te agregue.',
-  form_param_format_invalid: () => 'Revisa el correo: no parece una dirección válida.',
+      ? 'No encontramos una cuenta con ese correo. Si su empresa todavía no tiene acceso, agende una demo.'
+      : 'No encontramos una cuenta con ese correo. Pida a su administrador que lo agregue.',
+  form_param_format_invalid: () => 'Revise el correo: no parece una dirección válida.',
 }
 
 // Nunca devolver el inglés de Clerk: si no hay traducción, usamos el fallback.

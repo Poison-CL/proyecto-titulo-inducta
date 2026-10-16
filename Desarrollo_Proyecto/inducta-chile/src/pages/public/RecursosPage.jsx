@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Box, Grid, Icon, Input, InputGroup, InputLeftElement, Link, LinkBox, LinkOverlay, Text } from '@chakra-ui/react'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import { EncabezadoRecurso } from '../../layouts/RecursosLayout'
 import { TIPOS, buscar, fechaCorta } from '../../lib/recursos'
@@ -96,7 +96,7 @@ export function SinResultados({ consulta }) {
       </Text>
       <Text fontSize="sm" color="blackAlpha.600" mt={1}>
         Pruebe con otra palabra o{' '}
-        <Link as={RouterLink} to="/contacto" color="brand.primary" fontWeight="semibold">
+        <Link as={RouterLink} to="/contacto?motivo=soporte" color="brand.primary" fontWeight="semibold">
           escríbanos
         </Link>
         .
@@ -126,6 +126,20 @@ export default function RecursosPage() {
       <Text fontSize="sm" color="blackAlpha.600" mb={3} px={3}>
         {categoria ? `${categoria} · ` : ''}
         {articulos.length} {articulos.length === 1 ? 'tema' : 'temas'}
+        {categoria ? (
+          <Link
+            as={RouterLink}
+            to={`/recursos?tipo=${tipo}`}
+            ml={3}
+            display="inline-flex"
+            alignItems="center"
+            gap={1}
+            color="brand.primary"
+            fontWeight="medium"
+          >
+            Ver todos <Icon as={X} boxSize={3.5} aria-hidden />
+          </Link>
+        ) : null}
       </Text>
 
       <CabeceraTemas />

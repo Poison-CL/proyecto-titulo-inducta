@@ -115,6 +115,13 @@ export const clerkAppearance = {
       backgroundColor: '#FAFAFA',
       backgroundImage: 'none',
     },
+    // Las empresas las crea Inducta; el admin no debe abrir orgs nuevas desde el panel.
+    organizationSwitcherPopoverCreateOrganization: {
+      display: 'none',
+    },
+    organizationSwitcherPopoverActionButton__createOrganization: {
+      display: 'none',
+    },
   },
 }
 

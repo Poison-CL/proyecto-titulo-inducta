@@ -22,7 +22,7 @@ function AccesoCard({ title, body, actions }) {
           <Heading as="h1" size="lg" color="brand.ink">
             {title}
           </Heading>
-          <Text color="gray.600" lineHeight="1.7">
+          <Text color="blackAlpha.700" lineHeight="1.7">
             {body}
           </Text>
           <HStack spacing={3} flexWrap="wrap" pt={2}>
