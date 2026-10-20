@@ -1,13 +1,37 @@
 import { Box, Button, Heading, Text, VStack } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
+import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
 import { useSupabase } from '../../hooks/useSupabase'
+import { filtraPorCampos } from '../../lib/panelBusqueda'
 
 export default function AdminPagosPage() {
   const supabase = useSupabase()
+  const [params] = useSearchParams()
+  const consulta = params.get('q')?.trim() || ''
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const visibles = useMemo(
+    () =>
+      filtraPorCampos(rows, consulta, [
+        'nombre_comercial',
+        'email_contacto',
+        'orden_compra',
+        'estado',
+        'plan_solicitado',
+        'id_empresa',
+      ]),
+    [rows, consulta],
+  )
+
+  useEffect(() => {
+    if (!consulta || loading) return
+    requestAnimationFrame(() => {
+      document.querySelector('[data-busqueda-hit]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
+  }, [consulta, loading, visibles])
 
   useEffect(() => {
     let vivo = true
@@ -70,9 +94,20 @@ export default function AdminPagosPage() {
         </Text>
       )}
 
+      <BusquedaFiltroBanner consulta={consulta} total={rows.length} visibles={visibles.length} />
+
       <VStack align="stretch" spacing={0} borderTopWidth="1px" borderColor="blackAlpha.100">
-        {rows.map((p) => (
-          <Box key={p.id_pago} py={5} borderBottomWidth="1px" borderColor="blackAlpha.100">
+        {visibles.map((p) => (
+          <Box
+            key={p.id_pago}
+            py={5}
+            px={consulta ? 3 : 0}
+            borderBottomWidth="1px"
+            borderColor="blackAlpha.100"
+            bg={consulta ? 'brand.wash' : undefined}
+            borderRadius={consulta ? 'md' : undefined}
+            data-busqueda-hit={consulta || undefined}
+          >
             <Text fontSize="xs" color="blackAlpha.500" fontWeight="medium" letterSpacing="0.02em" mb={2}>
               {(p.estado || 'sin estado').toUpperCase()}
             </Text>
@@ -94,6 +129,11 @@ export default function AdminPagosPage() {
         {!loading && rows.length === 0 && (
           <Text py={12} fontSize="sm" color="blackAlpha.600">
             No hay pagos registrados.
+          </Text>
+        )}
+        {!loading && rows.length > 0 && visibles.length === 0 && (
+          <Text py={12} fontSize="sm" color="blackAlpha.600">
+            Ningún pago coincide con la búsqueda.
           </Text>
         )}
       </VStack>

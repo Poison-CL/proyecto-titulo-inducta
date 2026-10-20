@@ -1,31 +1,32 @@
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Grid, Text } from '@chakra-ui/react'
+import { useUser } from '@clerk/clerk-react'
+import { Building2, CreditCard, Ticket } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import AccionCard from '../../components/dashboard/AccionCard'
+import WorkspaceHome from '../../components/dashboard/WorkspaceHome'
 import { useSupabase } from '../../hooks/useSupabase'
-import { estadoPlan, fechaCortaEs } from '../../lib/planes'
+import { resolverBusquedaAdmin } from '../../lib/panelBusqueda'
 
 export default function AdminResumenPage() {
+  const { user } = useUser()
   const supabase = useSupabase()
-  const [stats, setStats] = useState({ empresas: 0, porVencer: 0, tickets: 0, pagos: 0 })
+  const navigate = useNavigate()
+  const [stats, setStats] = useState({ empresas: 0, tickets: 0, pagos: 0 })
   const [loading, setLoading] = useState(true)
+  const nombre = user?.firstName || 'equipo'
 
   useEffect(() => {
     let vivo = true
     ;(async () => {
       const [emp, cont, pagos] = await Promise.all([
-        supabase.from('empresa').select('id_empresa, plan_vence_en, cuenta_estado'),
+        supabase.from('empresa').select('id_empresa'),
         supabase.from('contactos').select('id', { count: 'exact', head: true }),
         supabase.from('pagos_transbank').select('id_pago', { count: 'exact', head: true }),
       ])
       if (!vivo) return
-      const empresas = emp.data || []
-      const porVencer = empresas.filter((e) => {
-        const s = estadoPlan(e.plan_vence_en)
-        return s.estado === 'por_vencer' || s.estado === 'vencido'
-      }).length
       setStats({
-        empresas: empresas.length,
-        porVencer,
+        empresas: (emp.data || []).length,
         tickets: cont.count ?? 0,
         pagos: pagos.count ?? 0,
       })
@@ -36,94 +37,56 @@ export default function AdminResumenPage() {
     }
   }, [supabase])
 
-  const cards = [
-    { label: 'Empresas', value: stats.empresas, to: '/admin/empresas', hint: 'Cuentas activas en la base' },
-    {
-      label: 'Planes al límite',
-      value: stats.porVencer,
-      to: '/admin/empresas',
-      hint: 'Por vencer o vencidos',
-      alert: stats.porVencer > 0,
+  const onBuscar = useCallback(
+    async (q) => {
+      const r = await resolverBusquedaAdmin(supabase, q)
+      if (r?.to) navigate(r.to)
+      return r
     },
-    { label: 'Tickets', value: stats.tickets, to: '/admin/tickets', hint: 'Contactos del sitio' },
-    { label: 'Pagos', value: stats.pagos, to: '/admin/pagos', hint: 'Registros Transbank' },
-  ]
+    [supabase, navigate],
+  )
 
   return (
-    <Box maxW="56rem">
-      <Heading
-        as="h1"
-        fontSize={{ base: '2rem', md: '2.4rem' }}
-        fontWeight="semibold"
-        letterSpacing="-0.03em"
-        lineHeight="1.1"
-        color="brand.ink"
-        mb={3}
-      >
-        Resumen
-      </Heading>
-      <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight={1.6} maxW="42ch" mb={2}>
-        Panel de la organización Inducta: soporte, cuentas y planes.
-      </Text>
-      <Text fontSize="xs" color="blackAlpha.500" mb={12}>
-        Hoy · {fechaCortaEs(new Date().toISOString().slice(0, 10))}
-      </Text>
-
+    <WorkspaceHome
+      pillLabel="Panel de soporte Inducta"
+      pillTo="/admin/empresas"
+      titulo={`¿Qué revisamos hoy, ${nombre}?`}
+      placeholder="Buscar persona, empresa, ticket…"
+      onBuscar={onBuscar}
+    >
       {loading ? (
-        <Text color="blackAlpha.600" fontSize="sm">
+        <Text color="blackAlpha.600" fontSize="sm" textAlign="center">
           Cargando…
         </Text>
       ) : (
-        <Flex
-          direction={{ base: 'column', md: 'row' }}
-          flexWrap="wrap"
-          borderTopWidth="1px"
-          borderColor="blackAlpha.100"
-        >
-          {cards.map((c) => (
-            <Box
-              key={c.label}
-              flex="1"
-              minW={{ md: '12rem' }}
-              py={10}
-              px={{ base: 0, md: 6 }}
-              borderBottomWidth="1px"
-              borderRightWidth={{ md: '1px' }}
-              borderColor="blackAlpha.100"
-              _last={{ borderRightWidth: 0 }}
-            >
-              <Text fontSize="xs" color="blackAlpha.500" fontWeight="medium" letterSpacing="0.02em" mb={3}>
-                {c.label.toUpperCase()}
-              </Text>
-              <Text
-                fontSize="2.75rem"
-                fontWeight="semibold"
-                letterSpacing="-0.04em"
-                lineHeight="1"
-                color={c.alert ? 'orange.700' : 'brand.ink'}
-                mb={2}
-              >
-                {c.value}
-              </Text>
-              <Text fontSize="sm" color="blackAlpha.600" mb={5} lineHeight={1.45}>
-                {c.hint}
-              </Text>
-              <Button
-                as={RouterLink}
-                to={c.to}
-                variant="link"
-                color="brand.primary"
-                fontWeight="semibold"
-                p={0}
-                h="auto"
-                fontSize="sm"
-              >
-                Ver →
-              </Button>
-            </Box>
-          ))}
-        </Flex>
+        <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
+          <AccionCard
+            icon={Building2}
+            titulo="Empresas"
+            bajada="Cuentas activas en la base. Revise planes y estado de cada organización."
+            cta="Ver empresas"
+            to="/admin/empresas"
+            primary
+            meta={stats.empresas}
+          />
+          <AccionCard
+            icon={Ticket}
+            titulo="Tickets"
+            bajada="Contactos del sitio web pendientes de respuesta y seguimiento."
+            cta="Abrir tickets"
+            to="/admin/tickets"
+            meta={stats.tickets}
+          />
+          <AccionCard
+            icon={CreditCard}
+            titulo="Pagos"
+            bajada="Registros Transbank y estado de cobros de la plataforma Inducta."
+            cta="Ver pagos"
+            to="/admin/pagos"
+            meta={stats.pagos}
+          />
+        </Grid>
       )}
-    </Box>
+    </WorkspaceHome>
   )
 }

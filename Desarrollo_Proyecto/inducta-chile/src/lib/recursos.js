@@ -6,6 +6,69 @@ export const TIPOS = {
   documentacion: { titulo: 'Documentación', bajada: 'Cómo funciona Inducta Chile, sección por sección.' },
 }
 
+/** Páginas estáticas del hub (antes rutas sueltas). Buscables junto a los artículos. */
+export const PAGINAS = {
+  capacitaciones: {
+    titulo: 'Capacitaciones',
+    bajada:
+      'Su empresa crea sus propias capacitaciones y pruebas. Inducta Chile le da la plataforma para armarlas, asignarlas y medirlas.',
+    secciones: [
+      {
+        titulo: 'Cómo se arma una capacitación',
+        numerada: true,
+        items: [
+          { t: 'Cree el contenido', d: 'Escriba las etapas con el material que su equipo necesita aprender.' },
+          { t: 'Agregue una prueba', d: 'Arme las preguntas con las que comprobará lo aprendido.' },
+          { t: 'Asígnela por cargo o área', d: 'Cada colaborador ve solo las capacitaciones que le corresponden.' },
+          { t: 'Revise los resultados', d: 'Vea quién la completó, cómo le fue en la prueba y en qué fecha.' },
+        ],
+      },
+      {
+        titulo: 'Lo que decide su empresa',
+        items: [
+          { t: 'El contenido', d: 'Qué se enseña y en qué orden. El material es suyo; nosotros no lo creamos ni lo modificamos.' },
+          { t: 'Las preguntas', d: 'Qué se evalúa en cada prueba.' },
+          { t: 'A quién se asigna', d: 'Por cargo, por área o a personas específicas.' },
+        ],
+      },
+    ],
+  },
+  cumplimiento: {
+    titulo: 'Cumplimiento',
+    bajada:
+      'Cada inducción y capacitación deja registro. Cuando le pidan evidencia en una auditoría o fiscalización, ya la tiene.',
+    secciones: [
+      {
+        titulo: 'Qué queda registrado',
+        items: [
+          { t: 'Quién', d: 'El colaborador, su cargo y su área.' },
+          { t: 'Qué', d: 'El programa asignado y sus contenidos.' },
+          { t: 'Cuándo', d: 'La fecha en que completó cada etapa.' },
+          { t: 'Resultado', d: 'Si terminó el programa y cómo le fue en las pruebas.' },
+        ],
+      },
+      {
+        titulo: 'Dónde suele pedirse esta evidencia',
+        items: [
+          {
+            t: 'Ley 16.744 y DS 44',
+            d: 'Informar a cada trabajador los riesgos de su puesto y las medidas preventivas al ingresar.',
+          },
+          {
+            t: 'Ley 21.643 (Ley Karin)',
+            d: 'Difundir el protocolo de prevención del acoso laboral, sexual y la violencia en el trabajo.',
+          },
+          {
+            t: 'Reglamento interno',
+            d: 'Dar a conocer el reglamento interno de orden, higiene y seguridad a cada colaborador.',
+          },
+        ],
+      },
+    ],
+    nota: 'Esta información es referencial. Valide los requisitos de su empresa con su asesor legal o de prevención de riesgos.',
+  },
+}
+
 export const ARTICULOS = [
   {
     slug: 'primer-dia-checklist',
@@ -208,6 +271,61 @@ export function buscar(tipo, consulta) {
     .sort((a, b) => enTitulo(b) - enTitulo(a))
 }
 
+const textoPagina = (key, p) =>
+  normaliza(
+    [
+      p.titulo,
+      p.bajada,
+      p.nota,
+      ...(p.secciones ?? []).flatMap((s) => [s.titulo, ...s.items.flatMap((i) => [i.t, i.d])]),
+    ]
+      .filter(Boolean)
+      .join(' '),
+  )
+
+/** Búsqueda en artículos + páginas del hub. */
+export function buscarTodo(consulta) {
+  const palabras = normaliza(consulta).split(/\s+/).filter(Boolean)
+  if (!palabras.length) return []
+
+  const articulos = ARTICULOS.filter((a) => palabras.every((p) => textoDe(a).includes(p))).map((a) => ({
+    kind: 'articulo',
+    slug: a.slug,
+    to: `/recursos/${a.slug}`,
+    titulo: a.titulo,
+    resumen: a.resumen,
+    etiqueta: TIPOS[a.tipo]?.titulo ?? a.tipo,
+  }))
+
+  const paginas = Object.entries(PAGINAS)
+    .filter(([key, p]) => palabras.every((w) => textoPagina(key, p).includes(w)))
+    .map(([key, p]) => ({
+      kind: 'pagina',
+      slug: key,
+      to: `/recursos/${key}`,
+      titulo: p.titulo,
+      resumen: p.bajada,
+      etiqueta: 'Sección',
+    }))
+
+  const textoSoporte = normaliza('soporte ayuda contacto preguntas frecuentes escribir equipo')
+  const soporte = palabras.every((p) => textoSoporte.includes(p))
+    ? [
+        {
+          kind: 'pagina',
+          slug: 'soporte',
+          to: '/recursos/soporte',
+          titulo: 'Soporte',
+          resumen: 'Preguntas frecuentes y contacto con el equipo.',
+          etiqueta: 'Sección',
+        },
+      ]
+    : []
+
+  const enTitulo = (r) => palabras.every((p) => normaliza(r.titulo).includes(p))
+  return [...articulos, ...paginas, ...soporte].sort((a, b) => enTitulo(b) - enTitulo(a))
+}
+
 export const getArticulo = (slug) => ARTICULOS.find((a) => a.slug === slug)
 
 export const fechaCorta = (iso) =>
@@ -222,4 +340,7 @@ if (import.meta.env.DEV) {
   if (buscar('guias', 'webpay').length !== 0) throw new Error('recursos: filtra por tipo')
   if (buscar('guias', '').length !== 4) throw new Error('recursos: consulta vacía')
   if (buscar('documentacion', 'codigo')[0]?.slug !== 'codigo-verificacion') throw new Error('recursos: título primero')
+  if (buscarTodo('webpay').length < 1) throw new Error('recursos: buscarTodo webpay')
+  if (buscarTodo('capacitacion').some((r) => r.slug === 'capacitaciones') === false)
+    throw new Error('recursos: buscarTodo páginas')
 }

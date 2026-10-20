@@ -15,7 +15,15 @@ export default function SoportePage() {
 
   return (
     <Box>
-      <EncabezadoRecurso titulo="Soporte" bajada="Busque una respuesta o escríbanos.">
+      <EncabezadoRecurso
+        titulo="Soporte"
+        bajada="Busque una respuesta o escríbanos."
+        migas={[
+          { label: 'Recursos', to: '/recursos' },
+          { label: 'Ayuda' },
+          { label: 'Soporte' },
+        ]}
+      >
         <Buscador
           value={consulta}
           onChange={setConsulta}

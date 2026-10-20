@@ -1,39 +1,26 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Image,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
-import { OrganizationSwitcher, useOrganization, useUser } from '@clerk/clerk-react'
-import { Home, Settings2, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link as RouterLink, NavLink, Navigate, Outlet } from 'react-router-dom'
+import { Box, Flex, Text } from '@chakra-ui/react'
+import { OrganizationSwitcher, useOrganization } from '@clerk/clerk-react'
+import { CircleHelp, Home, Settings2, UserPlus, Users } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
+import PanelShell, { PlanWidget } from '../components/dashboard/PanelShell'
 import { ModalCuentaTemporal } from '../features/cuenta/ModalCuentaTemporal'
 import { useEmpresaCuenta } from '../features/empresa/useEmpresaCuenta'
 import { DashboardTour } from '../features/tour/DashboardTour'
-import { esAdminEmpresa, etiquetaOrgRol, etiquetaRol, getRolUsuario } from '../lib/authRol'
+import { useSupabase } from '../hooks/useSupabase'
+import { esAdminEmpresa } from '../lib/authRol'
 import { esAdminPlataforma, esOrgInducta, esTrabajadorPlataforma } from '../lib/orgInducta'
+import { resolverBusquedaEmpresa } from '../lib/panelBusqueda'
+import { estadoPlan, getPlan } from '../lib/planes'
 import { clerkAppearance } from '../theme/clerkAppearance'
 
-const navBtn = {
-  variant: 'ghost',
-  justifyContent: 'flex-start',
-  h: '40px',
-  px: 3,
-  fontWeight: 'medium',
-  color: 'blackAlpha.700',
-  borderRadius: 'md',
-  _hover: { bg: 'blackAlpha.50', color: 'brand.ink' },
-  _activeLink: { bg: 'transparent', color: 'brand.primary', fontWeight: 'semibold' },
-}
-
 export default function AdminLayout() {
-  const { user } = useUser()
-  const { organization, membership } = useOrganization()
-  const rol = getRolUsuario(user)
+  const { organization, membership, memberships, invitations } = useOrganization({
+    memberships: { infinite: true },
+    invitations: { infinite: true },
+  })
+  const supabase = useSupabase()
   const admin = esAdminEmpresa(membership)
   const { empresa, loading, esTemporal, esDeshabilitada, marcarModalVisto, cargar } = useEmpresaCuenta()
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -45,18 +32,25 @@ export default function AdminLayout() {
     }
   }, [loading, empresa, esTemporal])
 
+  const resolverBusqueda = useCallback(
+    (consulta) =>
+      resolverBusquedaEmpresa(supabase, organization?.id, consulta, {
+        admin,
+        miembros: memberships?.data ?? [],
+        invitaciones: (invitations?.data ?? []).filter((i) => i.status === 'pending'),
+      }),
+    [supabase, organization?.id, admin, memberships?.data, invitations?.data],
+  )
+
   if (!loading && esDeshabilitada) {
     return <Navigate to="/cuenta-deshabilitada" replace />
   }
-
-  // Org plataforma Inducta: trabajadores → inicio; admins → panel de soporte
   if (esTrabajadorPlataforma(membership, organization)) {
     return <Navigate to="/" replace />
   }
   if (esAdminPlataforma(membership, organization)) {
     return <Navigate to="/admin" replace />
   }
-  // Org Inducta sin rol admin de plataforma: fuera del panel empresa
   if (esOrgInducta(organization)) {
     return <Navigate to="/" replace />
   }
@@ -66,68 +60,26 @@ export default function AdminLayout() {
     await marcarModalVisto()
   }
 
-  return (
-    <Flex h="100vh" bg="white">
-      <Flex
-        as="aside"
-        w="240px"
-        borderRightWidth="1px"
-        borderColor="blackAlpha.100"
-        px={5}
-        py={6}
-        direction="column"
-        justify="space-between"
-        flexShrink={0}
-      >
-        <Box>
-          <Box as={RouterLink} to="/" display="inline-block" mb={8} _hover={{ opacity: 0.85 }}>
-            <Image src="/logo-azul-oscuro.png" alt="Inducta Chile" h="28px" w="auto" />
-          </Box>
-          <VStack as="nav" align="stretch" spacing={0.5}>
-            <Button
-              as={NavLink}
-              to="/dashboard"
-              end
-              leftIcon={<Home size={16} />}
-              data-tour="nav-inicio"
-              {...navBtn}
-            >
-              Inicio
-            </Button>
-            {admin ? (
-              <Button
-                as={NavLink}
-                to="/dashboard/equipo"
-                leftIcon={<Users size={16} />}
-                data-tour="nav-equipo"
-                {...navBtn}
-              >
-                Equipo
-              </Button>
-            ) : null}
-            <Button
-              as={NavLink}
-              to="/dashboard/configuracion"
-              leftIcon={<Settings2 size={16} />}
-              data-tour="nav-config"
-              {...navBtn}
-            >
-              Configuración
-            </Button>
-          </VStack>
-        </Box>
+  const navPrimary = [
+    { to: '/dashboard', end: true, label: 'Inicio', icon: Home, dataTour: 'nav-inicio' },
+    ...(admin
+      ? [{ to: '/dashboard/equipo', label: 'Equipo', icon: Users, dataTour: 'nav-equipo' }]
+      : []),
+  ]
+  const navSettings = [
+    { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings2, dataTour: 'nav-config' },
+  ]
 
-        <Box pt={4} borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Text fontWeight="semibold" color="brand.ink" fontSize="sm" noOfLines={1} mb={0.5}>
-            {user?.fullName}
-          </Text>
-          <Text color="blackAlpha.600" fontSize="sm" noOfLines={1}>
-            {membership?.role ? etiquetaOrgRol(membership.role) : etiquetaRol(rol)}
-          </Text>
-          <Text color="blackAlpha.600" fontSize="sm" noOfLines={1} mb={3}>
-            {organization?.name}
-          </Text>
-          <Flex align="center" gap={2}>
+  const plan = getPlan(empresa?.plan)
+  const planEstado = estadoPlan(empresa?.plan_vence_en)
+
+  return (
+    <>
+      <PanelShell
+        logoTo="/"
+        topLinks={[{ label: 'Soporte', to: '/recursos/soporte', icon: CircleHelp }]}
+        topRight={
+          <Flex align="center" gap={2} ml={1}>
             <OrganizationSwitcher
               hidePersonal
               afterSelectOrganizationUrl="/dashboard"
@@ -135,37 +87,54 @@ export default function AdminLayout() {
             />
             <InductaUserButton afterSignOutUrl="/" />
           </Flex>
-        </Box>
-      </Flex>
-
-      <Box as="main" flex="1" overflowY="auto" px={{ base: 6, md: 10, xl: 14 }} py={{ base: 8, md: 10 }}>
-        {esTemporal ? (
-          <Box
-            mb={6}
-            px={4}
-            py={3}
-            bg="brand.wash"
-            borderRadius="md"
-            borderLeftWidth="3px"
-            borderLeftColor="brand.primary"
-          >
-            <Text fontSize="sm" color="brand.ink" lineHeight={1.55}>
-              Cuenta temporal: complete sus datos reales en Configuración. Mientras tanto no puede invitar usuarios.
-            </Text>
-          </Box>
-        ) : null}
+        }
+        navSections={[navPrimary, navSettings]}
+        ctaNav={
+          admin
+            ? { label: 'Invitar colaborador', to: '/dashboard/equipo', icon: UserPlus }
+            : null
+        }
+        resolverBusqueda={resolverBusqueda}
+        searchPlaceholder="Búsqueda rápida"
+        planWidget={
+          admin ? (
+            <PlanWidget
+              titulo="Plan actual"
+              planLabel={plan?.nombre || empresa?.plan || 'Sin plan'}
+              cta="Gestionar plan"
+              to="/dashboard/configuracion"
+              meta={planEstado.etiqueta}
+            />
+          ) : null
+        }
+        banner={
+          esTemporal ? (
+            <Box
+              mb={6}
+              px={4}
+              py={3}
+              bg="brand.wash"
+              borderRadius="md"
+              borderLeftWidth="3px"
+              borderLeftColor="brand.primary"
+            >
+              <Text fontSize="sm" color="brand.ink" lineHeight={1.55}>
+                Cuenta temporal: complete sus datos reales en Configuración. Mientras tanto no puede invitar usuarios.
+              </Text>
+            </Box>
+          ) : null
+        }
+      >
         <Outlet />
-      </Box>
+      </PanelShell>
 
-      {/* Esperar !loading: mientras carga, esTemporal es false por defecto y disparaba el tour a destiempo */}
       <DashboardTour enabled={!loading && !modalAbierto && !esTemporal} />
-
       <ModalCuentaTemporal
         isOpen={modalAbierto}
         idEmpresa={organization?.id}
         onCerrar={cerrarModal}
         onCompletado={() => cargar()}
       />
-    </Flex>
+    </>
   )
 }
