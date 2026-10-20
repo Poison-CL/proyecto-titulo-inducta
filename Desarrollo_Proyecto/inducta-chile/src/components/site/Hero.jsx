@@ -1,150 +1,130 @@
-import { Fragment } from 'react'
-import { Box, Button, Container, Flex, Heading, Link, Text } from '@chakra-ui/react'
-import { keyframes } from '@emotion/react'
+import { Box, Button, Container, Flex, Heading, Text, VStack } from '@chakra-ui/react'
 import { ChevronRight } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
-import { DesktopMock, PhoneMock } from './HeroMockups'
-
-const revelar = keyframes`
-  from { opacity: 0; transform: translateY(24px); filter: blur(12px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
-`
-
-const entrada = (delay) => ({
-  animation: `${revelar} 0.9s cubic-bezier(0.32, 0.72, 0, 1) ${delay}s both`,
-  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
-})
-
-const LINEAS = [
-  { palabras: ['Inducción', 'clara.'], color: 'brand.ink' },
-  { palabras: ['Equipo', 'listo.'], color: 'brand.primary' },
-]
+import { DashboardPanelMock } from './HeroMockups'
 
 export default function Hero() {
-  let n = 0
   return (
     <Box
       as="section"
-      bg="white"
+      position="relative"
       overflow="hidden"
       minH="100svh"
       display="flex"
       flexDirection="column"
       pt="var(--site-header-h, 72px)"
-      borderBottomWidth="1px"
-      borderColor="blackAlpha.100"
+      bg="white"
     >
-      <Container maxW="7xl" px={{ base: 5, md: 10 }} flex="1" display="flex" flexDirection="column">
-        <Flex flex="1" align="center" py={{ base: 14, md: 12 }}>
-        <Box w="full" maxW="6xl" mx="auto">
-        <Flex
-          direction={{ base: 'column', xl: 'row' }}
-          align={{ base: 'flex-start', xl: 'flex-end' }}
-          justify="space-between"
-          gap={{ base: 0, xl: 16 }}
+      <Container
+        maxW="7xl"
+        px={{ base: 5, md: 10 }}
+        flex="1"
+        display="flex"
+        flexDirection="column"
+        position="relative"
+        zIndex={1}
+        minH={0}
+      >
+        <VStack
+          flex="1"
+          justify="flex-end"
+          align="center"
+          textAlign="center"
+          spacing={0}
+          pt={{ base: 8, md: 10 }}
+          pb={{ base: 6, md: 8 }}
         >
+          <Text
+            fontSize={{ base: '0.65rem', md: '0.7rem' }}
+            fontWeight="medium"
+            letterSpacing="0.08em"
+            textTransform="uppercase"
+            color="blackAlpha.600"
+            mb={{ base: 3, md: 4 }}
+          >
+            Inducción y capacitación para empresas
+          </Text>
+
           <Heading
             as="h1"
-            fontSize={{ base: '3rem', sm: '3.8rem', md: '5rem', lg: '6rem', xl: '7rem' }}
+            fontSize={{ base: '3rem', sm: '3.75rem', md: '5rem', lg: '5.75rem' }}
             fontWeight="semibold"
-            lineHeight="1"
+            lineHeight="1.02"
             letterSpacing="-0.045em"
+            color="brand.ink"
+            mb={{ base: 4, md: 5 }}
           >
-            {LINEAS.map((linea) => (
-              <Box as="span" display="block" whiteSpace="nowrap" color={linea.color} key={linea.palabras[0]}>
-                {linea.palabras.map((p, i) => (
-                  <Fragment key={p}>
-                    {i > 0 && ' '}
-                    <Box as="span" display="inline-block" sx={entrada(0.1 + 0.09 * n++)}>
-                      {p}
-                    </Box>
-                  </Fragment>
-                ))}
-              </Box>
-            ))}
+            <Box as="span" display="block">
+              Inducción clara.
+            </Box>
+            <Box as="span" display="block" color="brand.primary">
+              Equipo listo.
+            </Box>
           </Heading>
 
           <Text
-            maxW={{ base: '44ch', xl: '23rem' }}
-            flexShrink={0}
-            mt={{ base: 5, md: 6, xl: 0 }}
-            fontSize={{ base: 'md', md: 'xl', xl: '1.1875rem' }}
-            color="blackAlpha.800"
-            pb={{ xl: '0.55rem' }}
-            lineHeight="1.55"
-            sx={entrada(0.46)}
+            fontSize={{ base: 'md', md: 'xl' }}
+            color="blackAlpha.700"
+            lineHeight="1.5"
+            maxW="42ch"
+            mb={{ base: 6, md: 8 }}
           >
-            Organice inducciones y capacitaciones por cargo o área, siga el avance de cada
-            colaborador y deje evidencia lista para auditorías.
+            Programas por cargo, avance de cada colaborador y evidencia lista para auditorías, en un solo lugar.
           </Text>
-        </Flex>
 
-            <Flex gap={7} wrap="wrap" align="center" mt={{ base: 7, md: 8, xl: 10 }} sx={entrada(0.55)}>
-              <Button
-                as={RouterLink}
-                to="/precios"
-                h="46px"
-                px={7}
-                borderRadius="full"
-                bg="brand.primary"
-                color="white"
-                fontWeight="medium"
-                fontSize="md"
-                _hover={{ bg: 'brand.primaryDark' }}
-              >
-                Ver planes
-              </Button>
-              <Link
-                as={RouterLink}
-                to="/contacto"
-                display="inline-flex"
-                alignItems="center"
-                gap={1}
-                fontSize="md"
-                fontWeight="medium"
-                color="brand.accent"
-                role="group"
-                _hover={{ color: 'brand.accentDark', textDecoration: 'none' }}
-              >
-                Agendar demo
-                <Box
-                  as="span"
-                  display="inline-flex"
-                  transition="transform 200ms cubic-bezier(0.32, 0.72, 0, 1)"
-                  _groupHover={{ transform: 'translateX(3px)' }}
-                >
-                  <ChevronRight size={18} aria-hidden />
-                </Box>
-              </Link>
-            </Flex>
-        </Box>
-        </Flex>
+          <Flex gap={3} wrap="wrap" justify="center">
+            <Button
+              as={RouterLink}
+              to="/precios"
+              h={{ base: '48px', md: '52px' }}
+              px={8}
+              borderRadius="md"
+              bg="brand.primary"
+              color="white"
+              fontWeight="semibold"
+              fontSize="md"
+              rightIcon={<ChevronRight size={18} aria-hidden />}
+              _hover={{ bg: 'brand.primaryDark' }}
+            >
+              Ver planes
+            </Button>
+            <Button
+              as={RouterLink}
+              to="/contacto"
+              h={{ base: '48px', md: '52px' }}
+              px={8}
+              borderRadius="md"
+              variant="outline"
+              borderColor="blackAlpha.200"
+              bg="white"
+              color="brand.ink"
+              fontWeight="semibold"
+              fontSize="md"
+              _hover={{ bg: 'brand.soft', borderColor: 'blackAlpha.300' }}
+            >
+              Agendar demo
+            </Button>
+          </Flex>
+        </VStack>
 
-        {/* Decorativo: los datos del mockup son de ejemplo. El borde inferior de la seccion lo recorta. */}
         <Box
           aria-hidden
-          display={{ base: 'none', md: 'block' }}
-          pointerEvents="none"
+          position="relative"
           w="full"
-          maxW="6xl"
-          mx="auto"
           flexShrink={0}
-          h={{ md: '240px', lg: '300px' }}
-          sx={entrada(0.64)}
+          h={{ base: '260px', sm: '320px', md: '380px', lg: '420px' }}
+          overflow="hidden"
+          pointerEvents="none"
         >
-          <Box position="relative" ml={{ md: '180px', lg: '200px' }}>
-            <Box filter="drop-shadow(0 18px 40px rgba(13, 13, 13, 0.12))">
-              <DesktopMock />
-            </Box>
-            <Box
-              position="absolute"
-              left={{ md: '-180px', lg: '-200px' }}
-              top={{ md: '48px', lg: '56px' }}
-              filter="drop-shadow(0 18px 36px rgba(13, 13, 13, 0.18))"
-            >
-              <PhoneMock />
-            </Box>
-          </Box>
+          <DashboardPanelMock />
+          <Box
+            position="absolute"
+            left={0}
+            right={0}
+            bottom={0}
+            h={{ base: '55%', md: '50%' }}
+            bgGradient="linear(to-b, transparent, white)"
+          />
         </Box>
       </Container>
     </Box>

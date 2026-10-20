@@ -5,44 +5,84 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  Grid,
   Heading,
+  Icon,
   Input,
   Text,
   useToast,
   VStack,
 } from '@chakra-ui/react'
-import { useAuth, useOrganization, useUser } from '@clerk/clerk-react'
+import { useAuth, useClerk, useOrganization, useUser } from '@clerk/clerk-react'
+import { Building2, CreditCard, LogOut, Settings2, User, Users } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
+import SettingsCard, { SettingsRow } from '../../components/dashboard/SettingsCard'
 import { CompletarCuentaForm } from '../../features/cuenta/CompletarCuentaForm'
 import { useEmpresaCuenta } from '../../features/empresa/useEmpresaCuenta'
 import { useEmpresaDatos } from '../../features/empresa/useEmpresaDatos'
 import { esAdminEmpresa, etiquetaOrgRol } from '../../lib/authRol'
 import { estadoPlan, fechaCortaEs, getPlan } from '../../lib/planes'
 
-function Fila({ label, children }) {
+function PageHeader({ titulo, bajada }) {
   return (
-    <Flex
-      gap={{ base: 1, md: 10 }}
-      py={5}
-      borderBottomWidth="1px"
-      borderColor="blackAlpha.100"
-      direction={{ base: 'column', md: 'row' }}
-      align={{ md: 'baseline' }}
-      _last={{ borderBottomWidth: 0 }}
-    >
-      <Text fontSize="sm" color="blackAlpha.600" w={{ md: '9rem' }} flexShrink={0}>
-        {label}
-      </Text>
-      <Box fontSize="md" color="brand.ink" fontWeight="medium" flex="1">
-        {children}
+    <Flex align="flex-start" gap={3} mb={8}>
+      <Flex
+        w="44px"
+        h="44px"
+        align="center"
+        justify="center"
+        borderRadius="lg"
+        borderWidth="1px"
+        borderColor="blackAlpha.100"
+        bg="brand.soft"
+        flexShrink={0}
+      >
+        <Icon as={Settings2} boxSize={5} color="brand.primary" strokeWidth={1.75} />
+      </Flex>
+      <Box>
+        <Heading
+          as="h1"
+          fontSize={{ base: '1.75rem', md: '2.1rem' }}
+          fontWeight="semibold"
+          letterSpacing="-0.03em"
+          lineHeight="1.15"
+          color="brand.ink"
+        >
+          {titulo}
+        </Heading>
+        <Text color="blackAlpha.600" fontSize="md" mt={1.5} lineHeight="1.5" maxW="48ch">
+          {bajada}
+        </Text>
       </Box>
     </Flex>
+  )
+}
+
+function CardSesion({ email }) {
+  const { signOut } = useClerk()
+  return (
+    <SettingsCard titulo="Sesión actual" bajada="Navegador activo en este dispositivo.">
+      <Text fontSize="sm" color="brand.ink" fontWeight="medium" mb={4} wordBreak="break-all">
+        {email || '—'}
+      </Text>
+      <Button
+        variant="outline"
+        size="sm"
+        h="36px"
+        borderColor="blackAlpha.200"
+        leftIcon={<LogOut size={15} />}
+        onClick={() => signOut({ redirectUrl: '/' })}
+      >
+        Cerrar sesión
+      </Button>
+    </SettingsCard>
   )
 }
 
 function ConfigAdmin() {
   const toast = useToast()
   const { getToken } = useAuth()
+  const { user } = useUser()
   const { organization } = useOrganization()
   const { empresa, loading, saving, error, guardar } = useEmpresaDatos()
   const { esTemporal, cargar: recargarCuenta } = useEmpresaCuenta()
@@ -88,6 +128,8 @@ function ConfigAdmin() {
     plan?.contratable && plan.id
       ? `/contratar?plan=${plan.id}&periodo=${empresa?.periodo === 'anual' ? 'anual' : 'mensual'}`
       : '/precios'
+  const colorVigencia =
+    vigencia.estado === 'vencido' ? 'red.600' : vigencia.estado === 'por_vencer' ? 'orange.700' : 'brand.primary'
 
   async function guardarDatos(ev) {
     ev.preventDefault()
@@ -106,13 +148,13 @@ function ConfigAdmin() {
       nombre_comercial: nom,
       email_contacto: email.trim() || null,
     })
-    if (res.ok) setOk('Datos de la empresa guardados.')
+    if (res.ok) setOk('Datos guardados.')
     else setErrLocal(res.error || 'No pudimos guardar.')
   }
 
   if (loading) {
     return (
-      <Text color="blackAlpha.600" fontSize="sm" mt={10}>
+      <Text color="blackAlpha.600" fontSize="sm">
         Cargando configuración…
       </Text>
     )
@@ -120,135 +162,118 @@ function ConfigAdmin() {
 
   if (!empresa) {
     return (
-      <Box mt={14}>
-        <Text color="brand.ink" mb={4} maxW="44ch" lineHeight="1.6">
-          Su organización aún no está sincronizada con la base de datos.
-        </Text>
-        <Button as={RouterLink} to="/dashboard" variant="link" color="brand.primary" fontWeight="semibold" p={0} h="auto">
-          Ir al inicio para sincronizar →
+      <SettingsCard titulo="Sincronización" bajada="Falta registrar la organización en la base.">
+        <Button as={RouterLink} to="/dashboard" bg="brand.primary" color="white" h="40px" _hover={{ bg: 'brand.primaryDark' }}>
+          Ir al inicio para sincronizar
         </Button>
-      </Box>
+      </SettingsCard>
     )
   }
 
-  const colorVigencia =
-    vigencia.estado === 'vencido' ? 'red.600' : vigencia.estado === 'por_vencer' ? 'orange.700' : 'brand.primary'
-
   return (
-    <Flex direction={{ base: 'column', xl: 'row' }} gap={{ base: 16, xl: 20 }} mt={14} align="flex-start">
-      <Box as="section" flex="1" minW={0} maxW={{ xl: '28rem' }}>
-        <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={2}>
-          Plan y renovación
-        </Heading>
-        <Text fontSize="sm" color="blackAlpha.700" mb={8} maxW="40ch" lineHeight="1.6">
-          Estado del plan contratado y fecha en que debe renovarse.
-        </Text>
-
-        <Box borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Fila label="Plan">{plan?.nombre ?? empresa.plan}</Fila>
-          <Fila label="Periodo">{empresa.periodo === 'anual' ? 'Anual' : empresa.periodo === 'mensual' ? 'Mensual' : '—'}</Fila>
-          <Fila label="Vence el">{fechaCortaEs(empresa.plan_vence_en)}</Fila>
-          <Fila label="Estado">
-            <Text color={colorVigencia}>{vigencia.etiqueta}</Text>
-          </Fila>
-          <Fila label="Cupo">{plan?.maxColaboradores == null ? 'Sin límite' : `Hasta ${plan.maxColaboradores}`}</Fila>
-        </Box>
-
-        {(vigencia.estado === 'vencido' || vigencia.estado === 'por_vencer') && (
-          <Text mt={6} fontSize="sm" color={vigencia.estado === 'vencido' ? 'red.700' : 'orange.800'} maxW="40ch" lineHeight="1.6">
-            {vigencia.estado === 'vencido'
-              ? 'Su plan está vencido. Renueve para seguir invitando colaboradores.'
-              : 'Su plan vence pronto. Puede renovarlo ahora para no quedarse sin acceso.'}
-          </Text>
-        )}
-
-        <Flex gap={6} mt={8} wrap="wrap" align="center">
-          <Button as={RouterLink} to={renovarTo} h="44px" px={7}>
-            {plan?.contratable ? 'Renovar plan' : 'Ver planes'}
-          </Button>
-          <Button as={RouterLink} to="/precios" variant="link" color="brand.primary" fontWeight="medium" p={0} h="auto">
-            Cambiar de plan →
-          </Button>
-        </Flex>
-
-        <Box mt={12}>
-          <Text fontSize="sm" fontWeight="semibold" color="brand.ink" mb={4}>
-            Incluido en su plan
-          </Text>
-          <VStack as="ul" align="stretch" spacing={3} listStyleType="none">
-            {(plan?.features ?? [])
-              .filter((f) => f.ok)
-              .map((f) => (
-                <Text as="li" key={f.text} fontSize="sm" color="blackAlpha.700" lineHeight="1.5">
-                  {f.text}
-                </Text>
-              ))}
-          </VStack>
-        </Box>
-      </Box>
-
-      <Box as="section" flex="1" minW={0} maxW={{ xl: '24rem' }} pt={{ base: 2, xl: 0 }}>
+    <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.4fr) minmax(0, 1fr)' }} gap={5} alignItems="start">
+      <VStack align="stretch" spacing={5}>
         {esTemporal ? (
-          <Box mb={14}>
-            <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={2}>
-              Verificar cuenta temporal
-            </Heading>
-            <Box mb={6}>
-              <CompletarCuentaForm onSubmit={completarCuenta} isLoading={verificando} />
-            </Box>
-          </Box>
+          <SettingsCard
+            icon={Building2}
+            titulo="Verificar cuenta temporal"
+            bajada="Complete sus datos reales para habilitar invitaciones."
+          >
+            <CompletarCuentaForm onSubmit={completarCuenta} isLoading={verificando} />
+          </SettingsCard>
         ) : null}
-        <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={2}>
-          Datos de la empresa
-        </Heading>
-        <Text fontSize="sm" color="blackAlpha.700" mb={8} maxW="40ch" lineHeight="1.6">
-          Nombre comercial y correo para contacto o facturación.
-        </Text>
-        <Box as="form" onSubmit={guardarDatos}>
-          <VStack align="stretch" spacing={5}>
-            <FormControl isRequired>
-              <FormLabel fontSize="sm">Nombre comercial</FormLabel>
-              <Input h="44px" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={160} />
-            </FormControl>
-            <FormControl>
-              <FormLabel fontSize="sm">Correo de contacto</FormLabel>
-              <Input
-                h="44px"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="compras@empresa.cl"
-              />
-            </FormControl>
-            {(errLocal || error) && (
-              <Text fontSize="sm" color="red.600">
-                {errLocal || error}
-              </Text>
-            )}
-            {ok && (
-              <Text fontSize="sm" color="brand.primary">
-                {ok}
-              </Text>
-            )}
-            <Button type="submit" alignSelf="flex-start" isLoading={saving} loadingText="Guardando" h="44px" px={7} mt={1}>
-              Guardar cambios
-            </Button>
-          </VStack>
-        </Box>
 
-        <Box mt={14} pt={10} borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={2}>
-            Equipo
-          </Heading>
-          <Text fontSize="sm" color="blackAlpha.700" mb={5} maxW="40ch" lineHeight="1.6">
-            Invite colaboradores y gestione roles según el cupo de su plan.
-          </Text>
-          <Button as={RouterLink} to="/dashboard/equipo" variant="link" color="brand.primary" fontWeight="semibold" p={0} h="auto">
-            Ir a Equipo →
-          </Button>
+        <Box as="form" onSubmit={guardarDatos}>
+          <SettingsCard
+            icon={User}
+            titulo="Perfil de la empresa"
+            bajada="Nombre comercial y correo de contacto o facturación."
+            footer={
+              <Button type="submit" size="sm" h="36px" px={5} isLoading={saving} loadingText="Guardando">
+                Guardar cambios
+              </Button>
+            }
+          >
+            <VStack align="stretch" spacing={4} pt={1}>
+              <FormControl isRequired>
+                <FormLabel fontSize="sm" mb={1.5}>
+                  Nombre comercial
+                </FormLabel>
+                <Input
+                  h="42px"
+                  borderRadius="md"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  maxLength={160}
+                  bg="white"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1.5}>
+                  Empresa o espacio
+                </FormLabel>
+                <Input h="42px" borderRadius="md" value={organization?.name || ''} isReadOnly bg="blackAlpha.50" />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1.5}>
+                  Correo electrónico
+                </FormLabel>
+                <Input
+                  h="42px"
+                  borderRadius="md"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="compras@empresa.cl"
+                  bg="white"
+                />
+              </FormControl>
+              {(errLocal || error) && (
+                <Text fontSize="sm" color="red.600">
+                  {errLocal || error}
+                </Text>
+              )}
+              {ok && (
+                <Text fontSize="sm" color="brand.primary">
+                  {ok}
+                </Text>
+              )}
+            </VStack>
+          </SettingsCard>
         </Box>
-      </Box>
-    </Flex>
+      </VStack>
+
+      <VStack align="stretch" spacing={5}>
+        <SettingsCard icon={CreditCard} titulo="Cuenta y plan" bajada="Estado de su suscripción Inducta.">
+          <SettingsRow label="Plan">{plan?.nombre ?? empresa.plan}</SettingsRow>
+          <SettingsRow label="Periodo">
+            {empresa.periodo === 'anual' ? 'Anual' : empresa.periodo === 'mensual' ? 'Mensual' : '—'}
+          </SettingsRow>
+          <SettingsRow label="Vence">{fechaCortaEs(empresa.plan_vence_en)}</SettingsRow>
+          <SettingsRow label="Estado" last>
+            <Text as="span" color={colorVigencia}>
+              {vigencia.etiqueta}
+            </Text>
+          </SettingsRow>
+          <Flex gap={3} mt={4} wrap="wrap">
+            <Button as={RouterLink} to={renovarTo} size="sm" h="36px">
+              {plan?.contratable ? 'Renovar' : 'Ver planes'}
+            </Button>
+            <Button as={RouterLink} to="/precios" size="sm" h="36px" variant="outline" borderColor="blackAlpha.200">
+              Cambiar plan
+            </Button>
+          </Flex>
+        </SettingsCard>
+
+        <SettingsCard icon={Users} titulo="Equipo" bajada="Invitaciones y roles según el cupo del plan.">
+          <Button as={RouterLink} to="/dashboard/equipo" size="sm" h="36px" variant="outline" borderColor="blackAlpha.200">
+            Gestionar equipo
+          </Button>
+        </SettingsCard>
+
+        <CardSesion email={user?.primaryEmailAddress?.emailAddress} />
+      </VStack>
+    </Grid>
   )
 }
 
@@ -257,49 +282,67 @@ function ConfigTrabajador() {
   const { organization, membership } = useOrganization()
 
   return (
-    <Flex direction={{ base: 'column', xl: 'row' }} gap={{ base: 16, xl: 20 }} mt={14} align="flex-start">
-      <Box as="section" flex="1" minW={0} maxW={{ xl: '28rem' }}>
-        <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={8}>
-          Su cuenta
-        </Heading>
-        <Box borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Fila label="Nombre">{user?.fullName || '—'}</Fila>
-          <Fila label="Correo">{user?.primaryEmailAddress?.emailAddress || '—'}</Fila>
-          <Fila label="Rol">{membership?.role ? etiquetaOrgRol(membership.role) : 'Trabajador'}</Fila>
-        </Box>
-      </Box>
-
-      <Box as="section" flex="1" minW={0} maxW={{ xl: '24rem' }}>
-        <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={8}>
-          Su empresa
-        </Heading>
-        <Box borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Fila label="Organización">{organization?.name || '—'}</Fila>
-        </Box>
-        <Text fontSize="sm" color="blackAlpha.700" mt={8} maxW="40ch" lineHeight="1.6">
-          El plan y los accesos los administra la empresa. Si necesita un cambio, escriba a su administrador.
-        </Text>
-
-        <Box mt={14} pt={10} borderTopWidth="1px" borderColor="blackAlpha.100">
-          <Heading as="h2" fontSize="xl" fontWeight="semibold" letterSpacing="-0.02em" mb={2}>
-            Preferencias
-          </Heading>
-          <Text fontSize="sm" color="blackAlpha.700" mb={5} maxW="40ch" lineHeight="1.6">
-            Actualice nombre, correo o contraseña desde su cuenta.
-          </Text>
+    <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.4fr) minmax(0, 1fr)' }} gap={5} alignItems="start">
+      <SettingsCard
+        icon={User}
+        titulo="Perfil"
+        bajada="Datos de su cuenta en Inducta."
+        footer={
           <Button
-            variant="link"
-            color="brand.primary"
-            fontWeight="semibold"
-            p={0}
-            h="auto"
+            size="sm"
+            h="36px"
+            variant="outline"
+            borderColor="blackAlpha.200"
             onClick={() => document.querySelector('.cl-userButtonTrigger')?.click()}
           >
-            Abrir mi cuenta →
+            Abrir mi cuenta
           </Button>
-        </Box>
-      </Box>
-    </Flex>
+        }
+      >
+        <FormControl mb={4}>
+          <FormLabel fontSize="sm" mb={1.5}>
+            Nombre completo
+          </FormLabel>
+          <Input h="42px" value={user?.fullName || ''} isReadOnly bg="blackAlpha.50" borderRadius="md" />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel fontSize="sm" mb={1.5}>
+            Correo electrónico
+          </FormLabel>
+          <Input
+            h="42px"
+            value={user?.primaryEmailAddress?.emailAddress || ''}
+            isReadOnly
+            bg="blackAlpha.50"
+            borderRadius="md"
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel fontSize="sm" mb={1.5}>
+            Rol
+          </FormLabel>
+          <Input
+            h="42px"
+            value={membership?.role ? etiquetaOrgRol(membership.role) : 'Trabajador'}
+            isReadOnly
+            bg="blackAlpha.50"
+            borderRadius="md"
+          />
+        </FormControl>
+      </SettingsCard>
+
+      <VStack align="stretch" spacing={5}>
+        <SettingsCard icon={Building2} titulo="Su empresa" bajada="Organización a la que pertenece.">
+          <SettingsRow label="Espacio" last>
+            {organization?.name || '—'}
+          </SettingsRow>
+          <Text fontSize="sm" color="blackAlpha.600" mt={3} lineHeight="1.5">
+            El plan y los accesos los administra la empresa.
+          </Text>
+        </SettingsCard>
+        <CardSesion email={user?.primaryEmailAddress?.emailAddress} />
+      </VStack>
+    </Grid>
   )
 }
 
@@ -308,24 +351,15 @@ export default function ConfiguracionPage() {
   const admin = esAdminEmpresa(membership)
 
   return (
-    <Box maxW="64rem">
-      <Heading
-        as="h1"
-        fontSize={{ base: '2rem', md: '2.4rem' }}
-        fontWeight="semibold"
-        letterSpacing="-0.03em"
-        lineHeight="1.1"
-        color="brand.ink"
-        mb={3}
-      >
-        {admin ? 'Configuración' : 'Su configuración'}
-      </Heading>
-      <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight="1.6" maxW="42ch">
-        {admin
-          ? 'Plan, renovación y datos de contacto de su organización.'
-          : 'Datos de su cuenta y de la empresa a la que pertenece.'}
-      </Text>
-
+    <Box maxW="64rem" mx="auto">
+      <PageHeader
+        titulo="Configuración de cuenta"
+        bajada={
+          admin
+            ? 'Administre el perfil de la empresa, el plan y la sesión actual.'
+            : 'Revise su perfil, la empresa a la que pertenece y la sesión actual.'
+        }
+      />
       {admin ? <ConfigAdmin /> : <ConfigTrabajador />}
     </Box>
   )

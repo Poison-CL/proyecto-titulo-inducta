@@ -1,12 +1,29 @@
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
 import { useSupabase } from '../../hooks/useSupabase'
+import { filtraPorCampos } from '../../lib/panelBusqueda'
 
 export default function AdminTicketsPage() {
   const supabase = useSupabase()
+  const [params] = useSearchParams()
+  const consulta = params.get('q')?.trim() || ''
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const visibles = useMemo(
+    () => filtraPorCampos(rows, consulta, ['nombre', 'email', 'empresa', 'mensaje', 'motivo']),
+    [rows, consulta],
+  )
+
+  useEffect(() => {
+    if (!consulta || loading) return
+    requestAnimationFrame(() => {
+      document.querySelector('[data-busqueda-hit]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
+  }, [consulta, loading, visibles])
 
   useEffect(() => {
     let vivo = true
@@ -54,9 +71,20 @@ export default function AdminTicketsPage() {
         </Text>
       )}
 
+      <BusquedaFiltroBanner consulta={consulta} total={rows.length} visibles={visibles.length} />
+
       <VStack align="stretch" spacing={0} borderTopWidth="1px" borderColor="blackAlpha.100">
-        {rows.map((r) => (
-          <Box key={r.id} py={6} borderBottomWidth="1px" borderColor="blackAlpha.100">
+        {visibles.map((r) => (
+          <Box
+            key={r.id}
+            py={6}
+            px={consulta ? 3 : 0}
+            borderBottomWidth="1px"
+            borderColor="blackAlpha.100"
+            bg={consulta ? 'brand.wash' : undefined}
+            borderRadius={consulta ? 'md' : undefined}
+            data-busqueda-hit={consulta || undefined}
+          >
             <Text fontSize="xs" color="blackAlpha.500" fontWeight="medium" letterSpacing="0.02em" mb={2}>
               {(r.motivo || 'Consulta').toUpperCase()}
             </Text>
@@ -76,6 +104,11 @@ export default function AdminTicketsPage() {
         {!loading && rows.length === 0 && (
           <Text py={12} fontSize="sm" color="blackAlpha.600">
             No hay mensajes todavía.
+          </Text>
+        )}
+        {!loading && rows.length > 0 && visibles.length === 0 && (
+          <Text py={12} fontSize="sm" color="blackAlpha.600">
+            Ningún ticket coincide con la búsqueda.
           </Text>
         )}
       </VStack>

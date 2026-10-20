@@ -61,7 +61,7 @@ export default function FaqSection() {
           gap={{ base: 8, lg: 16 }}
           alignItems="start"
         >
-          <Box position={{ lg: 'sticky' }} top={{ lg: '120px' }} sx={entrada(0)}>
+          <Box sx={entrada(0)}>
             <Heading
               as="h2"
               color="brand.ink"

@@ -10,8 +10,11 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
 import { useSupabase } from '../../hooks/useSupabase'
+import { filtraPorCampos } from '../../lib/panelBusqueda'
 import { estadoPlan, fechaCortaEs, getPlan } from '../../lib/planes'
 
 function colorVigencia(estado) {
@@ -22,6 +25,8 @@ function colorVigencia(estado) {
 
 export default function AdminEmpresasPage() {
   const supabase = useSupabase()
+  const [params] = useSearchParams()
+  const consulta = params.get('q')?.trim() || ''
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -29,6 +34,26 @@ export default function AdminEmpresasPage() {
   const [vence, setVence] = useState('')
   const [plan, setPlan] = useState('basico')
   const [saving, setSaving] = useState(false)
+
+  const visibles = useMemo(
+    () =>
+      filtraPorCampos(rows, consulta, [
+        'nombre_comercial',
+        'email_contacto',
+        'email_temporal',
+        'plan',
+        'cuenta_estado',
+        'id_empresa',
+      ]),
+    [rows, consulta],
+  )
+
+  useEffect(() => {
+    if (!consulta || loading) return
+    requestAnimationFrame(() => {
+      document.querySelector('[data-busqueda-hit]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
+  }, [consulta, loading, visibles])
 
   async function cargar() {
     setLoading(true)
@@ -104,13 +129,24 @@ export default function AdminEmpresasPage() {
         </Text>
       )}
 
+      <BusquedaFiltroBanner consulta={consulta} total={rows.length} visibles={visibles.length} />
+
       <VStack align="stretch" spacing={0} borderTopWidth="1px" borderColor="blackAlpha.100">
-        {rows.map((e) => {
+        {visibles.map((e) => {
           const vig = estadoPlan(e.plan_vence_en)
           const planNom = getPlan(e.plan)?.nombre || e.plan
           const colorVig = colorVigencia(vig.estado)
           return (
-            <Box key={e.id_empresa} py={6} borderBottomWidth="1px" borderColor="blackAlpha.100">
+            <Box
+              key={e.id_empresa}
+              py={6}
+              px={consulta ? 3 : 0}
+              borderBottomWidth="1px"
+              borderColor="blackAlpha.100"
+              bg={consulta ? 'brand.wash' : undefined}
+              borderRadius={consulta ? 'md' : undefined}
+              data-busqueda-hit={consulta || undefined}
+            >
               <Flex
                 justify="space-between"
                 gap={4}
@@ -187,6 +223,11 @@ export default function AdminEmpresasPage() {
         {!loading && rows.length === 0 && (
           <Text py={12} fontSize="sm" color="blackAlpha.600">
             No hay empresas registradas.
+          </Text>
+        )}
+        {!loading && rows.length > 0 && visibles.length === 0 && (
+          <Text py={12} fontSize="sm" color="blackAlpha.600">
+            Ninguna empresa coincide con la búsqueda.
           </Text>
         )}
       </VStack>

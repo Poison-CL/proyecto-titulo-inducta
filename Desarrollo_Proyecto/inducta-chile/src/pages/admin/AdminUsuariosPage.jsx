@@ -10,19 +10,36 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { useAuth } from '@clerk/clerk-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
 import { useSupabase } from '../../hooks/useSupabase'
+import { filtraPorCampos } from '../../lib/panelBusqueda'
 
 export default function AdminUsuariosPage() {
   const supabase = useSupabase()
   const { getToken } = useAuth()
   const toast = useToast()
+  const [params] = useSearchParams()
+  const consulta = params.get('q')?.trim() || ''
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [enviando, setEnviando] = useState(false)
+
+  const visibles = useMemo(
+    () => filtraPorCampos(rows, consulta, ['nombre_completo', 'rut', 'id_usuario', 'id_empresa', 'rol']),
+    [rows, consulta],
+  )
+
+  useEffect(() => {
+    if (!consulta || loading) return
+    requestAnimationFrame(() => {
+      document.querySelector('[data-busqueda-hit]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
+  }, [consulta, loading, visibles])
 
   useEffect(() => {
     let vivo = true
@@ -154,12 +171,23 @@ export default function AdminUsuariosPage() {
         </Text>
       )}
 
+      <BusquedaFiltroBanner consulta={consulta} total={rows.length} visibles={visibles.length} />
+
       <Text fontSize="xs" color="blackAlpha.500" fontWeight="medium" letterSpacing="0.02em" mb={3}>
         LISTADO
       </Text>
       <VStack align="stretch" spacing={0} borderTopWidth="1px" borderColor="blackAlpha.100">
-        {rows.map((u) => (
-          <Box key={u.id_usuario} py={5} borderBottomWidth="1px" borderColor="blackAlpha.100">
+        {visibles.map((u) => (
+          <Box
+            key={u.id_usuario}
+            py={5}
+            px={consulta ? 3 : 0}
+            borderBottomWidth="1px"
+            borderColor="blackAlpha.100"
+            bg={consulta ? 'brand.wash' : undefined}
+            borderRadius={consulta ? 'md' : undefined}
+            data-busqueda-hit={consulta || undefined}
+          >
             <Text fontWeight="semibold" color="brand.ink">
               {u.nombre_completo || 'Sin nombre'}
             </Text>
@@ -184,6 +212,11 @@ export default function AdminUsuariosPage() {
         {!loading && rows.length === 0 && (
           <Text py={12} fontSize="sm" color="blackAlpha.600">
             No hay usuarios en la base.
+          </Text>
+        )}
+        {!loading && rows.length > 0 && visibles.length === 0 && (
+          <Text py={12} fontSize="sm" color="blackAlpha.600">
+            Ningún usuario coincide con la búsqueda.
           </Text>
         )}
       </VStack>

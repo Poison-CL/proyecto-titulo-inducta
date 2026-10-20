@@ -7,63 +7,16 @@ import {
   Icon,
   IconButton,
   Image,
-  Link,
-  SimpleGrid,
-  Text,
   VStack,
   useDisclosure,
 } from '@chakra-ui/react'
 import { SignedIn, SignedOut } from '@clerk/clerk-react'
-import {
-  BookOpen,
-  ChevronDown,
-  FileText,
-  HelpCircle,
-  Layers,
-  Menu as MenuIcon,
-  ShieldCheck,
-  X,
-} from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { Menu as MenuIcon, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link as RouterLink, NavLink } from 'react-router-dom'
 import InductaUserButton from '../auth/InductaUserButton'
+import LinkAlPanel from '../auth/LinkAlPanel'
 import AnnouncementBanner from './AnnouncementBanner'
-
-const MotionPanel = motion.create(Box)
-
-const recursos = [
-  {
-    title: 'Guías de inducción',
-    desc: 'Cómo planificar el primer día y el primer mes',
-    icon: BookOpen,
-    href: '/recursos?tipo=guias',
-  },
-  {
-    title: 'Capacitaciones',
-    desc: 'Cree sus propios cursos y pruebas',
-    icon: Layers,
-    href: '/recursos/capacitaciones',
-  },
-  {
-    title: 'Cumplimiento',
-    desc: 'Qué queda registrado para auditorías',
-    icon: ShieldCheck,
-    href: '/recursos/cumplimiento',
-  },
-  {
-    title: 'Documentación',
-    desc: 'Artículos sobre cómo usar la plataforma',
-    icon: FileText,
-    href: '/recursos?tipo=documentacion',
-  },
-  {
-    title: 'Soporte',
-    desc: 'Preguntas frecuentes y contacto',
-    icon: HelpCircle,
-    href: '/recursos/soporte',
-  },
-]
 
 const linkBtn = {
   variant: 'ghost',
@@ -84,26 +37,15 @@ const mobileBtn = {
 }
 
 export default function Navbar() {
-  const { isOpen: megaOpen, onOpen: onMegaOpen, onClose: onMegaClose } = useDisclosure()
-  const { isOpen: mobileOpen, onToggle: onMobileToggle, onClose: onMobileClose } =
-    useDisclosure()
+  const { isOpen: mobileOpen, onToggle: onMobileToggle, onClose: onMobileClose } = useDisclosure()
   const [showBanner, setShowBanner] = useState(true)
-  const reduceMotion = useReducedMotion()
 
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--site-header-h',
-      showBanner ? '118px' : '72px',
-    )
+    document.documentElement.style.setProperty('--site-header-h', showBanner ? '118px' : '72px')
     return () => {
       document.documentElement.style.removeProperty('--site-header-h')
     }
   }, [showBanner])
-
-  const closeAll = () => {
-    onMegaClose()
-    onMobileClose()
-  }
 
   return (
     <Box
@@ -122,67 +64,29 @@ export default function Navbar() {
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
       }}
-      onMouseLeave={onMegaClose}
     >
-      {showBanner ? (
-        <AnnouncementBanner onClose={() => setShowBanner(false)} />
-      ) : null}
+      {showBanner ? <AnnouncementBanner onClose={() => setShowBanner(false)} /> : null}
 
-      <Flex
-        maxW="6xl"
-        mx="auto"
-        px={{ base: 4, md: 8 }}
-        h="72px"
-        align="center"
-        gap={{ base: 3, md: 6 }}
-      >
+      <Flex maxW="6xl" mx="auto" px={{ base: 4, md: 8 }} h="72px" align="center" gap={{ base: 3, md: 6 }}>
         <Box
           as={RouterLink}
           to="/"
           display="flex"
           alignItems="center"
           flexShrink={0}
-          onClick={closeAll}
+          onClick={onMobileClose}
           _hover={{ opacity: 0.85 }}
         >
-          <Image
-            src="/logo-blanco.png"
-            alt="Inducta Chile"
-            h={{ base: '22px', md: '26px' }}
-            w="auto"
-          />
+          <Image src="/logo-blanco.png" alt="Inducta Chile" h={{ base: '22px', md: '26px' }} w="auto" />
         </Box>
 
-        <HStack
-          as="nav"
-          spacing={0}
-          display={{ base: 'none', md: 'flex' }}
-          align="center"
-          flex="1"
-          h="40px"
-        >
+        <HStack as="nav" spacing={0} display={{ base: 'none', md: 'flex' }} align="center" flex="1" h="40px">
           <Button as={NavLink} to="/" end {...linkBtn}>
             Inicio
           </Button>
-
-          <Box
-            onMouseEnter={onMegaOpen}
-            display="flex"
-            alignItems="center"
-            h="40px"
-          >
-            <Button
-              type="button"
-              {...linkBtn}
-              rightIcon={<Icon as={ChevronDown} boxSize={3.5} />}
-              onClick={megaOpen ? onMegaClose : onMegaOpen}
-              aria-expanded={megaOpen}
-              aria-haspopup="true"
-            >
-              Recursos
-            </Button>
-          </Box>
-
+          <Button as={NavLink} to="/recursos" {...linkBtn}>
+            Recursos
+          </Button>
           <Button as={NavLink} to="/contacto" {...linkBtn}>
             Contacto
           </Button>
@@ -200,7 +104,7 @@ export default function Navbar() {
             color="white"
             fontWeight="bold"
             display={{ base: 'none', sm: 'inline-flex' }}
-            onClick={closeAll}
+            onClick={onMobileClose}
             _hover={{ bg: 'brand.accentDark' }}
             _active={{ bg: 'brand.primaryDark', transform: 'scale(0.97)' }}
           >
@@ -217,7 +121,7 @@ export default function Navbar() {
               px={3}
               fontWeight="semibold"
               color="white"
-              onClick={closeAll}
+              onClick={onMobileClose}
               _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
             >
               Ingresar
@@ -225,9 +129,7 @@ export default function Navbar() {
           </SignedOut>
 
           <SignedIn>
-            <Button
-              as={RouterLink}
-              to="/dashboard"
+            <LinkAlPanel
               size="sm"
               h="40px"
               variant="ghost"
@@ -237,7 +139,7 @@ export default function Navbar() {
               _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
             >
               Ir al panel
-            </Button>
+            </LinkAlPanel>
             <Flex align="center" h="40px">
               <InductaUserButton afterSignOutUrl="/" />
             </Flex>
@@ -290,70 +192,13 @@ export default function Navbar() {
               Precios
             </Button>
             <SignedIn>
-              <Button as={RouterLink} to="/dashboard" {...mobileBtn} onClick={onMobileClose}>
+              <LinkAlPanel {...mobileBtn} onClick={onMobileClose}>
                 Ir al panel
-              </Button>
+              </LinkAlPanel>
             </SignedIn>
           </VStack>
         </Box>
       </Collapse>
-
-      <AnimatePresence>
-        {megaOpen ? (
-          <MotionPanel
-            key="mega-menu"
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-            transition={
-              reduceMotion
-                ? { duration: 0.15 }
-                : { type: 'spring', bounce: 0, duration: 0.35 }
-            }
-            style={{ transformOrigin: 'top center' }}
-            display={{ base: 'none', md: 'block' }}
-            position="absolute"
-            left={0}
-            right={0}
-            top="100%"
-            bg="white"
-            borderBottomWidth="1px"
-            borderColor="blackAlpha.100"
-            boxShadow="0 12px 24px -12px rgba(13, 13, 13, 0.12)"
-            zIndex={51}
-          >
-            <Box maxW="6xl" mx="auto" px={{ base: 4, md: 8 }} py={8}>
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                {recursos.map((item) => (
-                  <Link
-                    key={item.title}
-                    as={RouterLink}
-                    to={item.href}
-                    display="block"
-                    p={4}
-                    borderRadius="md"
-                    bg="white"
-                    onClick={closeAll}
-                    _hover={{ bg: 'brand.soft', textDecoration: 'none' }}
-                  >
-                    <HStack align="start" spacing={3}>
-                      <Icon as={item.icon} boxSize={5} color="brand.ink" mt={0.5} />
-                      <Box>
-                        <Text fontWeight="semibold" color="brand.ink">
-                          {item.title}
-                        </Text>
-                        <Text fontSize="sm" color="blackAlpha.700" mt={1} maxW="28ch">
-                          {item.desc}
-                        </Text>
-                      </Box>
-                    </HStack>
-                  </Link>
-                ))}
-              </SimpleGrid>
-            </Box>
-          </MotionPanel>
-        ) : null}
-      </AnimatePresence>
     </Box>
   )
 }

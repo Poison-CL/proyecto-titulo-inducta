@@ -6,9 +6,9 @@ const columnas = [
   {
     titulo: 'Plataforma',
     items: [
-      { label: 'Inducciones', to: '/recursos?tipo=guias' },
-      { label: 'Capacitaciones', to: '/recursos/capacitaciones' },
-      { label: 'Cumplimiento y evidencia', to: '/recursos/cumplimiento' },
+      { label: 'Hub de recursos', to: '/recursos' },
+      { label: 'Guías de inducción', to: '/recursos/guias' },
+      { label: 'Documentación', to: '/recursos/documentacion' },
       { label: 'Planes y precios', to: '/precios' },
     ],
   },
@@ -142,10 +142,10 @@ export default function Footer() {
         >
           <Text>© {year} Inducta Chile SpA. Todos los derechos reservados.</Text>
           <Flex gap={5}>
-            <Link href="#" color="inherit" _hover={{ color: 'white' }}>
+            <Link as={RouterLink} to="/contacto" color="inherit" _hover={{ color: 'white' }}>
               Privacidad
             </Link>
-            <Link href="#" color="inherit" _hover={{ color: 'white' }}>
+            <Link as={RouterLink} to="/contacto" color="inherit" _hover={{ color: 'white' }}>
               Términos
             </Link>
             <Link as={RouterLink} to="/recursos/soporte" color="inherit" _hover={{ color: 'white' }}>

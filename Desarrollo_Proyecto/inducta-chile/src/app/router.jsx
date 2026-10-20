@@ -70,8 +70,11 @@ export function AppRouter() {
           <Route path="/pago/rechazado" element={<PagoResultadoPage />} />
           <Route path="/pago/anulado" element={<PagoResultadoPage />} />
           <Route path="/pago-exitoso" element={<Navigate to="/pago/exitoso" replace />} />
-          <Route path="/recursos" element={<RecursosLayout />}>
+          {/* splat /*: RR7 rematch de hijos al navegar entre secciones del hub */}
+          <Route path="/recursos/*" element={<RecursosLayout />}>
             <Route index element={<RecursosPage />} />
+            <Route path="guias" element={<RecursosPage tipo="guias" />} />
+            <Route path="documentacion" element={<RecursosPage tipo="documentacion" />} />
             <Route path="capacitaciones" element={<RecursoInfoPage pagina="capacitaciones" />} />
             <Route path="cumplimiento" element={<RecursoInfoPage pagina="cumplimiento" />} />
             <Route path="soporte" element={<SoportePage />} />
