@@ -1,0 +1,15 @@
+# Inducta Chile - requisitos
+
+# Este proyecto usa npm, no pip. Para instalar:
+#   npm install --prefix Desarrollo_Proyecto/inducta-chile
+
+nodejs>=20
+npm>=10
+podman>=5
+podman-compose>=1.5
+
+# podman-compose se instala con:
+#   pip install podman-compose
+#
+# Las dependencias del sitio no se listan aca: viven en Desarrollo_Proyecto/inducta-chile/package.json
+# y quedan fijadas en Desarrollo_Proyecto/inducta-chile/package-lock.json.

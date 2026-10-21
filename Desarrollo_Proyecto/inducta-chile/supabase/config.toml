@@ -20,3 +20,18 @@ entrypoint = "./functions/tbk-confirmar/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/tbk-confirmar/*.html" ]
+
+[functions.provisionar-cuenta-temporal]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/provisionar-cuenta-temporal/index.ts"
+
+[functions.completar-cuenta-temporal]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/completar-cuenta-temporal/index.ts"
+
+[functions.limpiar-cuentas-temporales]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/limpiar-cuentas-temporales/index.ts"

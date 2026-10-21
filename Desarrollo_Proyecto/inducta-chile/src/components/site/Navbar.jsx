@@ -24,7 +24,7 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link as RouterLink, NavLink } from 'react-router-dom'
 import InductaUserButton from '../auth/InductaUserButton'
@@ -35,33 +35,33 @@ const MotionPanel = motion.create(Box)
 const recursos = [
   {
     title: 'Guías de inducción',
-    desc: 'Documentación para procesos de ingreso',
+    desc: 'Cómo planificar el primer día y el primer mes',
     icon: BookOpen,
-    href: '/recursos',
+    href: '/recursos?tipo=guias',
   },
   {
     title: 'Capacitaciones',
-    desc: 'Programas por área y cargo',
+    desc: 'Cree sus propios cursos y pruebas',
     icon: Layers,
-    href: '/recursos',
+    href: '/recursos/capacitaciones',
   },
   {
     title: 'Cumplimiento',
-    desc: 'Registro y trazabilidad',
+    desc: 'Qué queda registrado para auditorías',
     icon: ShieldCheck,
-    href: '/recursos',
+    href: '/recursos/cumplimiento',
   },
   {
     title: 'Documentación',
-    desc: 'Manuales institucionales',
+    desc: 'Artículos sobre cómo usar la plataforma',
     icon: FileText,
-    href: '/recursos',
+    href: '/recursos?tipo=documentacion',
   },
   {
     title: 'Soporte',
-    desc: 'Canal de ayuda corporativo',
+    desc: 'Preguntas frecuentes y contacto',
     icon: HelpCircle,
-    href: '/contacto',
+    href: '/recursos/soporte',
   },
 ]
 
@@ -73,6 +73,7 @@ const linkBtn = {
   fontWeight: 'medium',
   color: 'white',
   _hover: { bg: 'whiteAlpha.200', color: 'white' },
+  _active: { bg: 'whiteAlpha.300', transform: 'none' },
 }
 
 const mobileBtn = {
@@ -87,6 +88,7 @@ export default function Navbar() {
   const { isOpen: mobileOpen, onToggle: onMobileToggle, onClose: onMobileClose } =
     useDisclosure()
   const [showBanner, setShowBanner] = useState(true)
+  const reduceMotion = useReducedMotion()
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -106,6 +108,7 @@ export default function Navbar() {
   return (
     <Box
       as="header"
+      className="site-header"
       position="fixed"
       top={0}
       left={0}
@@ -114,6 +117,11 @@ export default function Navbar() {
       bg="brand.primary"
       borderBottomWidth="1px"
       borderColor="whiteAlpha.200"
+      sx={{
+        backgroundColor: 'rgba(27, 34, 167, 0.92)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      }}
       onMouseLeave={onMegaClose}
     >
       {showBanner ? (
@@ -194,7 +202,7 @@ export default function Navbar() {
             display={{ base: 'none', sm: 'inline-flex' }}
             onClick={closeAll}
             _hover={{ bg: 'brand.accentDark' }}
-            _active={{ bg: 'brand.primaryDark' }}
+            _active={{ bg: 'brand.primaryDark', transform: 'scale(0.97)' }}
           >
             Precios
           </Button>
@@ -294,10 +302,15 @@ export default function Navbar() {
         {megaOpen ? (
           <MotionPanel
             key="mega-menu"
-            initial={{ opacity: 0, y: -8 }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            transition={
+              reduceMotion
+                ? { duration: 0.15 }
+                : { type: 'spring', bounce: 0, duration: 0.35 }
+            }
+            style={{ transformOrigin: 'top center' }}
             display={{ base: 'none', md: 'block' }}
             position="absolute"
             left={0}
@@ -306,7 +319,7 @@ export default function Navbar() {
             bg="white"
             borderBottomWidth="1px"
             borderColor="blackAlpha.100"
-            boxShadow="lg"
+            boxShadow="0 12px 24px -12px rgba(13, 13, 13, 0.12)"
             zIndex={51}
           >
             <Box maxW="6xl" mx="auto" px={{ base: 4, md: 8 }} py={8}>
@@ -329,7 +342,7 @@ export default function Navbar() {
                         <Text fontWeight="semibold" color="brand.ink">
                           {item.title}
                         </Text>
-                        <Text fontSize="sm" color="gray.600" mt={1} maxW="28ch">
+                        <Text fontSize="sm" color="blackAlpha.700" mt={1} maxW="28ch">
                           {item.desc}
                         </Text>
                       </Box>

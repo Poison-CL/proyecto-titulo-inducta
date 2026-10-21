@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node tests/unit/auth.test.js",
+    "test": "node tests/unit/auth.test.js && node tests/unit/planes.test.js && node tests/unit/cuentaEstado.test.js && node tests/unit/cuentaTemporalLifecycle.test.js",
     "check": "npm run test",
     "preview": "vite preview"
   },
@@ -19,6 +19,7 @@
     "@emotion/styled": "^11.14.1",
     "@supabase/supabase-js": "^2.115.0",
     "framer-motion": "^11.18.2",
+    "intro.js": "^8.6.0",
     "lucide-react": "^1.45.0",
     "motion": "^13.2.0",
     "react": "^19.2.8",
