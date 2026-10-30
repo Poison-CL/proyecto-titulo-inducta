@@ -9,11 +9,12 @@ import {
   peekRolPendiente,
   rutaAccesoSinOrg,
 } from '../../lib/authRol'
+import { rutaPanel } from '../../lib/rutaPanel'
 
 export default function PostLoginPage() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth()
   const { user, isLoaded: userLoaded } = useUser()
-  const { organization, isLoaded: orgLoaded } = useOrganization()
+  const { organization, membership, isLoaded: orgLoaded } = useOrganization()
   const { isLoaded: listLoaded, setActive, userMemberships } = useOrganizationList({
     userMemberships: { infinite: true },
   })
@@ -51,7 +52,7 @@ export default function PostLoginPage() {
   }
 
   if (organization) {
-    return <Navigate to={RUTAS_AUTH.dashboard} replace />
+    return <Navigate to={rutaPanel({ isSignedIn: true, membership, organization })} replace />
   }
 
   if (memberships.length > 0) {

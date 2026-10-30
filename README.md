@@ -16,6 +16,7 @@
 <p align="center">
   <img alt="React" src="https://img.shields.io/badge/React-19-20232A?style=flat-square&logo=react&logoColor=61DAFB">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white">
+  <img alt="Chakra" src="https://img.shields.io/badge/Chakra_UI-2-319795?style=flat-square&logo=chakraui&logoColor=white">
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres-3FCF8E?style=flat-square&logo=supabase&logoColor=white">
   <img alt="Clerk" src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white">
   <img alt="Transbank" src="https://img.shields.io/badge/Transbank-Webpay-E30613?style=flat-square">
@@ -25,10 +26,10 @@
 
 <p align="center">
   <a href="#sobre-el-proyecto">Proyecto</a> ·
+  <a href="#capturas-del-sistema">Capturas</a> ·
+  <a href="#qué-incluye-hoy">Funcionalidades</a> ·
   <a href="#equipo">Equipo</a> ·
   <a href="#stack-tecnológico">Stack</a> ·
-  <a href="#estructura-del-repositorio">Estructura</a> ·
-  <a href="#desarrollo-de-documentación">Documentación</a> ·
   <a href="#inicio-rápido">Inicio rápido</a> ·
   <a href="#arquitectura">Arquitectura</a>
 </p>
@@ -37,16 +38,92 @@
 
 ## Sobre el proyecto
 
-**Inducta Chile** es una plataforma **SaaS multi-tenant** orientada a digitalizar el onboarding y la capacitación del personal en empresas de Chile.
+**Inducta Chile** es una plataforma **SaaS multi-tenant** para digitalizar el onboarding y la capacitación del personal en empresas chilenas.
 
-La solución permite centralizar programas de inducción, registrar el avance de cada colaborador, emitir certificados en PDF como evidencia para auditorías y gestionar planes comerciales con pago vía Transbank (precios en UF). El acceso se separa entre perfiles de **empresa (admin)** y **trabajador**.
+Centraliza programas de inducción por cargo, el avance de cada colaborador, la evidencia para auditorías y los planes comerciales con pago vía Transbank (precios en UF). El acceso se separa entre perfiles de **empresa** y **empleado**, con organizaciones de Clerk y datos en Supabase.
 
 | Objetivo | Descripción |
 | --- | --- |
 | Ordenar | Inducciones y capacitaciones por cargo, área o normativa |
 | Trazar | Quién completó cada etapa y en qué fecha |
-| Evidenciar | Certificados listos para auditoría |
-| Monetizar | Suscripciones B2B con pasarela de pago |
+| Evidenciar | Registro listo para auditoría y fiscalización |
+| Monetizar | Suscripciones B2B con Webpay Plus |
+
+---
+
+## Capturas del sistema
+
+Capturas de la app en desarrollo.
+
+### Sitio público
+
+<p align="center">
+  <img src="assets/screenshots/home.png" alt="Inicio — hero Inducta Chile" width="100%">
+</p>
+<p align="center"><sub>Inicio: hero, marca y vista previa del panel</sub></p>
+
+<p align="center">
+  <img src="assets/screenshots/como-funciona.png" alt="Cómo funciona — cuatro pasos" width="100%">
+</p>
+<p align="center"><sub>Cómo funciona: programas, accesos, avance y evidencia</sub></p>
+
+<p align="center">
+  <img src="assets/screenshots/precios.png" alt="Planes y precios" width="100%">
+</p>
+<p align="center"><sub>Planes: Demostración, Empresa Básico, Plus y Plus+ (UF + IVA)</sub></p>
+
+### Hub de documentación
+
+<p align="center">
+  <img src="assets/screenshots/docs.png" alt="Hub de recursos / Docs" width="100%">
+</p>
+<p align="center"><sub>Docs: búsqueda, secciones (Introducción, Guías, Documentación, Soporte) y TOC</sub></p>
+
+### Panel e ingreso
+
+<p align="center">
+  <img src="assets/screenshots/panel.png" alt="Panel empresa — inicio" width="100%">
+</p>
+<p align="center"><sub>Panel empresa: shell con sidebar, búsqueda rápida (Ctrl K) y cards de acción</sub></p>
+
+<p align="center">
+  <img src="assets/screenshots/entrar.png" alt="Pantalla de ingreso" width="100%">
+</p>
+<p align="center"><sub>Ingreso: rol Empresa / Empleado y correo vía Clerk</sub></p>
+
+---
+
+## Qué incluye hoy
+
+### Sitio marketing
+
+- Home con hero, mockup del panel, sección **Cómo funciona** (4 pasos) y FAQ
+- **Hub de recursos** (`/recursos`) estilo documentación: búsqueda, tabs y artículos
+- **Precios** mensuales/anuales en UF, contratación y resultados de pago Webpay
+- Contacto y soporte público
+
+### Acceso y panel
+
+- Login custom **Empresa / Empleado** (`/entrar`) con Clerk Organizations
+- Post-login y pantallas de ayuda si falta empresa o membresía
+- Panel empresa (`/dashboard`): Inicio, Equipo, Configuración
+- Shell compartido: topbar, sidebar, búsqueda del panel, cards de acción
+- Panel admin de plataforma (`/admin`): resumen, tickets, empresas, pagos, usuarios
+
+### Rutas principales
+
+| Ruta | Descripción |
+| --- | --- |
+| `/` | Home marketing |
+| `/precios` · `/contratar` | Planes y contratación |
+| `/recursos/*` | Hub de docs, guías y soporte |
+| `/entrar` | Ingreso (empresa o empleado) |
+| `/dashboard` | Panel de la organización |
+| `/dashboard/equipo` | Invitaciones y roles |
+| `/dashboard/configuracion` | Plan y datos de contacto |
+| `/admin/*` | Administración de la plataforma |
+
+Código de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md)
 
 ---
 
@@ -65,7 +142,7 @@ La solución permite centralizar programas de inducción, registrar el avance de
       <br><br>
       Fullstack
       <br>
-      <sub>React · Vite · Chakra UI · Supabase · Flujos de acceso</sub>
+      <sub>React · Vite · Chakra UI · Supabase · Flujos de acceso · Panel y sitio</sub>
       <br><br>
       <a href="https://github.com/Poison-CL"><img src="https://img.shields.io/badge/GitHub-Poison--CL-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub Mateo"></a>
       <a href="https://mateo-dev-seven.vercel.app/"><img src="https://img.shields.io/badge/Portfolio-Web-0B6E4F?style=flat-square" alt="Portfolio Mateo"></a>
@@ -102,8 +179,8 @@ La solución permite centralizar programas de inducción, registrar el avance de
 
 | Capa | Tecnología |
 | --- | --- |
-| Frontend | React 19, Vite, Chakra UI, React Router |
-| Autenticación | Clerk (organizaciones y roles) |
+| Frontend | React 19, Vite 8, Chakra UI, React Router 7, Framer Motion / Motion |
+| Autenticación | Clerk (organizaciones, roles, login custom) |
 | Datos | Supabase (PostgreSQL, RLS, Storage, Edge Functions) |
 | Pagos | Transbank Webpay Plus |
 | Contenedor | Podman + Compose |
@@ -114,78 +191,60 @@ La solución permite centralizar programas de inducción, registrar el avance de
 
 ```text
 proyecto-titulo-inducta/
-├── assets/                          # Logo y diagramas del README
-│   └── diagrams/
-├── Desarrollo de Documentacion/     # Análisis, guías técnicas y requisitos
-├── Desarrollo_Proyecto/             # Código de la aplicación
-│   ├── inducta-chile/               # App web + Supabase + Podman
-│   └── package.json
-├── FASE 1/                          # Evidencias académicas Capstone
+├── assets/
+│   ├── diagrams/              # Arquitectura, modelo de datos, auth, deploy
+│   ├── screenshots/           # Capturas del sistema (README)
+│   └── logo-oficial.png
+├── Desarrollo de Documentacion/   # Análisis, guías y requisitos
+├── Desarrollo_Proyecto/
+│   └── inducta-chile/         # App web (Vite) + Supabase + Podman
+├── Fase 1/                    # Evidencias académicas Capstone
 └── README.md
 ```
-
-Código de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md)
 
 ---
 
 ## Desarrollo de Documentación
 
-La carpeta [`Desarrollo de Documentacion/`](Desarrollo%20de%20Documentacion/) concentra el trabajo previo y paralelo al código: entender el problema, definir el producto, priorizar el backlog y dejar guías operativas para levantar el entorno.
-
-Sirve como **memoria del proyecto**: quién hace qué, qué actores intervienen, qué historias importan y cómo se autentica o se despliega la app sin depender solo del chat o de la memoria del equipo.
-
-### Para qué está
-
-| Bloque | Para qué |
-| --- | --- |
-| Análisis y producto (01–11) | Del caso de negocio al backlog priorizado (épicas, historias, impacto, retrospectiva) |
-| Guías técnicas (Markdown) | Cómo instalar Podman y cómo funciona el login Empresa / Empleado con Clerk |
-| Requisitos | Versiones mínimas de Node, npm y Podman |
+La carpeta [`Desarrollo de Documentacion/`](Desarrollo%20de%20Documentacion/) concentra el trabajo previo y paralelo al código: problema, producto, backlog y guías para levantar el entorno.
 
 ### Documentos de análisis y producto
 
 | # | Documento | Contenido |
 | --- | --- | --- |
-| 01 | [Análisis del Caso](Desarrollo%20de%20Documentacion/01%20Analisis%20del%20Caso.docx) | Problema, contexto y oportunidad de Inducta |
-| 02 | [Squad y responsabilidades](Desarrollo%20de%20Documentacion/02%20Squad%20y%20responsabilidades.docx) | Roles del equipo y división del trabajo |
-| 03 | [Mapa Mental](Desarrollo%20de%20Documentacion/03%20Mapa%20Mental.docx) | Visión panorámica de dominios y conceptos |
-| 04 | [Mapa de Actores](Desarrollo%20de%20Documentacion/04%20Mapa%20de%20Actores.docx) | Empresa, trabajador, Inducta y sistemas externos |
-| 05 | [Visión del Proyecto y 4 pilares](Desarrollo%20de%20Documentacion/05%20Vision%20del%20Proyecto%20y%204%20pilares.docx) | Dirección del producto y pilares de valor |
-| 06 | [Épicas](Desarrollo%20de%20Documentacion/06%20Epicas.docx) | Grandes bloques de funcionalidad |
-| 07 | [Historias de Usuario](Desarrollo%20de%20Documentacion/07%20Historias%20de%20Usuario.docx) | Historias concretas para desarrollo |
-| 08 | [Impact Mapping](Desarrollo%20de%20Documentacion/08%20Impact%20Mapping.docx) | Impacto esperado por actor / objetivo |
-| 09 | [Product Backlog Priorizado](Desarrollo%20de%20Documentacion/09%20Product%20Backlog%20Priorizado.docx) | Orden de entrega y prioridades |
-| 10 | [User Story Mapping](Desarrollo%20de%20Documentacion/10%20User%20Story%20Mapping.docx) | Flujo de usuario de punta a punta |
-| 11 | [Retrospectiva del proyecto](Desarrollo%20de%20Documentacion/11%20Retrospectiva%20del%20proyecto.docx) | Aprendizajes y mejoras del proceso |
+| 01 | [Análisis del Caso](Desarrollo%20de%20Documentacion/01%20Analisis%20del%20Caso.docx) | Problema, contexto y oportunidad |
+| 02 | [Squad y responsabilidades](Desarrollo%20de%20Documentacion/02%20Squad%20y%20responsabilidades.docx) | Roles y división del trabajo |
+| 03 | [Mapa Mental](Desarrollo%20de%20Documentacion/03%20Mapa%20Mental.docx) | Dominios y conceptos |
+| 04 | [Mapa de Actores](Desarrollo%20de%20Documentacion/04%20Mapa%20de%20Actores.docx) | Empresa, trabajador, Inducta, externos |
+| 05 | [Visión del Proyecto y 4 pilares](Desarrollo%20de%20Documentacion/05%20Vision%20del%20Proyecto%20y%204%20pilares.docx) | Dirección del producto |
+| 06 | [Épicas](Desarrollo%20de%20Documentacion/06%20Epicas.docx) | Bloques de funcionalidad |
+| 07 | [Historias de Usuario](Desarrollo%20de%20Documentacion/07%20Historias%20de%20Usuario.docx) | Historias para desarrollo |
+| 08 | [Impact Mapping](Desarrollo%20de%20Documentacion/08%20Impact%20Mapping.docx) | Impacto por actor / objetivo |
+| 09 | [Product Backlog Priorizado](Desarrollo%20de%20Documentacion/09%20Product%20Backlog%20Priorizado.docx) | Orden de entrega |
+| 10 | [User Story Mapping](Desarrollo%20de%20Documentacion/10%20User%20Story%20Mapping.docx) | Flujo de punta a punta |
+| 11 | [Retrospectiva del proyecto](Desarrollo%20de%20Documentacion/11%20Retrospectiva%20del%20proyecto.docx) | Aprendizajes |
 
 ### Guías técnicas
 
 | Documento | Contenido |
 | --- | --- |
-| [requirements.txt](Desarrollo%20de%20Documentacion/requirements.txt) | Node ≥ 20, npm ≥ 10, Podman ≥ 5, podman-compose |
-| [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md) | Script de demo: `machine start`, `.env`, `compose up`, checklist anti-error |
-| [CLERK-EMPRESA-EMPLEADO.md](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md) | Login custom, Organizations, guards `RequireAuth` / `RequireOrg`, pantallas `/acceso/sin-*` |
-| [README de la app](Desarrollo_Proyecto/inducta-chile/README.md) | Setup npm/Podman, estructura de `src/` y comandos |
-
-### Cómo leerlo (orden sugerido)
-
-1. **01 Análisis** → **05 Visión** → entender el “por qué”.
-2. **04 Actores** → **06 Épicas** → **07 Historias** → **09 Backlog** → qué construir primero.
-3. **CLERK-…** y **INSTALACION-PODMAN** → cómo entrar a la app y cómo levantarla.
-4. **README de la app** → detalle del código cuando ya estás desarrollando.
+| [requirements.txt](Desarrollo%20de%20Documentacion/requirements.txt) | Node ≥ 20, npm ≥ 10, Podman ≥ 5 |
+| [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md) | Demo con Podman Compose |
+| [CLERK-EMPRESA-EMPLEADO.md](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md) | Login, Organizations, guards |
+| [README de la app](Desarrollo_Proyecto/inducta-chile/README.md) | Setup npm/Podman y estructura de `src/` |
 
 ---
 
 ## Inicio rápido
 
-Guía detallada de deploy: [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md)
+Guía detallada: [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md)
 
 ### Requisitos
 
 - Node.js 20 o superior
-- [Podman Desktop](https://podman-desktop.io/) (para la demo en `:8080`)
+- [Podman Desktop](https://podman-desktop.io/) (demo en `:8080`)
 - Cuentas de [Clerk](https://dashboard.clerk.com) y [Supabase](https://supabase.com/dashboard)
-- En Clerk, orígenes permitidos: `http://localhost:5173` y `http://localhost:8080`
+- Orígenes permitidos en Clerk: `http://localhost:5173` y `http://localhost:8080`
 
 ### 1. Entrar a la app
 
@@ -199,7 +258,7 @@ cd Desarrollo_Proyecto\inducta-chile
 copy .env.example .env
 ```
 
-Completa en `.env` (obligatorio):
+Completa en `.env`:
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
@@ -218,16 +277,12 @@ Aplicación en [http://localhost:5173/](http://localhost:5173/)
 
 ### 3B. Demo / deploy (Podman)
 
-Abre Podman Desktop, luego:
-
 ```powershell
 podman machine start
 podman compose up --build
 ```
 
 Aplicación en [http://localhost:8080/](http://localhost:8080/)
-
-Para detener:
 
 ```powershell
 podman compose down
@@ -241,7 +296,7 @@ Archivos en `assets/diagrams/`.
 
 ### Vista de sistema
 
-Flujo principal: React → Clerk (JWT + `org_id`) → Supabase (API, RLS, Postgres), con pagos vía Edge Functions → Transbank y archivos en Storage.
+React → Clerk (JWT + `org_id`) → Supabase (API, RLS, Postgres), con pagos vía Edge Functions → Transbank y archivos en Storage.
 
 <p align="center">
   <img src="assets/diagrams/arquitectura-inducta.png" alt="Arquitectura Inducta Chile" width="900">
@@ -257,26 +312,22 @@ Multi-tenant con `empresa` como raíz: usuarios, tests de inducción, preguntas,
 
 ### Autenticación (Empresa / Empleado)
 
-Así funciona el ingreso, en orden:
-
-1. La persona abre **Entrar** (empresa o empleado) → pantalla `/entrar`.
-2. Escribe correo y contraseña. La app le pide a **Clerk** que valide la cuenta.
-3. Si Clerk acepta, crea la sesión (token JWT) y manda a `/post-login`.
-4. Ahí se revisa si pertenece a una **empresa (Organization)**:
-   - **Sí** → entra al panel (`/dashboard`).
-   - **No** → ve una pantalla de ayuda (`/acceso/sin-empresa` o `/acceso/sin-membresia`), no el panel.
-
-El gráfico de abajo es la misma historia dibujada de arriba a abajo (cada flecha = un paso). La flecha naranja es el camino feliz (sí tiene empresa).
+1. La persona abre **Entrar** → `/entrar`.
+2. Escribe correo; Clerk valida la cuenta.
+3. Si hay sesión, va a `/post-login`.
+4. Si pertenece a una **Organization**:
+   - **Sí** → panel (`/dashboard`).
+   - **No** → ayuda (`/acceso/sin-empresa` o `/acceso/sin-membresia`).
 
 <p align="center">
   <img src="assets/diagrams/auth-login-clerk.png" alt="Secuencia login Clerk Inducta Chile" width="900">
 </p>
 
-Detalle escrito: [CLERK-EMPRESA-EMPLEADO.md](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md)
+Detalle: [CLERK-EMPRESA-EMPLEADO.md](Desarrollo%20de%20Documentacion/CLERK-EMPRESA-EMPLEADO.md)
 
 ### Despliegue local (Podman)
 
-El contenedor `web` corre en la máquina del desarrollador; Clerk, Supabase y Transbank viven en la nube. Las claves van en `.env` local.
+El contenedor `web` corre en la máquina del desarrollador; Clerk, Supabase y Transbank viven en la nube.
 
 <p align="center">
   <img src="assets/diagrams/despliegue-podman.png" alt="Despliegue Podman Inducta Chile" width="900">

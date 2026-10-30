@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { Box, Flex, Heading, HStack, Icon, Link, LinkBox, LinkOverlay, ListItem, Text, UnorderedList } from '@chakra-ui/react'
 import { ChevronRight } from 'lucide-react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
+import { useDocsToc } from '../../hooks/useDocsToc'
 import { ARTICULOS, TIPOS, fechaLarga, getArticulo } from '../../lib/recursos'
 import NoEncontradaPage from './NoEncontradaPage'
 
@@ -25,27 +26,15 @@ if (import.meta.env.DEV) {
 }
 
 export default function ArticuloPage() {
-  const articulo = getArticulo(useParams().slug)
-  const subtitulos = articulo ? articulo.cuerpo.filter((b) => b.h).map((b) => b.h) : []
-  const [activo, setActivo] = useState(null)
-
-  useEffect(() => {
-    if (!subtitulos.length) return
-    // ponytail: recorre los h2 en cada scroll; con artículos de decenas de secciones conviene IntersectionObserver.
-    const alScroll = () => {
-      const tope = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-h')) || 72) + 40
-      let actual = null
-      for (const h of subtitulos) {
-        const el = document.getElementById(anclaDe(h))
-        if (el && el.getBoundingClientRect().top <= tope) actual = h
-      }
-      setActivo(actual)
-    }
-    alScroll()
-    window.addEventListener('scroll', alScroll, { passive: true })
-    return () => window.removeEventListener('scroll', alScroll)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articulo?.slug])
+  const slug = useParams().slug
+  const articulo = getArticulo(slug)
+  const subtitulos = useMemo(
+    () => (articulo ? articulo.cuerpo.filter((b) => b.h).map((b) => b.h) : []),
+    [articulo],
+  )
+  const anclas = useMemo(() => subtitulos.map(anclaDe), [subtitulos])
+  const { activo: activoId, irA } = useDocsToc(anclas)
+  const activo = subtitulos.find((h) => anclaDe(h) === activoId) || null
 
   if (!articulo) return <NoEncontradaPage />
 
@@ -56,17 +45,20 @@ export default function ArticuloPage() {
     <Flex gap={12} align="flex-start">
       <Box as="article" flex="1" minW={0} maxW="68ch">
         <HStack spacing={1} fontSize="sm" color="blackAlpha.600" mb={4} flexWrap="wrap">
-          <Link as={RouterLink} to="/recursos?tipo=guias" color="blackAlpha.600">
+          <Link as={RouterLink} to="/recursos" color="blackAlpha.600">
             Recursos
           </Link>
           <Icon as={ChevronRight} boxSize={3.5} />
-          <Link as={RouterLink} to={`/recursos?tipo=${articulo.tipo}`} color="blackAlpha.600">
+          <Link as={RouterLink} to={`/recursos/${articulo.tipo}`} color="blackAlpha.600">
             {tipo.titulo}
           </Link>
           <Icon as={ChevronRight} boxSize={3.5} />
           <Link
             as={RouterLink}
-            to={`/recursos?tipo=${articulo.tipo}&categoria=${encodeURIComponent(articulo.categoria)}`}
+            to={{
+              pathname: `/recursos/${articulo.tipo}`,
+              search: `?categoria=${encodeURIComponent(articulo.categoria)}`,
+            }}
             color="brand.primary"
             fontWeight="medium"
           >
@@ -97,7 +89,7 @@ export default function ArticuloPage() {
                 letterSpacing="-0.01em"
                 mt={10}
                 mb={3}
-                sx={{ scrollMarginTop: 'calc(var(--site-header-h, 72px) + 24px)' }}
+                sx={{ scrollMarginTop: 'calc(var(--docs-header-h, 56px) + 24px)' }}
               >
                 {b.h}
               </Heading>
@@ -171,29 +163,43 @@ export default function ArticuloPage() {
           w="200px"
           flexShrink={0}
           position="sticky"
-          top="calc(var(--site-header-h, 72px) + 24px)"
+          top="calc(var(--docs-header-h, 56px) + 24px)"
         >
           <Text fontSize="xs" fontWeight="semibold" color="blackAlpha.600" mb={2}>
             En esta página
           </Text>
-          <Box borderLeftWidth="1px" borderColor="blackAlpha.100">
+          <Box position="relative" borderLeftWidth="1px" borderColor="blackAlpha.100">
+            <Box
+              aria-hidden
+              position="absolute"
+              left="-1px"
+              top={`${Math.max(0, subtitulos.findIndex((h) => h === activo)) * 32}px`}
+              w="2px"
+              h="32px"
+              bg="brand.primary"
+              borderRadius="1px"
+              transition="top 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+              sx={{ '@media (prefers-reduced-motion: reduce)': { transition: 'none' } }}
+            />
             {subtitulos.map((h) => {
+              const id = anclaDe(h)
               const es = h === activo
               return (
                 <Link
                   key={h}
-                  href={`#${anclaDe(h)}`}
+                  href={`#${id}`}
+                  onClick={(e) => irA(id, e)}
                   aria-current={es ? 'location' : undefined}
-                  display="block"
+                  display="flex"
+                  alignItems="center"
+                  h="32px"
                   fontSize="sm"
-                  py={1}
                   pl={3}
-                  ml="-1px"
-                  borderLeftWidth="2px"
-                  borderColor={es ? 'brand.primary' : 'transparent'}
                   color={es ? 'brand.primary' : 'blackAlpha.700'}
                   fontWeight={es ? 'semibold' : 'normal'}
-                  transition="color 150ms, border-color 150ms"
+                  transition="color 200ms cubic-bezier(0.4, 0, 0.2, 1)"
+                  _hover={{ color: 'brand.primary', textDecoration: 'none' }}
+                  sx={{ '@media (prefers-reduced-motion: reduce)': { transition: 'none' } }}
                 >
                   {h}
                 </Link>
