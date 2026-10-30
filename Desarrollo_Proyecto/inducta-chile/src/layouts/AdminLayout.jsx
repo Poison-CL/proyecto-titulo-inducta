@@ -54,6 +54,10 @@ export default function AdminLayout() {
   if (esOrgInducta(organization)) {
     return <Navigate to="/" replace />
   }
+  // Empleados/miembros tienen su propio dashboard
+  if (!loading && !admin) {
+    return <Navigate to="/empleado" replace />
+  }
 
   async function cerrarModal() {
     setModalAbierto(false)
@@ -62,9 +66,7 @@ export default function AdminLayout() {
 
   const navPrimary = [
     { to: '/dashboard', end: true, label: 'Inicio', icon: Home, dataTour: 'nav-inicio' },
-    ...(admin
-      ? [{ to: '/dashboard/equipo', label: 'Equipo', icon: Users, dataTour: 'nav-equipo' }]
-      : []),
+    { to: '/dashboard/equipo', label: 'Equipo', icon: Users, dataTour: 'nav-equipo' },
   ]
   const navSettings = [
     { to: '/dashboard/configuracion', label: 'Configuración', icon: Settings2, dataTour: 'nav-config' },
@@ -89,23 +91,17 @@ export default function AdminLayout() {
           </Flex>
         }
         navSections={[navPrimary, navSettings]}
-        ctaNav={
-          admin
-            ? { label: 'Invitar colaborador', to: '/dashboard/equipo', icon: UserPlus }
-            : null
-        }
+        ctaNav={{ label: 'Invitar colaborador', to: '/dashboard/equipo', icon: UserPlus }}
         resolverBusqueda={resolverBusqueda}
         searchPlaceholder="Búsqueda rápida"
         planWidget={
-          admin ? (
-            <PlanWidget
-              titulo="Plan actual"
-              planLabel={plan?.nombre || empresa?.plan || 'Sin plan'}
-              cta="Gestionar plan"
-              to="/dashboard/configuracion"
-              meta={planEstado.etiqueta}
-            />
-          ) : null
+          <PlanWidget
+            titulo="Plan actual"
+            planLabel={plan?.nombre || empresa?.plan || 'Sin plan'}
+            cta="Gestionar plan"
+            to="/dashboard/configuracion"
+            meta={planEstado.etiqueta}
+          />
         }
         banner={
           esTemporal ? (
