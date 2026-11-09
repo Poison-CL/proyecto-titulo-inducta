@@ -30,7 +30,15 @@ export default function AdminUsuariosPage() {
   const [enviando, setEnviando] = useState(false)
 
   const visibles = useMemo(
-    () => filtraPorCampos(rows, consulta, ['nombre_completo', 'rut', 'id_usuario', 'id_empresa', 'rol']),
+    () =>
+      filtraPorCampos(rows, consulta, [
+        'nombre_completo',
+        'rut',
+        'id_usuario',
+        'id_empresa',
+        'rol',
+        'nombre_empresa',
+      ]),
     [rows, consulta],
   )
 
@@ -43,17 +51,38 @@ export default function AdminUsuariosPage() {
 
   useEffect(() => {
     let vivo = true
-    supabase
-      .from('usuario')
-      .select('id_usuario, id_empresa, nombre_completo, rol, activo, rut')
-      .order('nombre_completo')
-      .limit(100)
-      .then(({ data, error: err }) => {
-        if (!vivo) return
-        if (err) setError(err.message)
-        setRows(data || [])
+    ;(async () => {
+      const { data: usuarios, error: errU } = await supabase
+        .from('usuario')
+        .select('id_usuario, id_empresa, nombre_completo, rol, activo, rut')
+        .order('nombre_completo')
+        .limit(100)
+      if (!vivo) return
+      if (errU) {
+        setError(errU.message)
+        setRows([])
         setLoading(false)
-      })
+        return
+      }
+
+      const ids = [...new Set((usuarios || []).map((u) => u.id_empresa).filter(Boolean))]
+      let mapa = {}
+      if (ids.length) {
+        const { data: emps } = await supabase
+          .from('empresa')
+          .select('id_empresa, nombre_comercial')
+          .in('id_empresa', ids)
+        mapa = Object.fromEntries((emps || []).map((e) => [e.id_empresa, e.nombre_comercial]))
+      }
+
+      setRows(
+        (usuarios || []).map((u) => ({
+          ...u,
+          nombre_empresa: mapa[u.id_empresa] || '',
+        })),
+      )
+      setLoading(false)
+    })()
     return () => {
       vivo = false
     }
@@ -116,6 +145,7 @@ export default function AdminUsuariosPage() {
       </Text>
 
       <Box
+        id="admin-reset-password"
         as="form"
         onSubmit={resetPassword}
         mb={14}
@@ -195,7 +225,8 @@ export default function AdminUsuariosPage() {
               {u.id_usuario}
             </Text>
             <Text fontSize="sm" color="blackAlpha.500" mt={1}>
-              {u.rol} · {u.activo === false ? 'inactivo' : 'activo'} · empresa {u.id_empresa}
+              {u.rol} · {u.activo === false ? 'inactivo' : 'activo'}
+              {u.nombre_empresa ? ` · ${u.nombre_empresa}` : u.id_empresa ? ` · ${u.id_empresa}` : ''}
             </Text>
             <Button
               size="sm"
@@ -203,9 +234,15 @@ export default function AdminUsuariosPage() {
               color="brand.primary"
               mt={2}
               fontWeight="semibold"
-              onClick={() => setUserId(u.id_usuario)}
+              onClick={() => {
+                setUserId(u.id_usuario)
+                document.getElementById('admin-reset-password')?.scrollIntoView({
+                  block: 'start',
+                  behavior: 'smooth',
+                })
+              }}
             >
-              Usar este id
+              Restablecer contraseña
             </Button>
           </Box>
         ))}

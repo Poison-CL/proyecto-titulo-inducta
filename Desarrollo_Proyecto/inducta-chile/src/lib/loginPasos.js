@@ -22,6 +22,11 @@ export function pasoSiguiente(signIn) {
   return null
 }
 
+/** Tras password ok, Clerk pide código (MFA o Device Trust en dispositivo nuevo). */
+export function pideCodigoTrasPassword(status) {
+  return status === 'needs_second_factor' || status === 'needs_client_trust'
+}
+
 // Clerk manda inglés; esES no cubre este login. El copy depende del rol.
 const ERRORES_PROPIOS = {
   form_identifier_not_found: (rol) =>

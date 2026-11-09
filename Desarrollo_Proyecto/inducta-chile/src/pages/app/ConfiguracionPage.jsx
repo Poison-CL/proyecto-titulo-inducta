@@ -279,6 +279,7 @@ function ConfigAdmin() {
 
 function ConfigTrabajador() {
   const { user } = useUser()
+  const { openUserProfile } = useClerk()
   const { organization, membership } = useOrganization()
 
   return (
@@ -293,7 +294,7 @@ function ConfigTrabajador() {
             h="36px"
             variant="outline"
             borderColor="blackAlpha.200"
-            onClick={() => document.querySelector('.cl-userButtonTrigger')?.click()}
+            onClick={() => openUserProfile()}
           >
             Abrir mi cuenta
           </Button>

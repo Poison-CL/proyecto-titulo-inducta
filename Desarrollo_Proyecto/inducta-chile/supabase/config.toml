@@ -35,3 +35,13 @@ entrypoint = "./functions/completar-cuenta-temporal/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/limpiar-cuentas-temporales/index.ts"
+
+[functions.responder-contacto]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/responder-contacto/index.ts"
+
+[functions.admin-reset-password]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-reset-password/index.ts"

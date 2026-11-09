@@ -1,21 +1,31 @@
 import {
-  Badge,
   Box,
   Grid,
-  HStack,
-  Progress,
   Text,
   VStack,
 } from '@chakra-ui/react'
 import { useOrganization, useUser } from '@clerk/clerk-react'
 import { Award, BookOpen, TrendingUp } from 'lucide-react'
+import { useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AccionCard from '../../components/dashboard/AccionCard'
 import WorkspaceHome from '../../components/dashboard/WorkspaceHome'
+import { resolverBusquedaEmpleado } from '../../lib/panelBusqueda'
 
 export default function EmpleadoDashboardPage() {
   const { user } = useUser()
   const { organization } = useOrganization()
+  const navigate = useNavigate()
   const nombre = user?.firstName || 'colaborador'
+
+  const onBuscar = useCallback(
+    async (q) => {
+      const r = await resolverBusquedaEmpleado(q)
+      if (r?.to) navigate(r.to)
+      return r
+    },
+    [navigate],
+  )
 
   return (
     <WorkspaceHome
@@ -23,8 +33,8 @@ export default function EmpleadoDashboardPage() {
       pillTo="/empleado"
       titulo={`Hola, ${nombre}.`}
       placeholder="Buscar sección del panel…"
+      onBuscar={onBuscar}
     >
-      {/* Resumen de actividad */}
       <Box mb={8}>
         <Text
           fontSize="xs"
@@ -37,46 +47,28 @@ export default function EmpleadoDashboardPage() {
           Tu actividad
         </Text>
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={3}>
-          <ResumenCard
-            label="Programas asignados"
-            valor="—"
-            color="brand.primary"
-          />
-          <ResumenCard label="Etapas completadas" valor="—" color="green.500" />
-          <ResumenCard
-            label="Certificados obtenidos"
-            valor="—"
-            color="purple.500"
-          />
+          <ResumenCard label="Programas asignados" valor="0" color="brand.primary" />
+          <ResumenCard label="Etapas completadas" valor="0" color="green.500" />
+          <ResumenCard label="Certificados obtenidos" valor="0" color="purple.500" />
         </Grid>
       </Box>
 
-      {/* Programa activo placeholder */}
       <Box
         mb={8}
         p={5}
         borderWidth="1px"
         borderColor="blackAlpha.100"
         borderRadius="xl"
+        bg="white"
       >
-        <HStack justify="space-between" mb={3}>
-          <Text fontWeight="semibold" color="brand.ink" fontSize="sm">
-            Inducción activa
-          </Text>
-          <Badge colorScheme="blue" fontSize="10px" borderRadius="full" px={2}>
-            En progreso
-          </Badge>
-        </HStack>
-        <Text color="blackAlpha.600" fontSize="sm" mb={4}>
-          Cuando tu empresa te asigne un programa de inducción aparecerá aquí.
+        <Text fontWeight="semibold" color="brand.ink" fontSize="sm" mb={2}>
+          Inducción activa
         </Text>
-        <Progress value={0} size="sm" borderRadius="full" colorScheme="blue" />
-        <Text fontSize="xs" color="blackAlpha.500" mt={1.5}>
-          0% completado
+        <Text color="blackAlpha.600" fontSize="sm">
+          Todavía no tienes un programa asignado. Cuando tu empresa te asigne uno, el avance aparecerá aquí.
         </Text>
       </Box>
 
-      {/* Accesos rápidos */}
       <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
         <AccionCard
           icon={BookOpen}

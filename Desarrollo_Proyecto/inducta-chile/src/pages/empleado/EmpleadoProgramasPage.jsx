@@ -1,46 +1,11 @@
 import {
-  Badge,
   Box,
   Flex,
   Heading,
-  Progress,
+  Icon,
   Text,
-  VStack,
 } from '@chakra-ui/react'
 import { BookOpen } from 'lucide-react'
-
-const PROGRAMAS_PLACEHOLDER = [
-  {
-    id: 1,
-    nombre: 'Inducción General',
-    descripcion: 'Conoce la empresa, sus valores y procesos básicos.',
-    progreso: 0,
-    estado: 'pendiente',
-    etapas: 5,
-    etapasCompletadas: 0,
-  },
-  {
-    id: 2,
-    nombre: 'Seguridad y Prevención',
-    descripcion: 'Protocolos de seguridad laboral según normativa vigente.',
-    progreso: 0,
-    estado: 'pendiente',
-    etapas: 3,
-    etapasCompletadas: 0,
-  },
-]
-
-const estadoColor = {
-  pendiente: 'gray',
-  'en-progreso': 'blue',
-  completado: 'green',
-}
-
-const estadoLabel = {
-  pendiente: 'Pendiente',
-  'en-progreso': 'En progreso',
-  completado: 'Completado',
-}
 
 export default function EmpleadoProgramasPage() {
   return (
@@ -59,65 +24,24 @@ export default function EmpleadoProgramasPage() {
       </Flex>
 
       <Text color="blackAlpha.600" mb={8} fontSize="sm">
-        Aquí aparecerán los programas de inducción y capacitación que tu empresa
-        te haya asignado.
+        Aquí aparecerán los programas de inducción y capacitación que tu empresa te asigne.
       </Text>
 
-      <VStack spacing={4} align="stretch">
-        {PROGRAMAS_PLACEHOLDER.map((p) => (
-          <ProgramaCard key={p.id} programa={p} />
-        ))}
-      </VStack>
-    </Box>
-  )
-}
-
-function ProgramaCard({ programa }) {
-  return (
-    <Box
-      p={5}
-      borderWidth="1px"
-      borderColor="blackAlpha.100"
-      borderRadius="xl"
-      bg="white"
-      _hover={{ borderColor: 'blackAlpha.200', shadow: 'sm' }}
-      transition="all 0.15s"
-    >
-      <Flex justify="space-between" align="start" mb={2}>
-        <Text fontWeight="semibold" color="brand.ink" fontSize="sm">
-          {programa.nombre}
+      <Box
+        p={10}
+        borderWidth="1px"
+        borderColor="blackAlpha.100"
+        borderRadius="xl"
+        textAlign="center"
+      >
+        <Icon as={BookOpen} boxSize={10} color="blackAlpha.200" mb={4} />
+        <Text fontWeight="semibold" color="brand.ink" mb={2}>
+          Sin programas asignados
         </Text>
-        <Badge
-          colorScheme={estadoColor[programa.estado]}
-          fontSize="10px"
-          borderRadius="full"
-          px={2}
-          flexShrink={0}
-          ml={3}
-        >
-          {estadoLabel[programa.estado]}
-        </Badge>
-      </Flex>
-
-      <Text color="blackAlpha.600" fontSize="sm" mb={4}>
-        {programa.descripcion}
-      </Text>
-
-      <Progress
-        value={programa.progreso}
-        size="sm"
-        borderRadius="full"
-        colorScheme="blue"
-        mb={1.5}
-      />
-      <Flex justify="space-between">
-        <Text fontSize="xs" color="blackAlpha.500">
-          {programa.etapasCompletadas} / {programa.etapas} etapas
+        <Text fontSize="sm" color="blackAlpha.600" maxW="36ch" mx="auto">
+          Cuando tu administrador te asigne una inducción o capacitación, la verás en esta lista.
         </Text>
-        <Text fontSize="xs" color="blackAlpha.500">
-          {programa.progreso}%
-        </Text>
-      </Flex>
+      </Box>
     </Box>
   )
 }

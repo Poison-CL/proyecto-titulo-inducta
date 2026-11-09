@@ -19,6 +19,8 @@ import { Link as RouterLink, NavLink, useNavigate } from 'react-router-dom'
 
 const navBtn = {
   variant: 'ghost',
+  display: 'flex',
+  w: 'full',
   justifyContent: 'flex-start',
   h: '36px',
   px: 2.5,
@@ -145,43 +147,45 @@ export default function PanelShell({
           display={{ base: 'none', md: 'flex' }}
         >
           <Box>
-            {/* Quick search */}
-            <Box as="form" onSubmit={buscar} mb={2.5}>
-              <InputGroup size="sm">
-                <InputLeftElement pointerEvents="none" h="36px">
-                  <Icon as={Search} boxSize={3.5} color="blackAlpha.400" />
-                </InputLeftElement>
-                <Input
-                  ref={inputRef}
-                  value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value)
-                    if (msg) setMsg('')
-                  }}
-                  placeholder={searchPlaceholder}
-                  aria-label="Búsqueda rápida del panel"
-                  h="36px"
-                  pl={9}
-                  borderRadius="md"
-                  borderColor="blackAlpha.200"
-                  bg="blackAlpha.50"
-                  fontSize="sm"
-                  isDisabled={buscando}
-                  _placeholder={{ color: 'blackAlpha.500' }}
-                  _focus={{ bg: 'white', borderColor: 'brand.primary' }}
-                />
-                <InputRightElement w="auto" pr={1.5} h="36px" pointerEvents="none">
-                  <Kbd fontSize="9px" bg="white" borderColor="blackAlpha.200" color="blackAlpha.600">
-                    Ctrl K
-                  </Kbd>
-                </InputRightElement>
-              </InputGroup>
-              {msg ? (
-                <Text fontSize="xs" color="blackAlpha.500" mt={1.5} px={1}>
-                  {msg}
-                </Text>
-              ) : null}
-            </Box>
+            {/* Quick search: sin resolver no se muestra (evita input muerto) */}
+            {resolverBusqueda ? (
+              <Box as="form" onSubmit={buscar} mb={2.5}>
+                <InputGroup size="sm">
+                  <InputLeftElement pointerEvents="none" h="36px">
+                    <Icon as={Search} boxSize={3.5} color="blackAlpha.400" />
+                  </InputLeftElement>
+                  <Input
+                    ref={inputRef}
+                    value={q}
+                    onChange={(e) => {
+                      setQ(e.target.value)
+                      if (msg) setMsg('')
+                    }}
+                    placeholder={searchPlaceholder}
+                    aria-label="Búsqueda rápida del panel"
+                    h="36px"
+                    pl={9}
+                    borderRadius="md"
+                    borderColor="blackAlpha.200"
+                    bg="blackAlpha.50"
+                    fontSize="sm"
+                    isDisabled={buscando}
+                    _placeholder={{ color: 'blackAlpha.500' }}
+                    _focus={{ bg: 'white', borderColor: 'brand.primary' }}
+                  />
+                  <InputRightElement w="auto" pr={1.5} h="36px" pointerEvents="none">
+                    <Kbd fontSize="9px" bg="white" borderColor="blackAlpha.200" color="blackAlpha.600">
+                      Ctrl K
+                    </Kbd>
+                  </InputRightElement>
+                </InputGroup>
+                {msg ? (
+                  <Text fontSize="xs" color="blackAlpha.500" mt={1.5} px={1}>
+                    {msg}
+                  </Text>
+                ) : null}
+              </Box>
+            ) : null}
 
             {/* CTA tipo “New project” */}
             {ctaNav ? (
@@ -210,7 +214,7 @@ export default function PanelShell({
             {/* Nav agrupada */}
             <VStack as="nav" align="stretch" spacing={0.5}>
               {navSections.map((group, gi) => (
-                <Box key={gi}>
+                <VStack key={gi} align="stretch" spacing={0.5}>
                   {gi > 0 ? <Divider my={2.5} borderColor="blackAlpha.100" /> : null}
                   {group.map(({ to, end, label, icon: IconCmp, dataTour }) => (
                     <Button
@@ -225,7 +229,7 @@ export default function PanelShell({
                       {label}
                     </Button>
                   ))}
-                </Box>
+                </VStack>
               ))}
             </VStack>
           </Box>

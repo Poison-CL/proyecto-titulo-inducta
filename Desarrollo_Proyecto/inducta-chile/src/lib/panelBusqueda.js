@@ -1,10 +1,9 @@
 /** Búsqueda del panel: primero secciones, luego datos (Supabase / miembros). */
 
 export const RUTAS_BUSQUEDA_ADMIN = [
-  { to: '/admin/tickets', keys: ['ticket', 'tickets', 'contacto', 'contactos'] },
+  { to: '/admin/soporte', keys: ['ticket', 'tickets', 'contacto', 'contactos', 'soporte', 'ayuda', 'support'] },
   { to: '/admin/pagos', keys: ['pago', 'pagos', 'webpay', 'cobro', 'cobros', 'billing'] },
   { to: '/admin/usuarios', keys: ['usuario', 'usuarios', 'acceso', 'accesos', 'team'] },
-  { to: '/admin/soporte', keys: ['soporte', 'ayuda', 'support'] },
   { to: '/admin/empresas', keys: ['empresa', 'empresas', 'cuenta', 'cuentas', 'plan', 'planes'] },
   { to: '/admin', keys: ['resumen', 'inicio', 'home', 'workspace'] },
 ]
@@ -14,6 +13,23 @@ export const RUTAS_BUSQUEDA_EMPRESA = [
   { to: '/dashboard/equipo', keys: ['equipo', 'colaborador', 'colaboradores', 'invitar', 'miembro', 'miembros', 'team'] },
   { to: '/dashboard/configuracion', keys: ['configuracion', 'config', 'cuenta', 'plan', 'planes', 'datos', 'contacto', 'billing', 'settings'] },
 ]
+
+export const RUTAS_BUSQUEDA_EMPLEADO = [
+  { to: '/empleado', keys: ['inicio', 'home', 'panel', 'resumen', 'workspace'] },
+  { to: '/empleado/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'capacitacion', 'capacitaciones'] },
+  { to: '/empleado/progreso', keys: ['progreso', 'avance', 'etapa', 'etapas'] },
+  { to: '/empleado/certificados', keys: ['certificado', 'certificados', 'diploma'] },
+  { to: '/empleado/perfil', keys: ['perfil', 'cuenta', 'config', 'configuracion', 'datos'] },
+]
+
+/** @returns {Promise<{ to: string|null, msg?: string }>} */
+export async function resolverBusquedaEmpleado(consulta) {
+  const q = String(consulta || '').trim()
+  if (!q) return { to: null, msg: 'Escriba algo para buscar.' }
+  const seccion = matchSeccion(q, RUTAS_BUSQUEDA_EMPLEADO)
+  if (seccion) return { to: seccion }
+  return { to: null, msg: `No encontramos «${q}» en el panel.` }
+}
 
 export function matchSeccion(consulta, routes) {
   const v = consulta.trim().toLowerCase()
@@ -90,7 +106,7 @@ export async function resolverBusquedaAdmin(supabase, consulta) {
 
   if (usuarios.data?.length) return { to: rutaConQ('/admin/usuarios', q) }
   if (empresas.data?.length) return { to: rutaConQ('/admin/empresas', q) }
-  if (tickets.data?.length) return { to: rutaConQ('/admin/tickets', q) }
+  if (tickets.data?.length) return { to: rutaConQ('/admin/soporte', q) }
   if (pagos.data?.length) return { to: rutaConQ('/admin/pagos', q) }
 
   return { to: null, msg: `No encontramos «${q}» en el panel.` }
@@ -152,6 +168,9 @@ export async function resolverBusquedaEmpresa(supabase, orgId, consulta, opts = 
 if (import.meta.env.DEV) {
   if (matchSeccion('usuarios', RUTAS_BUSQUEDA_ADMIN) !== '/admin/usuarios') {
     throw new Error('panelBusqueda: seccion usuarios')
+  }
+  if (matchSeccion('programas', RUTAS_BUSQUEDA_EMPLEADO) !== '/empleado/programas') {
+    throw new Error('panelBusqueda: seccion empleado')
   }
   if (rutaConQ('/admin/usuarios', 'Hans Elfert') !== '/admin/usuarios?q=Hans%20Elfert') {
     throw new Error('panelBusqueda: rutaConQ')

@@ -1,6 +1,6 @@
 import { Flex } from '@chakra-ui/react'
 import { OrganizationSwitcher, useOrganization, useUser } from '@clerk/clerk-react'
-import { Building2, CreditCard, Headset, Home, KeyRound, Plus, Ticket } from 'lucide-react'
+import { Building2, CreditCard, Headset, Home, KeyRound, Plus } from 'lucide-react'
 import { useCallback } from 'react'
 import { Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
@@ -21,17 +21,17 @@ export default function SoporteAdminLayout() {
 
   const navPrimary = [
     { to: '/admin', end: true, label: 'Resumen', icon: Home },
+    { to: '/admin/soporte', label: 'Soporte', icon: Headset },
     { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
-    { to: '/admin/tickets', label: 'Tickets', icon: Ticket },
     { to: '/admin/pagos', label: 'Pagos', icon: CreditCard },
   ]
   const navEquipo = [{ to: '/admin/usuarios', label: 'Usuarios', icon: KeyRound }]
-  const navSettings = [{ to: '/admin/soporte', label: 'Soporte', icon: Headset }]
+  const navSettings = []
 
   return (
     <PanelShell
       logoTo="/admin"
-      topLinks={[{ label: 'Soporte', to: '/admin/soporte', icon: Headset }]}
+      topLinks={[{ label: 'Bandeja', to: '/admin/soporte', icon: Headset }]}
       topRight={
         <Flex align="center" gap={2} ml={1}>
           <OrganizationSwitcher
@@ -42,8 +42,8 @@ export default function SoporteAdminLayout() {
           <InductaUserButton afterSignOutUrl="/" />
         </Flex>
       }
-      navSections={[navPrimary, navEquipo, navSettings]}
-      ctaNav={{ label: 'Ver empresas', to: '/admin/empresas', icon: Plus }}
+      navSections={[navPrimary, navEquipo].filter((g) => g.length)}
+      ctaNav={{ label: 'Abrir soporte', to: '/admin/soporte', icon: Plus }}
       resolverBusqueda={resolverBusqueda}
       searchPlaceholder="Búsqueda rápida"
       planWidget={
