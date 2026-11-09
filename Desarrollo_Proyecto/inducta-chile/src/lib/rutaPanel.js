@@ -1,5 +1,5 @@
-import { esAdminEmpresa } from './authRol'
-import { esAdminPlataforma, esOrgInducta, esTrabajadorPlataforma } from './orgInducta'
+import { esAdminEmpresa } from './authRol.js'
+import { esAdminPlataforma, esOrgInducta, esTrabajadorPlataforma } from './orgInducta.js'
 
 /** Destino correcto de "Ir al panel" / Docs → Panel. */
 export function rutaPanel({ isSignedIn, membership, organization }) {

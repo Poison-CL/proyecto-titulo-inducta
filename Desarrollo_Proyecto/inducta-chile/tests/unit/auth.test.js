@@ -1,7 +1,17 @@
 // npm run test
 import assert from 'node:assert/strict'
-import { getRolUsuario, ROL } from '../../src/lib/authRol.js'
-import { clerkError, PASO, pasoSiguiente } from '../../src/lib/loginPasos.js'
+import {
+  elegirRolAdmin,
+  elegirRolTrabajador,
+  esAdminEmpresa,
+  etiquetaOrgRol,
+  getRolUsuario,
+  ORG_ROL,
+  ROL,
+  rolSelectMiembro,
+} from '../../src/lib/authRol.js'
+import { clerkError, PASO, pasoSiguiente, pideCodigoTrasPassword } from '../../src/lib/loginPasos.js'
+import { rutaPanel } from '../../src/lib/rutaPanel.js'
 
 const signIn = (...estrategias) => ({
   supportedFirstFactors: estrategias.map((strategy) => ({ strategy })),
@@ -17,6 +27,11 @@ assert.equal(
   null,
   'una estrategia que no manejamos no habilita ingreso',
 )
+
+assert.equal(pideCodigoTrasPassword('needs_second_factor'), true)
+assert.equal(pideCodigoTrasPassword('needs_client_trust'), true)
+assert.equal(pideCodigoTrasPassword('complete'), false)
+assert.equal(pideCodigoTrasPassword('needs_first_factor'), false)
 
 assert.equal(
   getRolUsuario({ publicMetadata: { rol: 'empresa' }, unsafeMetadata: { rol: 'empleado' } }),
@@ -66,4 +81,44 @@ for (const code of ['form_identifier_not_found', 'form_code_incorrect', 'otro', 
   }
 }
 
-console.log('ok: pasoSiguiente, getRolUsuario y clerkError')
+assert.equal(
+  elegirRolTrabajador([ORG_ROL.ADMIN_INDUCTA, ORG_ROL.TRABAJADOR, ORG_ROL.MIEMBRO]),
+  ORG_ROL.TRABAJADOR,
+  'preferimos org:trabajador sobre org:member',
+)
+assert.equal(
+  elegirRolTrabajador([ORG_ROL.ADMIN, ORG_ROL.MIEMBRO]),
+  ORG_ROL.MIEMBRO,
+  'si no hay trabajador custom, usamos org:member',
+)
+assert.equal(
+  elegirRolAdmin([ORG_ROL.ADMIN_INDUCTA, ORG_ROL.TRABAJADOR], ORG_ROL.ADMIN_INDUCTA),
+  ORG_ROL.ADMIN_INDUCTA,
+)
+assert.equal(esAdminEmpresa({ role: ORG_ROL.TRABAJADOR }), false)
+assert.equal(esAdminEmpresa({ role: ORG_ROL.MIEMBRO }), false)
+assert.equal(etiquetaOrgRol(ORG_ROL.TRABAJADOR), 'Trabajador')
+assert.equal(
+  rolSelectMiembro({ role: ORG_ROL.TRABAJADOR }, ORG_ROL.ADMIN_INDUCTA, ORG_ROL.TRABAJADOR),
+  ORG_ROL.TRABAJADOR,
+)
+assert.equal(
+  rutaPanel({
+    isSignedIn: true,
+    membership: { role: ORG_ROL.TRABAJADOR },
+    organization: { id: 'org_empresa' },
+  }),
+  '/empleado',
+  'trabajador de empresa va a /empleado',
+)
+assert.equal(
+  rutaPanel({
+    isSignedIn: true,
+    membership: { role: ORG_ROL.ADMIN_INDUCTA },
+    organization: { id: 'org_empresa' },
+  }),
+  '/dashboard',
+  'admin de empresa va a /dashboard',
+)
+
+console.log('ok: pasoSiguiente, getRolUsuario, clerkError y roles org')

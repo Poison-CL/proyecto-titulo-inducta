@@ -124,6 +124,21 @@ export default function AdminPagosPage() {
               {p.fecha_pago ? new Date(p.fecha_pago).toLocaleString('es-CL') : 'Sin fecha'}
               {p.email_contacto ? ` · ${p.email_contacto}` : ''}
             </Text>
+            {p.nombre_comercial || p.id_empresa ? (
+              <Button
+                as={RouterLink}
+                to={`/admin/empresas?q=${encodeURIComponent(p.nombre_comercial || p.id_empresa)}`}
+                size="sm"
+                variant="link"
+                color="brand.primary"
+                mt={2}
+                p={0}
+                h="auto"
+                fontWeight="semibold"
+              >
+                Ver empresa →
+              </Button>
+            ) : null}
           </Box>
         ))}
         {!loading && rows.length === 0 && (

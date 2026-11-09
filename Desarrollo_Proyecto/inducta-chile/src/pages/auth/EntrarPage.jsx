@@ -22,7 +22,13 @@ import { useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { RUTAS_AUTH } from '../../lib/authCopy'
 import { isRolValido, ROL, setRolPendiente } from '../../lib/authRol'
-import { clerkError, factorByStrategy, PASO, pasoSiguiente } from '../../lib/loginPasos'
+import {
+  clerkError,
+  factorByStrategy,
+  PASO,
+  pasoSiguiente,
+  pideCodigoTrasPassword,
+} from '../../lib/loginPasos'
 
 const MotionBox = motion.create(Box)
 
@@ -267,7 +273,11 @@ function LoginCard() {
         emailAddressId: factor.emailAddressId,
       })
     }
-    setInfo(`Enviamos un código a ${emailNormalizado()}. Revise su bandeja de entrada.`)
+    setInfo(
+      asSecond
+        ? `Contraseña correcta. Por seguridad enviamos un código a ${emailNormalizado()}.`
+        : `Enviamos un código a ${emailNormalizado()}. Revise su bandeja de entrada.`,
+    )
     setCooldown(RESEND_SEGUNDOS)
   }
 
@@ -338,12 +348,13 @@ function LoginCard() {
       })
       if (await finishIfComplete(result)) return
 
-      // Contraseña correcta pero Clerk pide MFA (código al correo)
-      if (result.status === 'needs_second_factor') {
+      // Contraseña ok: MFA o Device Trust (dispositivo nuevo) → código al correo.
+      // Usar `result` (no el hook): el signIn del hook puede ir atrasado un tick.
+      if (pideCodigoTrasPassword(result.status)) {
         const tieneEmail = result.supportedSecondFactors?.some((f) => f.strategy === 'email_code')
         if (tieneEmail) {
           setCodeAsSecond(true)
-          await sendEmailCode(signIn, true)
+          await sendEmailCode(result, true)
           setStep('code')
           return
         }

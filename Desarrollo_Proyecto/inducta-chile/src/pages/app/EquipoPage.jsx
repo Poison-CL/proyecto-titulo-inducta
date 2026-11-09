@@ -21,7 +21,14 @@ import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanne
 import SettingsCard, { SettingsRow } from '../../components/dashboard/SettingsCard'
 import { useEmpresaCuenta } from '../../features/empresa/useEmpresaCuenta'
 import { useSupabase } from '../../hooks/useSupabase'
-import { esAdminEmpresa, etiquetaOrgRol, ORG_ROL, rolInvitarAdmin } from '../../lib/authRol'
+import {
+  elegirRolAdmin,
+  elegirRolTrabajador,
+  esAdminEmpresa,
+  etiquetaOrgRol,
+  ORG_ROL,
+  rolSelectMiembro,
+} from '../../lib/authRol'
 import { textoCoincide } from '../../lib/panelBusqueda'
 import { cuposDisponibles, getPlan, puedeInvitar } from '../../lib/planes'
 
@@ -47,6 +54,13 @@ function mensajeErrorClerk(err) {
     return 'Esa persona ya pertenece a la empresa o ya tiene una invitación pendiente.'
   }
   if (code === 'form_param_format_invalid') return 'Escriba un correo válido.'
+  if (
+    code === 'organization_invalid_role_key' ||
+    code === 'form_param_value_invalid' ||
+    /role/i.test(err?.errors?.[0]?.message || '')
+  ) {
+    return 'Ese rol no está habilitado en Clerk para esta organización. Revise Roles & Permissions (Trabajador = org:trabajador u org:member).'
+  }
   return err?.errors?.[0]?.longMessage || err?.message || 'No pudimos completar la acción. Intente de nuevo.'
 }
 
@@ -59,8 +73,14 @@ export default function EquipoPage() {
   })
 
   const [email, setEmail] = useState('')
-  const rolAdmin = rolInvitarAdmin(membership)
-  const [rolInvitar, setRolInvitar] = useState(ORG_ROL.MIEMBRO)
+  const [rolKeys, setRolKeys] = useState([])
+  const [rolesListos, setRolesListos] = useState(false)
+  const rolAdmin = useMemo(
+    () => elegirRolAdmin(rolKeys, membership?.role),
+    [rolKeys, membership?.role],
+  )
+  const rolTrabajador = useMemo(() => elegirRolTrabajador(rolKeys), [rolKeys])
+  const [rolInvitar, setRolInvitar] = useState(ORG_ROL.TRABAJADOR)
   const [enviando, setEnviando] = useState(false)
   const [accionId, setAccionId] = useState(null)
   const [error, setError] = useState('')
@@ -85,6 +105,36 @@ export default function EquipoPage() {
       vivo = false
     }
   }, [organization?.id, supabase])
+
+  // Cargar claves reales de Clerk (org:trabajador vs org:member, etc.)
+  useEffect(() => {
+    if (!organization?.getRoles) {
+      setRolKeys([])
+      setRolesListos(true)
+      return
+    }
+    let vivo = true
+    setRolesListos(false)
+    organization
+      .getRoles({ pageSize: 20, initialPage: 1 })
+      .then((res) => {
+        if (!vivo) return
+        const keys = (res?.data || []).map((r) => r.key).filter(Boolean)
+        setRolKeys(keys)
+        const trab = elegirRolTrabajador(keys)
+        setRolInvitar((prev) => (prev === ORG_ROL.MIEMBRO || prev === ORG_ROL.TRABAJADOR ? trab : prev))
+      })
+      .catch((err) => {
+        console.error('No se pudieron cargar roles Clerk', err)
+        if (vivo) setRolKeys([])
+      })
+      .finally(() => {
+        if (vivo) setRolesListos(true)
+      })
+    return () => {
+      vivo = false
+    }
+  }, [organization?.id])
 
   const miembros = memberships?.data ?? []
   const pendientes = (invitations?.data ?? []).filter((i) => i.status === 'pending')
@@ -151,10 +201,14 @@ export default function EquipoPage() {
     }
     setEnviando(true)
     try {
-      await organization.inviteMember({ emailAddress: correo, role: rolInvitar })
+      const role =
+        rolInvitar === rolAdmin || esAdminEmpresa({ role: rolInvitar })
+          ? rolAdmin
+          : rolTrabajador
+      await organization.inviteMember({ emailAddress: correo, role })
       setEmail('')
-      setRolInvitar(ORG_ROL.MIEMBRO)
-      setOk(`Invitación enviada a ${correo}.`)
+      setRolInvitar(rolTrabajador)
+      setOk(`Invitación enviada a ${correo} como ${etiquetaOrgRol(role)}.`)
       await refrescar()
     } catch (err) {
       setError(mensajeErrorClerk(err))
@@ -164,7 +218,9 @@ export default function EquipoPage() {
   }
 
   async function cambiarRol(m, role) {
-    const quedaAdmin = role === rolAdmin || esAdminEmpresa({ role })
+    const roleFinal =
+      role === rolAdmin || esAdminEmpresa({ role }) ? rolAdmin : rolTrabajador
+    const quedaAdmin = esAdminEmpresa({ role: roleFinal })
     if (soyYo(m) && !quedaAdmin) {
       setError('No puede quitarse el rol de administrador a sí mismo.')
       return
@@ -173,12 +229,13 @@ export default function EquipoPage() {
       setError('Debe quedar al menos un administrador en la empresa.')
       return
     }
+    if (m.role === roleFinal) return
     setError('')
     setOk('')
     setAccionId(m.id)
     try {
-      await m.update({ role })
-      setOk('Rol actualizado.')
+      await m.update({ role: roleFinal })
+      setOk(`Rol actualizado a ${etiquetaOrgRol(roleFinal)}.`)
       await refrescar()
     } catch (err) {
       setError(mensajeErrorClerk(err))
@@ -323,12 +380,18 @@ export default function EquipoPage() {
                   bg="white"
                 />
               </FormControl>
-              <FormControl w={{ base: 'full', sm: '11rem' }} isDisabled={!hayCupo || bloqueoTemporal}>
+              <FormControl w={{ base: 'full', sm: '11rem' }} isDisabled={!hayCupo || bloqueoTemporal || !rolesListos}>
                 <FormLabel fontSize="sm" mb={1.5}>
                   Rol
                 </FormLabel>
-                <Select h="42px" borderRadius="md" value={rolInvitar} onChange={(e) => setRolInvitar(e.target.value)} bg="white">
-                  <option value={ORG_ROL.MIEMBRO}>Trabajador</option>
+                <Select
+                  h="42px"
+                  borderRadius="md"
+                  value={rolInvitar === rolAdmin ? rolAdmin : rolTrabajador}
+                  onChange={(e) => setRolInvitar(e.target.value)}
+                  bg="white"
+                >
+                  <option value={rolTrabajador}>Trabajador</option>
                   <option value={rolAdmin}>Administrador</option>
                 </Select>
               </FormControl>
@@ -415,13 +478,13 @@ export default function EquipoPage() {
                       w={{ base: 'full', md: '10.5rem' }}
                       h="36px"
                       borderRadius="md"
-                      value={esAdminEmpresa(m) ? rolAdmin : ORG_ROL.MIEMBRO}
-                      isDisabled={accionId === m.id}
+                      value={rolSelectMiembro(m, rolAdmin, rolTrabajador)}
+                      isDisabled={accionId === m.id || !rolesListos}
                       onChange={(e) => cambiarRol(m, e.target.value)}
                       aria-label={`Rol de ${nombre}`}
                       bg="white"
                     >
-                      <option value={ORG_ROL.MIEMBRO}>Trabajador</option>
+                      <option value={rolTrabajador}>Trabajador</option>
                       <option value={rolAdmin}>Administrador</option>
                     </Select>
                     <Button

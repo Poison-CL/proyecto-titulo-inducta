@@ -8,11 +8,13 @@ import {
   Settings2,
   TrendingUp,
 } from 'lucide-react'
+import { useCallback } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
 import PanelShell from '../components/dashboard/PanelShell'
 import { esAdminEmpresa } from '../lib/authRol'
 import { esAdminPlataforma, esOrgInducta } from '../lib/orgInducta'
+import { resolverBusquedaEmpleado } from '../lib/panelBusqueda'
 
 /**
  * Layout del dashboard de empleado.
@@ -21,6 +23,8 @@ import { esAdminPlataforma, esOrgInducta } from '../lib/orgInducta'
  */
 export default function EmpleadoLayout() {
   const { membership, organization, isLoaded } = useOrganization()
+
+  const resolverBusqueda = useCallback((consulta) => resolverBusquedaEmpleado(consulta), [])
 
   // Seguridad extra: si por alguna razón un admin llega aquí, lo redirigimos
   if (isLoaded && esAdminEmpresa(membership)) {
@@ -54,6 +58,7 @@ export default function EmpleadoLayout() {
         </Flex>
       }
       navSections={[navPrimary, navSettings]}
+      resolverBusqueda={resolverBusqueda}
       searchPlaceholder="Buscar en el panel…"
     >
       <Box>
