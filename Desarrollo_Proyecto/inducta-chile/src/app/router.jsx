@@ -1,8 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import RequireAuth from '../components/auth/RequireAuth'
 import RequireAdminPlataforma from '../components/auth/RequireAdminPlataforma'
+import RequireEmpleado from '../components/auth/RequireEmpleado'
 import RequireOrg from '../components/auth/RequireOrg'
 import AdminLayout from '../layouts/AdminLayout'
+import EmpleadoLayout from '../layouts/EmpleadoLayout'
 import SoporteAdminLayout from '../layouts/SoporteAdminLayout'
 import RecursosLayout from '../layouts/RecursosLayout'
 import SiteLayout from '../layouts/SiteLayout'
@@ -23,6 +25,11 @@ import ContratarPage from '../pages/public/ContratarPage'
 import DashboardPage from '../pages/app/DashboardPage'
 import ConfiguracionPage from '../pages/app/ConfiguracionPage'
 import EquipoPage from '../pages/app/EquipoPage'
+import EmpleadoDashboardPage from '../pages/empleado/EmpleadoDashboardPage'
+import EmpleadoProgramasPage from '../pages/empleado/EmpleadoProgramasPage'
+import EmpleadoProgresosPage from '../pages/empleado/EmpleadoProgresosPage'
+import EmpleadoCertificadosPage from '../pages/empleado/EmpleadoCertificadosPage'
+import EmpleadoPerfilPage from '../pages/empleado/EmpleadoPerfilPage'
 import CuentaDeshabilitadaPage from '../pages/CuentaDeshabilitadaPage'
 import EntrarPage from '../pages/auth/EntrarPage'
 import HomePage from '../pages/public/HomePage'
@@ -36,6 +43,7 @@ import { RUTAS_AUTH } from '../lib/authCopy'
 import PagoResultadoPage from '../pages/public/PagoResultadoPage'
 
 
+// Guard: Admin de empresa (/dashboard)
 function ProtectedApp() {
   return (
     <RequireAuth>
@@ -46,6 +54,7 @@ function ProtectedApp() {
   )
 }
 
+// Guard: Admin de plataforma Inducta (/admin)
 function ProtectedAdminPlataforma() {
   return (
     <RequireAuth>
@@ -53,6 +62,19 @@ function ProtectedAdminPlataforma() {
         <RequireAdminPlataforma>
           <SoporteAdminLayout />
         </RequireAdminPlataforma>
+      </RequireOrg>
+    </RequireAuth>
+  )
+}
+
+// Guard: Empleado/miembro (/empleado)
+function ProtectedEmpleado() {
+  return (
+    <RequireAuth>
+      <RequireOrg>
+        <RequireEmpleado>
+          <EmpleadoLayout />
+        </RequireEmpleado>
       </RequireOrg>
     </RequireAuth>
   )
@@ -95,7 +117,7 @@ export function AppRouter() {
         />
         <Route path={RUTAS_AUTH.postLogin} element={<PostLoginPage />} />
 
-        {/* Pantallas para cuando el usuario entro pero no puede pasar al panel */}
+        {/* Pantallas para cuando el usuario entró pero no puede pasar al panel */}
         <Route path={RUTAS_AUTH.sinEmpresa} element={<AccesoSinEmpresaPage />} />
         <Route path={RUTAS_AUTH.sinMembresia} element={<AccesoSinMembresiaPage />} />
         <Route path={RUTAS_AUTH.registroBloqueado} element={<AccesoRegistroPage />} />
@@ -119,12 +141,23 @@ export function AppRouter() {
           element={<Navigate to={RUTAS_AUTH.registroBloqueado} replace />}
         />
 
+        {/* Dashboard: Admin de Empresa */}
         <Route path="/dashboard" element={<ProtectedApp />}>
           <Route index element={<DashboardPage />} />
           <Route path="equipo" element={<EquipoPage />} />
           <Route path="configuracion" element={<ConfiguracionPage />} />
         </Route>
 
+        {/* Dashboard: Empleado/Colaborador */}
+        <Route path="/empleado" element={<ProtectedEmpleado />}>
+          <Route index element={<EmpleadoDashboardPage />} />
+          <Route path="programas" element={<EmpleadoProgramasPage />} />
+          <Route path="progreso" element={<EmpleadoProgresosPage />} />
+          <Route path="certificados" element={<EmpleadoCertificadosPage />} />
+          <Route path="perfil" element={<EmpleadoPerfilPage />} />
+        </Route>
+
+        {/* Dashboard: Admin de Plataforma Inducta */}
         <Route path="/admin" element={<ProtectedAdminPlataforma />}>
           <Route index element={<AdminResumenPage />} />
           <Route path="soporte" element={<AdminSoportePage />} />
