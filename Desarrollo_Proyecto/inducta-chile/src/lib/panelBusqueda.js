@@ -16,7 +16,7 @@ export const RUTAS_BUSQUEDA_EMPRESA = [
 
 export const RUTAS_BUSQUEDA_EMPLEADO = [
   { to: '/empleado', keys: ['inicio', 'home', 'panel', 'resumen', 'workspace'] },
-  { to: '/empleado/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'capacitacion', 'capacitaciones'] },
+  { to: '/empleado/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'capacitacion', 'capacitaciones', 'prueba', 'pruebas', 'test', 'tests', 'evaluacion', 'evaluaciones'] },
   { to: '/empleado/progreso', keys: ['progreso', 'avance', 'etapa', 'etapas'] },
   { to: '/empleado/certificados', keys: ['certificado', 'certificados', 'diploma'] },
   { to: '/empleado/perfil', keys: ['perfil', 'cuenta', 'config', 'configuracion', 'datos'] },

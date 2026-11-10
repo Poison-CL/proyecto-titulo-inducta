@@ -8,6 +8,7 @@ export const PLANES = [
     ufMensual: 0,
     ufAnual: 0,
     maxColaboradores: 5,
+    maxEvaluaciones: 1,
     features: [
       { ok: true, text: 'Hasta 5 colaboradores' },
       { ok: true, text: 'Una evaluación propia' },
@@ -26,6 +27,7 @@ export const PLANES = [
     ufMensual: 1.5,
     ufAnual: 15,
     maxColaboradores: 50,
+    maxEvaluaciones: 5,
     features: [
       { ok: true, text: 'Hasta 50 colaboradores' },
       { ok: true, text: 'Hasta 5 evaluaciones' },
@@ -45,6 +47,7 @@ export const PLANES = [
     ufMensual: 4.5,
     ufAnual: 45,
     maxColaboradores: 250,
+    maxEvaluaciones: null,
     features: [
       { ok: true, text: 'Hasta 250 colaboradores' },
       { ok: true, text: 'Evaluaciones sin límite' },
@@ -63,6 +66,7 @@ export const PLANES = [
     ufMensual: 10,
     ufAnual: 100,
     maxColaboradores: null,
+    maxEvaluaciones: null,
     features: [
       { ok: true, text: 'Colaboradores sin límite' },
       { ok: true, text: 'Evaluaciones sin límite' },
@@ -122,6 +126,17 @@ export function cuposDisponibles(plan, miembros = 0, pendientes = 0) {
 
 export function puedeInvitar(plan, miembros = 0, pendientes = 0) {
   const cupos = cuposDisponibles(plan, miembros, pendientes)
+  return cupos === null || cupos > 0
+}
+
+/** null = sin límite. Cuenta evaluaciones creadas. */
+export function cuposEvaluacionesDisponibles(plan, total = 0) {
+  if (!plan || plan.maxEvaluaciones == null) return null
+  return Math.max(0, plan.maxEvaluaciones - total)
+}
+
+export function puedeCrearEvaluacion(plan, total = 0) {
+  const cupos = cuposEvaluacionesDisponibles(plan, total)
   return cupos === null || cupos > 0
 }
 
