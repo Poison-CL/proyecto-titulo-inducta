@@ -3,16 +3,17 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Heading,
   Input,
   Text,
   VStack,
   useToast,
 } from '@chakra-ui/react'
 import { useAuth } from '@clerk/clerk-react'
+import { Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import { useSupabase } from '../../hooks/useSupabase'
 import { filtraPorCampos } from '../../lib/panelBusqueda'
 
@@ -128,21 +129,12 @@ export default function AdminUsuariosPage() {
   }
 
   return (
-    <Box maxW="56rem">
-      <Heading
-        as="h1"
-        fontSize={{ base: '2rem', md: '2.4rem' }}
-        fontWeight="semibold"
-        letterSpacing="-0.03em"
-        lineHeight="1.1"
-        color="brand.ink"
-        mb={3}
-      >
-        Usuarios
-      </Heading>
-      <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight={1.6} maxW="44ch" mb={12}>
-        Cuentas en Supabase y restablecimiento de contraseña vía Clerk (requiere Edge Function).
-      </Text>
+    <Box maxW="56rem" mx="auto">
+      <PanelPageHeader
+        icon={Users}
+        titulo="Usuarios"
+        bajada="Cuentas en Supabase y restablecimiento de contraseña vía Clerk."
+      />
 
       <Box
         id="admin-reset-password"

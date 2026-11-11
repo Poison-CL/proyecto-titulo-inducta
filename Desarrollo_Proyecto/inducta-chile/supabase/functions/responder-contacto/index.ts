@@ -1,34 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 import nodemailer from 'npm:nodemailer@6.9.16'
+import { AuthError, requireClerkAuth } from '../_shared/clerkAuth.ts'
+import { jsonResponse, optionsResponse } from '../_shared/cors.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const ORG_INDUCTA = Deno.env.get('ORG_INDUCTA_ID') || 'org_3Kmnph0KjXr140vNE2SdpxPMYk9'
 
-const ORG_INDUCTA = 'org_3Kmnph0KjXr140vNE2SdpxPMYk9'
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
-}
-
-function userIdFromJwt(authHeader: string | null): string | null {
-  if (!authHeader?.startsWith('Bearer ')) return null
-  try {
-    const part = authHeader.slice(7).split('.')[1]
-    if (!part) return null
-    let b64 = part.replace(/-/g, '+').replace(/_/g, '/')
-    const pad = (4 - (b64.length % 4)) % 4
-    if (pad) b64 += '='.repeat(pad)
-    const payload = JSON.parse(atob(b64))
-    return typeof payload.sub === 'string' ? payload.sub : null
-  } catch {
-    return null
-  }
+function json(body: unknown, status = 200, req?: Request) {
+  return jsonResponse(body, status, req)
 }
 
 function escapeHtml(s: string) {
@@ -158,11 +137,11 @@ async function enviarCorreo(opts: {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method === 'OPTIONS') return optionsResponse(req)
 
   try {
-    const callerId = userIdFromJwt(req.headers.get('Authorization'))
-    if (!callerId) return json({ error: 'Sin sesión Clerk válida' }, 401)
+    const auth = await requireClerkAuth(req)
+    const callerId = auth.userId
 
     const { displayName } = await assertMiembroInducta(callerId)
 
@@ -285,7 +264,8 @@ serve(async (req) => {
       estado: patch.estado || ticket.estado,
     })
   } catch (e) {
+    if (e instanceof AuthError) return json({ error: e.message }, e.status, req)
     const status = (e as Error & { status?: number }).status || 400
-    return json({ error: (e as Error).message || 'Error desconocido' }, status)
+    return json({ error: (e as Error).message || 'Error desconocido' }, status, req)
   }
 })

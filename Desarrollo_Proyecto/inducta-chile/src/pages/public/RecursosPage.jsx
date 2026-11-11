@@ -32,20 +32,20 @@ const TOC_IDS = TOC.map((t) => t.id)
 
 const FLUJO = [
   {
-    t: 'Defina programas por cargo',
-    d: 'Separe lo general de lo específico. Cada colaborador ve solo lo que necesita para su puesto.',
+    t: 'Cree la evaluación y los niveles',
+    d: 'En Programas: preguntas, exigencia de aprobación y, si aplica, Nivel → Lección → texto o YouTube.',
   },
   {
-    t: 'Cree accesos y asigne',
-    d: 'Alta con correo, asignación del programa y un responsable para la primera semana.',
+    t: 'Invite al equipo',
+    d: 'Desde Equipo invite por correo (respetando el cupo del plan). Publique la inducción.',
   },
   {
-    t: 'Siga el avance',
-    d: 'Revise quién completó cada etapa, cuándo y cómo le fue en las pruebas.',
+    t: 'El colaborador estudia y rinde',
+    d: 'En Mis programas completa el estudio; el cuestionario se desbloquea al 100 %. Si aprueba, obtiene constancia.',
   },
   {
-    t: 'Muestre evidencia',
-    d: 'Ante una auditoría o fiscalización, el registro ya está listo en el panel.',
+    t: 'Revise avances y evidencia',
+    d: 'En Programas → Avances ve quién estudió y rindió; exporte CSV cuando lo pidan en una auditoría.',
   },
 ]
 
@@ -230,7 +230,7 @@ function RecursosIntro() {
       <Box as="article" flex="1" minW={0} maxW="68ch">
         <EncabezadoRecurso
           titulo="Introducción a Inducta"
-          bajada="Programe inducciones por cargo, siga el avance de cada colaborador y tenga evidencia lista para auditorías, desde un solo panel."
+          bajada="Cree inducciones con estudio (texto o video) y cuestionario, invite al equipo, siga avances y guarde constancias listas para auditoría."
           migas={[
             { label: 'Recursos', to: '/recursos' },
             { label: 'Primeros pasos' },
@@ -250,10 +250,10 @@ function RecursosIntro() {
             Qué es Inducta
           </Heading>
           <Text mb={5} color="blackAlpha.800">
-            Inducta Chile es la plataforma para inducción y capacitación en empresas. Cada organización administra programas, accesos, avance y evidencia desde el panel.
+            Inducta Chile es la plataforma para inducción y capacitación en empresas. Cada organización administra programas, niveles de estudio, accesos, avance y evidencia desde el panel de empresa.
           </Text>
           <Text mb={10} color="blackAlpha.800">
-            Los colaboradores entran con su correo, ven solo lo asignado a su cargo y dejan registro de cada etapa completada.
+            Los colaboradores entran desde Ingresar → Empleado con su correo, estudian en Mis programas, rinden el cuestionario cuando corresponde y descargan su constancia al aprobar.
           </Text>
 
           <Heading
@@ -309,10 +309,10 @@ function RecursosIntro() {
           </Heading>
           <Box as="ul" pl={0} listStyleType="none" mb={10}>
             {[
-              'Quién recibió cada programa y en qué fecha.',
-              'Qué contenidos incluía y si completó cada etapa.',
-              'Resultado de pruebas cuando la capacitación las tiene.',
-              'Registro listo para fiscalizaciones (p. ej. seguridad laboral o protocolos internos).',
+              'Quién recibió cada programa, progreso de estudio y fecha de evaluación.',
+              'Qué contenidos incluía (niveles, textos o videos) y si los completó.',
+              'Resultado del cuestionario (aprobada / reprobada) y constancia al aprobar.',
+              'Exportación CSV y registro útil para fiscalizaciones (seguridad laboral o protocolos internos).',
             ].map((item) => (
               <Text as="li" key={item} display="flex" gap={2} mb={2} color="blackAlpha.800">
                 <Text as="span" color="brand.primary" fontWeight="bold">

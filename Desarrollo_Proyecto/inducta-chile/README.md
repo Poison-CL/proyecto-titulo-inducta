@@ -144,3 +144,52 @@ inducta-chile/
 | `supabase/migrations` | SQL versionado |
 | `supabase/functions` | Pagos Transbank |
 | `container/` | Config nginx del contenedor |
+
+---
+
+## 7. Qué incluye la app hoy
+
+### Sitio público
+- Home, Precios (UF + IVA), Contacto, hub `/recursos` (guías, documentación, capacitaciones, cumplimiento, soporte)
+
+### Panel empresa (`/dashboard`)
+- **Programas**: crear/editar evaluaciones, niveles de estudio (texto / YouTube), publicar
+- **Avances** (pestaña en Programas): matriz trabajadores × inducciones, export CSV
+- **Equipo**: invitaciones y cupos según plan
+- **Configuración**: plan y datos de contacto
+
+### Panel empleado (`/empleado`)
+- **Mis programas**: estudiar (Completar y seguir) → rendir cuando el estudio está al 100 %
+- **Mis certificados**: constancia al aprobar
+- Inicio y perfil
+
+### Seguridad y pagos
+- Clerk Organizations (JWT + `org_id`) + RLS en Supabase
+- Calificación y publicación de avance vía Edge Function `publicar-avance` (no se confía en el cliente)
+- Webpay: monto calculado en servidor (`tbk-iniciar` / `tbk-confirmar`)
+
+Documentación de usuario: artículos en `src/lib/recursos.js` (visibles en `/recursos`).
+
+---
+
+## 8. Funciones desplegadas permitidas
+
+Edge Functions que deben permanecer en el proyecto Supabase:
+
+- `tbk-iniciar`
+- `tbk-confirmar`
+- `provisionar-cuenta-temporal`
+- `completar-cuenta-temporal`
+- `limpiar-cuentas-temporales`
+- `responder-contacto`
+- `admin-reset-password`
+- `publicar-avance`
+
+Funciones de prueba o utilidades puntuales que **no** deben quedar desplegadas en producción (eliminar del proyecto si existen):
+
+```powershell
+supabase functions delete test-smtp
+supabase functions delete test-resend
+supabase functions delete prep-fix-test-user
+supabase functions delete crear-org-administradores
+```

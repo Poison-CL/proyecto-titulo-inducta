@@ -7,7 +7,6 @@ import {
   FormControl,
   FormLabel,
   Grid,
-  Heading,
   Icon,
   Input,
   Select,
@@ -18,6 +17,7 @@ import { useOrganization, useUser } from '@clerk/clerk-react'
 import { Mail, UserPlus, Users } from 'lucide-react'
 import { Link as RouterLink, Navigate, useSearchParams } from 'react-router-dom'
 import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import SettingsCard, { SettingsRow } from '../../components/dashboard/SettingsCard'
 import { useEmpresaCuenta } from '../../features/empresa/useEmpresaCuenta'
 import { useSupabase } from '../../hooks/useSupabase'
@@ -292,36 +292,11 @@ export default function EquipoPage() {
 
   return (
     <Box maxW="64rem" mx="auto">
-      <Flex align="flex-start" gap={3} mb={8}>
-        <Flex
-          w="44px"
-          h="44px"
-          align="center"
-          justify="center"
-          borderRadius="lg"
-          borderWidth="1px"
-          borderColor="blackAlpha.100"
-          bg="brand.soft"
-          flexShrink={0}
-        >
-          <Icon as={Users} boxSize={5} color="brand.primary" strokeWidth={1.75} />
-        </Flex>
-        <Box>
-          <Heading
-            as="h1"
-            fontSize={{ base: '1.75rem', md: '2.1rem' }}
-            fontWeight="semibold"
-            letterSpacing="-0.03em"
-            lineHeight="1.15"
-            color="brand.ink"
-          >
-            Equipo
-          </Heading>
-          <Text color="blackAlpha.600" fontSize="md" mt={1.5} lineHeight="1.5" maxW="48ch">
-            Invite y gestione colaboradores de {organization?.name || 'su empresa'}.
-          </Text>
-        </Box>
-      </Flex>
+      <PanelPageHeader
+        icon={Users}
+        titulo="Equipo"
+        bajada={`Invite y gestione colaboradores de ${organization?.name || 'su empresa'}.`}
+      />
 
       <BusquedaFiltroBanner
         consulta={consulta}

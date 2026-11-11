@@ -66,6 +66,7 @@ export default function AdminLayout() {
 
   const navPrimary = [
     { to: '/dashboard', end: true, label: 'Inicio', icon: Home, dataTour: 'nav-inicio' },
+    { to: '/dashboard/programas', label: 'Programas', icon: ClipboardList, dataTour: 'nav-programas' },
     { to: '/dashboard/equipo', label: 'Equipo', icon: Users, dataTour: 'nav-equipo' },
   ]
   const navSettings = [

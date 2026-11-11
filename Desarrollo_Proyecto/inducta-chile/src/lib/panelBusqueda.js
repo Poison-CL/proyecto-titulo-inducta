@@ -10,14 +10,14 @@ export const RUTAS_BUSQUEDA_ADMIN = [
 
 export const RUTAS_BUSQUEDA_EMPRESA = [
   { to: '/dashboard', keys: ['inicio', 'home', 'resumen', 'panel', 'workspace'] },
+  { to: '/dashboard/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'evaluacion', 'evaluaciones', 'test', 'tests', 'cuestionario'] },
   { to: '/dashboard/equipo', keys: ['equipo', 'colaborador', 'colaboradores', 'invitar', 'miembro', 'miembros', 'team'] },
   { to: '/dashboard/configuracion', keys: ['configuracion', 'config', 'cuenta', 'plan', 'planes', 'datos', 'contacto', 'billing', 'settings'] },
 ]
 
 export const RUTAS_BUSQUEDA_EMPLEADO = [
   { to: '/empleado', keys: ['inicio', 'home', 'panel', 'resumen', 'workspace'] },
-  { to: '/empleado/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'capacitacion', 'capacitaciones', 'prueba', 'pruebas', 'test', 'tests', 'evaluacion', 'evaluaciones'] },
-  { to: '/empleado/progreso', keys: ['progreso', 'avance', 'etapa', 'etapas'] },
+  { to: '/empleado/programas', keys: ['programa', 'programas', 'induccion', 'inducciones', 'capacitacion', 'capacitaciones', 'prueba', 'pruebas', 'test', 'tests', 'evaluacion', 'evaluaciones', 'progreso', 'avance', 'etapa', 'etapas'] },
   { to: '/empleado/certificados', keys: ['certificado', 'certificados', 'diploma'] },
   { to: '/empleado/perfil', keys: ['perfil', 'cuenta', 'config', 'configuracion', 'datos'] },
 ]

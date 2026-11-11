@@ -291,7 +291,7 @@ export function PlanWidget({ titulo, planLabel, cta, to, meta }) {
       <Text fontSize="xs" color="blackAlpha.600" mb={0.5}>
         {titulo}
       </Text>
-      <Text fontSize="sm" fontWeight="semibold" color="brand.ink" mb={3} textTransform="capitalize">
+      <Text fontSize="sm" fontWeight="semibold" color="brand.ink" mb={3} noOfLines={2}>
         {planLabel}
       </Text>
       {cta && to ? (

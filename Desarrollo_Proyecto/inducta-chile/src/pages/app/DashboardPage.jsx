@@ -64,7 +64,7 @@ export default function DashboardPage() {
           <AccionCard
             icon={ClipboardList}
             titulo="Programas y Evaluaciones"
-            bajada="Cree inducciones, defina cuestionarios de evaluación y supervise la acreditación y avances del equipo."
+            bajada="Cree niveles de estudio, cuestionarios y supervise la acreditación y avances del equipo."
             cta="Gestionar programas"
             to="/dashboard/programas"
           />

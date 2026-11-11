@@ -11,7 +11,6 @@ export const iniciarPagoTransbank = async (datosPago) => {
   }
 
   if (!data?.token || !data?.url) {
-    console.error("Detalle del rechazo de Transbank:", data) // <-- Añade esta línea
     throw new Error('Respuesta inválida desde Transbank')
   }
 

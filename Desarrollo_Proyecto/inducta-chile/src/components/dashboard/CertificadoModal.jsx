@@ -1,10 +1,8 @@
 import {
-  Badge,
   Box,
   Button,
-  Divider,
   Flex,
-  Icon,
+  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -13,177 +11,287 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  VStack,
 } from '@chakra-ui/react'
-import { Award, Printer, ShieldCheck } from 'lucide-react'
-import { fechaCortaEs } from '../../lib/planes'
+import { Printer } from 'lucide-react'
+import { brandingCertificado, fechaCortaEs, getPlan } from '../../lib/planes'
 
-export default function CertificadoModal({ isOpen, onClose, avance, empresa, plan }) {
+const LOGO_INDUCTA = '/logo-azul-oscuro.png'
+
+export default function CertificadoModal({
+  isOpen,
+  onClose,
+  avance,
+  empresa,
+  plan,
+  logoEmpresaUrl,
+}) {
   if (!avance) return null
 
-  const esDemo = !plan || plan.id === 'demo'
+  const planResuelto = plan || getPlan(empresa?.plan) || getPlan('demo')
+  const brand = brandingCertificado(planResuelto)
+  const esMarcaInducta = brand.modo === 'marca_inducta'
+
   const nombreTrabajador = avance.nombre_usuario || 'Colaborador'
   const nombreEmpresa = empresa?.nombre_comercial || 'Empresa'
-  const nombrePrograma = avance.test_titulo || 'Inducción Corporativa'
-  const fechaTexto = avance.fecha_evaluacion ? fechaCortaEs(avance.fecha_evaluacion) : 'Fecha de aprobación'
+  const nombrePrograma = avance.test_titulo || 'Inducción corporativa'
+  const fechaTexto = avance.fecha_evaluacion ? fechaCortaEs(avance.fecha_evaluacion) : '—'
   const puntaje = avance.puntaje ?? 100
   const puntajeMinimo = avance.porcentaje_minimo ?? 70
-
-  const handlePrint = () => {
-    window.print()
-  }
+  const logoEmpresa = logoEmpresaUrl || empresa?.logo_url || null
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl" isCentered>
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl" isCentered scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(2px)" />
-      <ModalContent borderRadius="2xl" overflow="hidden" boxShadow="2xl">
-        <ModalHeader borderBottomWidth="1px" borderColor="blackAlpha.100" py={4} bg="brand.soft">
-          <Flex align="center" justify="space-between" pr={6}>
-            <Flex align="center" gap={2}>
-              <Icon as={Award} color="brand.primary" boxSize={5} />
-              <Text fontSize="md" fontWeight="semibold" color="brand.ink">
-                Constancia de Inducción Laboral
-              </Text>
-            </Flex>
-            <Badge colorScheme="green" fontSize="xs" px={2.5} py={0.5} borderRadius="full">
-              Aprobada
-            </Badge>
-          </Flex>
+      <ModalContent borderRadius="xl" overflow="hidden">
+        <ModalHeader
+          borderBottomWidth="1px"
+          borderColor="blackAlpha.100"
+          py={3.5}
+          px={5}
+          fontSize="sm"
+          fontWeight="semibold"
+          letterSpacing="-0.02em"
+          color="brand.ink"
+        >
+          Constancia
         </ModalHeader>
         <ModalCloseButton />
 
-        <ModalBody p={{ base: 6, md: 10 }}>
-          {/* Contenedor imprimible del Certificado */}
+        <ModalBody p={{ base: 4, md: 6 }} bg="brand.soft">
           <Box
             id="certificado-print-area"
-            p={{ base: 6, md: 10 }}
-            borderWidth="2px"
-            borderColor="brand.primary"
-            borderRadius="xl"
             bg="white"
+            borderWidth="1px"
+            borderColor="blackAlpha.200"
+            px={{ base: 5, md: 10 }}
+            py={{ base: 7, md: 10 }}
             position="relative"
-            boxShadow="sm"
           >
-            {/* Encabezado con Identidad Visual según plan (HU-17) */}
-            <Flex justify="space-between" align="center" mb={8} borderBottomWidth="1px" borderColor="blackAlpha.100" pb={6}>
-              <Box>
-                {esDemo ? (
-                  <Flex align="center" gap={2}>
-                    <img src="/assets/logo-oficial.png" alt="Inducta Chile" style={{ height: '36px' }} onError={(e) => { e.target.style.display = 'none' }} />
-                    <Text fontWeight="bold" fontSize="lg" color="brand.primary" letterSpacing="-0.02em">
-                      Inducta Chile
+            <Box
+              position="absolute"
+              inset="10px"
+              borderWidth="1px"
+              borderColor="blackAlpha.150"
+              pointerEvents="none"
+              aria-hidden
+            />
+
+            {/* Encabezado: logos según plan */}
+            <Flex justify="space-between" align="flex-start" mb={8} position="relative" gap={4}>
+              {esMarcaInducta ? (
+                <Flex align="center" gap={3} minW={0}>
+                  <Image
+                    src={LOGO_INDUCTA}
+                    alt="Inducta Chile"
+                    h={{ base: '36px', md: '44px' }}
+                    w="auto"
+                    objectFit="contain"
+                  />
+                  <Box minW={0}>
+                    <Text
+                      fontSize="2xs"
+                      color="blackAlpha.500"
+                      letterSpacing="0.04em"
+                      textTransform="uppercase"
+                    >
+                      Acreditación de inducción laboral
                     </Text>
-                  </Flex>
-                ) : (
-                  <Box>
-                    <Text fontWeight="bold" fontSize="xl" color="brand.ink">
+                    <Text fontSize="xs" color="blackAlpha.600" mt={0.5} noOfLines={1}>
                       {nombreEmpresa}
                     </Text>
-                    <Text fontSize="xs" color="blackAlpha.500" letterSpacing="0.05em" textTransform="uppercase">
-                      Acreditación de Capacitación Interna
-                    </Text>
                   </Box>
-                )}
-              </Box>
+                </Flex>
+              ) : (
+                <Flex align="center" gap={3} minW={0}>
+                  {logoEmpresa ? (
+                    <Image
+                      src={logoEmpresa}
+                      alt={nombreEmpresa}
+                      h={{ base: '40px', md: '48px' }}
+                      w="auto"
+                      maxW="160px"
+                      objectFit="contain"
+                      borderRadius="md"
+                    />
+                  ) : (
+                    <Box>
+                      <Text
+                        fontSize={{ base: 'md', md: 'lg' }}
+                        fontWeight="semibold"
+                        letterSpacing="-0.02em"
+                        color="brand.ink"
+                        noOfLines={2}
+                      >
+                        {nombreEmpresa}
+                      </Text>
+                      <Text
+                        fontSize="2xs"
+                        color="blackAlpha.500"
+                        letterSpacing="0.04em"
+                        textTransform="uppercase"
+                        mt={0.5}
+                      >
+                        Acreditación de inducción laboral
+                      </Text>
+                    </Box>
+                  )}
+                  {logoEmpresa ? (
+                    <Box minW={0}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        letterSpacing="-0.02em"
+                        color="brand.ink"
+                        noOfLines={2}
+                      >
+                        {nombreEmpresa}
+                      </Text>
+                      <Text
+                        fontSize="2xs"
+                        color="blackAlpha.500"
+                        letterSpacing="0.04em"
+                        textTransform="uppercase"
+                      >
+                        Acreditación de inducción laboral
+                      </Text>
+                    </Box>
+                  ) : null}
+                </Flex>
+              )}
 
-              <Flex align="center" gap={1.5} bg="green.50" px={3} py={1.5} borderRadius="lg" borderWidth="1px" borderColor="green.200">
-                <Icon as={ShieldCheck} color="green.600" boxSize={4} />
-                <Text fontSize="xs" fontWeight="semibold" color="green.700">
-                  Acreditación Válida
+              <Box textAlign="right" flexShrink={0}>
+                {!esMarcaInducta ? (
+                  <Image
+                    src={LOGO_INDUCTA}
+                    alt="Inducta Chile"
+                    h="22px"
+                    w="auto"
+                    objectFit="contain"
+                    ml="auto"
+                    mb={2}
+                    opacity={0.9}
+                  />
+                ) : null}
+                <Text fontSize="2xs" color="blackAlpha.500" lineHeight="1.4">
+                  Registro digital
+                  <br />
+                  {fechaTexto}
                 </Text>
-              </Flex>
+                <Text
+                  mt={1.5}
+                  fontSize="2xs"
+                  fontWeight="semibold"
+                  color="brand.primary"
+                  letterSpacing="0.04em"
+                  textTransform="uppercase"
+                >
+                  {brand.planNombre}
+                </Text>
+              </Box>
             </Flex>
 
-            {/* Cuerpo del Certificado */}
-            <VStack spacing={5} textAlign="center" py={4}>
-              <Text fontSize="xs" fontWeight="semibold" letterSpacing="0.15em" textTransform="uppercase" color="brand.primary">
-                Certificado de Aprobación
+            <Box textAlign="center" mb={8} position="relative">
+              <Text
+                fontSize="11px"
+                fontWeight="semibold"
+                letterSpacing="0.18em"
+                textTransform="uppercase"
+                color="blackAlpha.500"
+                mb={5}
+              >
+                Constancia de aprobación
               </Text>
 
-              <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="brand.ink" letterSpacing="-0.03em" lineHeight="1.2">
+              <Text fontSize="sm" color="blackAlpha.600" mb={2}>
+                Se deja constancia de que
+              </Text>
+              <Text
+                fontSize={{ base: '1.75rem', md: '2.25rem' }}
+                fontWeight="semibold"
+                letterSpacing="-0.035em"
+                lineHeight="1.15"
+                color="brand.ink"
+                mb={4}
+              >
                 {nombreTrabajador}
               </Text>
-
-              <Text fontSize="sm" color="blackAlpha.700" maxW="48ch" lineHeight="tall">
-                Ha completado y aprobado satisfactoriamente los contenidos y la evaluación correspondientes al programa de inducción institucional:
+              <Text fontSize="sm" color="blackAlpha.600" maxW="42ch" mx="auto" lineHeight="1.6">
+                aprobó la evaluación correspondiente al programa de inducción:
               </Text>
+              <Text
+                mt={4}
+                fontSize={{ base: 'md', md: 'lg' }}
+                fontWeight="semibold"
+                letterSpacing="-0.02em"
+                color="brand.ink"
+                maxW="36ch"
+                mx="auto"
+                lineHeight="1.35"
+              >
+                {nombrePrograma}
+              </Text>
+              <Text mt={2} fontSize="sm" color="blackAlpha.500">
+                {nombreEmpresa}
+              </Text>
+            </Box>
 
-              <Box p={4} bg="brand.soft" borderRadius="lg" w="full" borderWidth="1px" borderColor="blackAlpha.100">
-                <Text fontWeight="semibold" fontSize="lg" color="brand.primary">
-                  {nombrePrograma}
+            <Flex
+              borderTopWidth="1px"
+              borderBottomWidth="1px"
+              borderColor="blackAlpha.100"
+              py={4}
+              justify="space-between"
+              gap={4}
+              flexWrap="wrap"
+              position="relative"
+            >
+              <Dato label="Resultado" valor={`${puntaje}%`} />
+              <Dato label="Exigencia" valor={`${puntajeMinimo}%`} />
+              <Dato label="Fecha" valor={fechaTexto} />
+              <Dato label="Estado" valor="Aprobado" />
+            </Flex>
+
+            <Flex justify="space-between" align="flex-end" mt={8} gap={4} position="relative">
+              <Flex align="center" gap={2} minW={0}>
+                {esMarcaInducta ? (
+                  <Image src={LOGO_INDUCTA} alt="" h="16px" w="auto" opacity={0.7} aria-hidden />
+                ) : null}
+                <Text fontSize="2xs" color="blackAlpha.400" maxW="42ch" lineHeight="1.5">
+                  {brand.etiquetaPie}. Para fines de cumplimiento interno y auditoría laboral.
                 </Text>
-                <Text fontSize="xs" color="blackAlpha.600" mt={1}>
-                  Organización: <strong>{nombreEmpresa}</strong>
+              </Flex>
+              <Box textAlign="right" minW="9rem">
+                <Box borderBottomWidth="1px" borderColor="blackAlpha.300" mb={1.5} h="1px" />
+                <Text fontSize="2xs" color="blackAlpha.500">
+                  Registro electrónico
                 </Text>
               </Box>
-
-              {/* Métricas de aprobación */}
-              <Flex justify="center" gap={8} pt={2}>
-                <Box textAlign="center">
-                  <Text fontSize="xs" color="blackAlpha.500">
-                    Resultado
-                  </Text>
-                  <Text fontWeight="bold" color="green.600" fontSize="md">
-                    {puntaje}% de aciertos
-                  </Text>
-                </Box>
-                <Divider orientation="vertical" h="36px" />
-                <Box textAlign="center">
-                  <Text fontSize="xs" color="blackAlpha.500">
-                    Exigencia mínima
-                  </Text>
-                  <Text fontWeight="medium" color="brand.ink" fontSize="md">
-                    {puntajeMinimo}%
-                  </Text>
-                </Box>
-                <Divider orientation="vertical" h="36px" />
-                <Box textAlign="center">
-                  <Text fontSize="xs" color="blackAlpha.500">
-                    Fecha de acreditación
-                  </Text>
-                  <Text fontWeight="medium" color="brand.ink" fontSize="md">
-                    {fechaTexto}
-                  </Text>
-                </Box>
-              </Flex>
-            </VStack>
-
-            {/* Pie de constancia (HU-17: sin folio y sin firma) */}
-            <Flex justify="space-between" align="center" mt={10} pt={4} borderTopWidth="1px" borderColor="blackAlpha.100">
-              <Text fontSize="2xs" color="blackAlpha.400">
-                Registro digital emitido mediante la plataforma Inducta Chile · Constancia para fines de cumplimiento y auditoría interna.
-              </Text>
-              {esDemo && (
-                <Text fontSize="2xs" color="brand.primary" fontWeight="medium">
-                  Plan Demostración
-                </Text>
-              )}
             </Flex>
           </Box>
         </ModalBody>
 
-        <ModalFooter bg="brand.soft" borderTopWidth="1px" borderColor="blackAlpha.100" py={3}>
-          <Flex w="full" justify="space-between" align="center">
-            <Text fontSize="xs" color="blackAlpha.500">
-              Listo para presentar ante auditorías laborales y fiscalizaciones.
-            </Text>
-            <Flex gap={2}>
-              <Button size="sm" variant="outline" onClick={onClose}>
-                Cerrar
-              </Button>
-              <Button
-                size="sm"
-                variant="solid"
-                bg="brand.primary"
-                leftIcon={<Printer size={15} />}
-                onClick={handlePrint}
-              >
-                Imprimir / Guardar PDF
-              </Button>
-            </Flex>
-          </Flex>
+        <ModalFooter borderTopWidth="1px" borderColor="blackAlpha.100" py={3} gap={2}>
+          <Button size="sm" h="36px" variant="outline" onClick={onClose}>
+            Cerrar
+          </Button>
+          <Button size="sm" h="36px" leftIcon={<Printer size={15} />} onClick={() => window.print()}>
+            Imprimir / PDF
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
+  )
+}
+
+function Dato({ label, valor }) {
+  return (
+    <Box minW="5.5rem">
+      <Text fontSize="2xs" color="blackAlpha.500" textTransform="uppercase" letterSpacing="0.06em" mb={0.5}>
+        {label}
+      </Text>
+      <Text fontSize="sm" fontWeight="semibold" color="brand.ink">
+        {valor}
+      </Text>
+    </Box>
   )
 }

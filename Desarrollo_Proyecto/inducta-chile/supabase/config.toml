@@ -45,3 +45,9 @@ entrypoint = "./functions/responder-contacto/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/admin-reset-password/index.ts"
+
+# Auth Clerk validada dentro de la función (Bearer + verifyToken)
+[functions.publicar-avance]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/publicar-avance/index.ts"

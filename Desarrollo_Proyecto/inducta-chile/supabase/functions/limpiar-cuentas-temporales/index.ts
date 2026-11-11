@@ -25,7 +25,11 @@ async function clerk(path: string, init: RequestInit = {}) {
 
 serve(async (req) => {
   const secret = Deno.env.get('CRON_SECRET') || Deno.env.get('INTERNAL_FUNCTION_SECRET')
-  if (secret && req.headers.get('x-inducta-secret') !== secret) {
+  // Fail-closed: sin secret no se ejecuta nada (P1-8)
+  if (!secret) {
+    return new Response(JSON.stringify({ error: 'Falta CRON_SECRET' }), { status: 500 })
+  }
+  if (req.headers.get('x-inducta-secret') !== secret) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 })
   }
 

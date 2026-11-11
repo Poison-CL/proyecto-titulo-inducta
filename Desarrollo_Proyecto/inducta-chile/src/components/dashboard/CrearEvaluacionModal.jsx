@@ -34,7 +34,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { Check, ClipboardList, Plus, Sparkles, Trash2, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   crearEvaluacion,
   EVALUACION_SEMILLA_DEFAULT,
@@ -66,9 +66,137 @@ export default function CrearEvaluacionModal({
       ],
     },
   ])
+  const [modulos, setModulos] = useState([])
   const [guardando, setGuardando] = useState(false)
 
+  const nuevoId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+
+  const handleAgregarNivel = () => {
+    setModulos((prev) => [
+      ...prev,
+      {
+        id: nuevoId(),
+        titulo: `Nivel ${prev.length + 1}`,
+        lecciones: [{ id: nuevoId(), titulo: 'Lección 1', items: [] }],
+      },
+    ])
+  }
+
+  const handleEliminarNivel = (nIdx) => {
+    setModulos((prev) => prev.filter((_, i) => i !== nIdx))
+  }
+
+  const handleTituloNivel = (nIdx, titulo) => {
+    setModulos((prev) => prev.map((n, i) => (i === nIdx ? { ...n, titulo } : n)))
+  }
+
+  const handleAgregarLeccion = (nIdx) => {
+    setModulos((prev) =>
+      prev.map((n, i) =>
+        i === nIdx
+          ? {
+              ...n,
+              lecciones: [
+                ...(n.lecciones || []),
+                {
+                  id: nuevoId(),
+                  titulo: `Lección ${(n.lecciones || []).length + 1}`,
+                  items: [],
+                },
+              ],
+            }
+          : n,
+      ),
+    )
+  }
+
+  const handleEliminarLeccion = (nIdx, lIdx) => {
+    setModulos((prev) =>
+      prev.map((n, i) =>
+        i === nIdx
+          ? { ...n, lecciones: (n.lecciones || []).filter((_, j) => j !== lIdx) }
+          : n,
+      ),
+    )
+  }
+
+  const handleTituloLeccion = (nIdx, lIdx, titulo) => {
+    setModulos((prev) =>
+      prev.map((n, i) => {
+        if (i !== nIdx) return n
+        const lecciones = (n.lecciones || []).map((l, j) => (j === lIdx ? { ...l, titulo } : l))
+        return { ...n, lecciones }
+      }),
+    )
+  }
+
+  const handleAgregarItem = (nIdx, lIdx, tipo) => {
+    setModulos((prev) =>
+      prev.map((n, i) => {
+        if (i !== nIdx) return n
+        const lecciones = (n.lecciones || []).map((l, j) =>
+          j === lIdx
+            ? {
+                ...l,
+                items: [
+                  ...(l.items || []),
+                  tipo === 'youtube'
+                    ? { id: nuevoId(), tipo: 'youtube', titulo: '', url: '', descripcion: '' }
+                    : { id: nuevoId(), tipo: 'texto', titulo: '', cuerpo: '' },
+                ],
+              }
+            : l,
+        )
+        return { ...n, lecciones }
+      }),
+    )
+  }
+
+  const handleItemChange = (nIdx, lIdx, iIdx, patch) => {
+    setModulos((prev) =>
+      prev.map((n, i) => {
+        if (i !== nIdx) return n
+        const lecciones = (n.lecciones || []).map((l, j) => {
+          if (j !== lIdx) return l
+          const items = (l.items || []).map((it, k) => (k === iIdx ? { ...it, ...patch } : it))
+          return { ...l, items }
+        })
+        return { ...n, lecciones }
+      }),
+    )
+  }
+
+  const handleEliminarItem = (nIdx, lIdx, iIdx) => {
+    setModulos((prev) =>
+      prev.map((n, i) => {
+        if (i !== nIdx) return n
+        const lecciones = (n.lecciones || []).map((l, j) =>
+          j === lIdx ? { ...l, items: (l.items || []).filter((_, k) => k !== iIdx) } : l,
+        )
+        return { ...n, lecciones }
+      }),
+    )
+  }
+
   const puedeCrear = puedeCrearEvaluacion(plan, totalActuales)
+
+  useEffect(() => {
+    if (!isOpen) return
+    setTitulo('')
+    setPorcentajeMinimo(75)
+    setModulos([])
+    setPreguntas([
+      {
+        id_temp: 1,
+        enunciado: '',
+        opciones: [
+          { id_temp: 1, texto_opcion: '', es_correcta: true },
+          { id_temp: 2, texto_opcion: '', es_correcta: false },
+          { id_temp: 3, texto_opcion: '', es_correcta: false },
+        ],
+      },
+    ])
+  }, [isOpen])
 
   const handleCargarEjemplo = () => {
     setTitulo(EVALUACION_SEMILLA_DEFAULT.titulo)
@@ -207,6 +335,57 @@ export default function CrearEvaluacionModal({
       return
     }
 
+    for (let n = 0; n < modulos.length; n++) {
+      const nivel = modulos[n]
+      if (!nivel.titulo?.trim()) {
+        toast({
+          title: `Nivel ${n + 1}`,
+          description: 'Asigne un título al nivel de estudio.',
+          status: 'warning',
+        })
+        return
+      }
+      if (!nivel.lecciones?.length) {
+        toast({
+          title: `Nivel ${n + 1}`,
+          description: 'Agregue al menos una lección.',
+          status: 'warning',
+        })
+        return
+      }
+      for (let l = 0; l < nivel.lecciones.length; l++) {
+        const lec = nivel.lecciones[l]
+        if (!lec.titulo?.trim()) {
+          toast({
+            title: `Nivel ${n + 1}, lección ${l + 1}`,
+            description: 'Asigne un título a la lección.',
+            status: 'warning',
+          })
+          return
+        }
+        for (let i = 0; i < (lec.items || []).length; i++) {
+          const it = lec.items[i]
+          if (it.tipo === 'youtube') {
+            if (!String(it.url || '').trim()) {
+              toast({
+                title: `Nivel ${n + 1} · Lección ${l + 1} · video`,
+                description: 'Pegue el enlace de YouTube.',
+                status: 'warning',
+              })
+              return
+            }
+          } else if (!String(it.cuerpo || '').trim()) {
+            toast({
+              title: `Nivel ${n + 1} · Lección ${l + 1} · texto`,
+              description: 'Escriba el contenido de estudio.',
+              status: 'warning',
+            })
+            return
+          }
+        }
+      }
+    }
+
     // Validar preguntas
     for (let i = 0; i < preguntas.length; i++) {
       const p = preguntas[i]
@@ -249,11 +428,35 @@ export default function CrearEvaluacionModal({
         porcentaje_aprobacion: Number(porcentajeMinimo) || 75,
         estado: 'activo',
         preguntas,
+        modulos: modulos.map((n) => ({
+          id: n.id,
+          titulo: n.titulo.trim(),
+          lecciones: (n.lecciones || []).map((l) => ({
+            id: l.id,
+            titulo: l.titulo.trim(),
+            items: (l.items || []).map((it) =>
+              it.tipo === 'youtube'
+                ? {
+                    id: it.id,
+                    tipo: 'youtube',
+                    titulo: (it.titulo || '').trim(),
+                    url: String(it.url || '').trim(),
+                    descripcion: String(it.descripcion || '').trim(),
+                  }
+                : {
+                    id: it.id,
+                    tipo: 'texto',
+                    titulo: (it.titulo || '').trim(),
+                    cuerpo: String(it.cuerpo || '').trim(),
+                  },
+            ),
+          })),
+        })),
       })
 
       toast({
         title: 'Evaluación creada exitosamente',
-        description: `Se configuró "${titulo}" con ${preguntas.length} preguntas de inducción.`,
+        description: `Se configuró "${titulo}" con ${modulos.length} nivel(es) y ${preguntas.length} preguntas.`,
         status: 'success',
         duration: 4000,
       })
@@ -280,19 +483,19 @@ export default function CrearEvaluacionModal({
         <ModalHeader borderBottomWidth="1px" borderColor="blackAlpha.100" py={4} bg="brand.soft">
           <Flex align="center" justify="space-between" pr={6}>
             <Flex align="center" gap={2}>
-              <Icon as={ClipboardList} color="brand.primary" boxSize={5} />
-              <Text fontSize="md" fontWeight="bold" color="brand.ink">
-                Nueva Evaluación de Inducción
+              <Icon as={ClipboardList} color="brand.primary" boxSize={5} strokeWidth={1.75} />
+              <Text fontSize="md" fontWeight="semibold" letterSpacing="-0.02em" color="brand.ink">
+                Nueva evaluación
               </Text>
             </Flex>
             <Button
               size="xs"
+              h="28px"
               variant="outline"
-              colorScheme="purple"
               leftIcon={<Sparkles size={13} />}
               onClick={handleCargarEjemplo}
             >
-              Cargar inducción sugerida
+              Inducción sugerida
             </Button>
           </Flex>
         </ModalHeader>
@@ -313,8 +516,8 @@ export default function CrearEvaluacionModal({
           <VStack spacing={6} align="stretch">
             {/* Datos generales de la prueba */}
             <Box p={5} borderWidth="1px" borderColor="blackAlpha.100" borderRadius="xl" bg="white">
-              <Heading fontSize="sm" color="brand.ink" mb={4} textTransform="uppercase" letterSpacing="0.05em">
-                1. Datos del Programa
+              <Heading fontSize="sm" fontWeight="semibold" color="brand.ink" mb={4} textTransform="uppercase" letterSpacing="0.05em">
+                1. Datos del programa
               </Heading>
 
               <Stack spacing={4}>
@@ -361,12 +564,203 @@ export default function CrearEvaluacionModal({
               </Stack>
             </Box>
 
+            <Box p={5} borderWidth="1px" borderColor="blackAlpha.100" borderRadius="xl" bg="white">
+              <Flex justify="space-between" align="center" mb={3}>
+                <Box>
+                  <Heading
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="brand.ink"
+                    textTransform="uppercase"
+                    letterSpacing="0.05em"
+                  >
+                    2. Niveles de estudio ({modulos.length})
+                  </Heading>
+                  <Text fontSize="xs" color="blackAlpha.600" mt={0.5}>
+                    Estructura Nivel → Lección → video/texto. Completar el estudio desbloquea el
+                    cuestionario. Opcional.
+                  </Text>
+                </Box>
+                <Button size="sm" variant="outline" leftIcon={<Plus size={15} />} onClick={handleAgregarNivel}>
+                  Agregar nivel
+                </Button>
+              </Flex>
+
+              <VStack spacing={4} align="stretch">
+                {modulos.length === 0 ? (
+                  <Text fontSize="sm" color="blackAlpha.500">
+                    Sin niveles: el cuestionario queda disponible de inmediato.
+                  </Text>
+                ) : (
+                  modulos.map((nivel, nIdx) => (
+                    <Box
+                      key={nivel.id}
+                      p={4}
+                      borderWidth="1px"
+                      borderColor="blackAlpha.100"
+                      borderRadius="lg"
+                      bg="brand.soft"
+                    >
+                      <Flex gap={2} align="center" mb={3}>
+                        <Input
+                          size="sm"
+                          bg="white"
+                          value={nivel.titulo}
+                          onChange={(e) => handleTituloNivel(nIdx, e.target.value)}
+                          placeholder={`Nivel ${nIdx + 1}`}
+                        />
+                        <IconButton
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="red"
+                          icon={<Trash2 size={14} />}
+                          aria-label="Eliminar nivel"
+                          onClick={() => handleEliminarNivel(nIdx)}
+                        />
+                      </Flex>
+
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        mb={3}
+                        leftIcon={<Plus size={12} />}
+                        onClick={() => handleAgregarLeccion(nIdx)}
+                      >
+                        Agregar lección
+                      </Button>
+
+                      <VStack spacing={3} align="stretch">
+                        {(nivel.lecciones || []).map((lec, lIdx) => (
+                          <Box
+                            key={lec.id}
+                            p={3}
+                            bg="white"
+                            borderRadius="md"
+                            borderWidth="1px"
+                            borderColor="blackAlpha.100"
+                          >
+                            <Flex gap={2} align="center" mb={2}>
+                              <Badge fontSize="2xs">Lección {lIdx + 1}</Badge>
+                              <Input
+                                size="sm"
+                                value={lec.titulo}
+                                onChange={(e) => handleTituloLeccion(nIdx, lIdx, e.target.value)}
+                                placeholder={`Lección ${lIdx + 1}`}
+                              />
+                              <IconButton
+                                size="xs"
+                                variant="ghost"
+                                colorScheme="red"
+                                icon={<Trash2 size={13} />}
+                                aria-label="Eliminar lección"
+                                onClick={() => handleEliminarLeccion(nIdx, lIdx)}
+                              />
+                            </Flex>
+                            <HStack mb={2} spacing={2}>
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                leftIcon={<Plus size={12} />}
+                                onClick={() => handleAgregarItem(nIdx, lIdx, 'texto')}
+                              >
+                                Texto
+                              </Button>
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                leftIcon={<Plus size={12} />}
+                                onClick={() => handleAgregarItem(nIdx, lIdx, 'youtube')}
+                              >
+                                YouTube
+                              </Button>
+                            </HStack>
+                            <VStack spacing={2} align="stretch">
+                              {(lec.items || []).map((it, iIdx) => (
+                                <Box
+                                  key={it.id}
+                                  p={3}
+                                  bg="brand.soft"
+                                  borderRadius="md"
+                                  borderWidth="1px"
+                                  borderColor="blackAlpha.100"
+                                >
+                                  <Flex justify="space-between" mb={2}>
+                                    <Badge fontSize="2xs">
+                                      {it.tipo === 'youtube' ? 'YouTube' : 'Texto'}
+                                    </Badge>
+                                    <IconButton
+                                      size="xs"
+                                      variant="ghost"
+                                      icon={<X size={13} />}
+                                      aria-label="Quitar ítem"
+                                      onClick={() => handleEliminarItem(nIdx, lIdx, iIdx)}
+                                    />
+                                  </Flex>
+                                  <Input
+                                    size="sm"
+                                    mb={2}
+                                    bg="white"
+                                    placeholder="Título"
+                                    value={it.titulo || ''}
+                                    onChange={(e) =>
+                                      handleItemChange(nIdx, lIdx, iIdx, { titulo: e.target.value })
+                                    }
+                                  />
+                                  {it.tipo === 'youtube' ? (
+                                    <>
+                                      <Input
+                                        size="sm"
+                                        mb={2}
+                                        bg="white"
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                        value={it.url || ''}
+                                        onChange={(e) =>
+                                          handleItemChange(nIdx, lIdx, iIdx, { url: e.target.value })
+                                        }
+                                      />
+                                      <Textarea
+                                        size="sm"
+                                        rows={2}
+                                        bg="white"
+                                        placeholder="Descripción corta (opcional)"
+                                        value={it.descripcion || ''}
+                                        onChange={(e) =>
+                                          handleItemChange(nIdx, lIdx, iIdx, {
+                                            descripcion: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </>
+                                  ) : (
+                                    <Textarea
+                                      size="sm"
+                                      rows={3}
+                                      bg="white"
+                                      placeholder="Contenido de estudio..."
+                                      value={it.cuerpo || ''}
+                                      onChange={(e) =>
+                                        handleItemChange(nIdx, lIdx, iIdx, { cuerpo: e.target.value })
+                                      }
+                                    />
+                                  )}
+                                </Box>
+                              ))}
+                            </VStack>
+                          </Box>
+                        ))}
+                      </VStack>
+                    </Box>
+                  ))
+                )}
+              </VStack>
+            </Box>
+
             {/* Constructor de Preguntas (HU-11) */}
             <Box>
               <Flex justify="space-between" align="center" mb={4}>
                 <Box>
-                  <Heading fontSize="sm" color="brand.ink" textTransform="uppercase" letterSpacing="0.05em">
-                    2. Cuestionario de Evaluación ({preguntas.length} preguntas)
+                  <Heading fontSize="sm" fontWeight="semibold" color="brand.ink" textTransform="uppercase" letterSpacing="0.05em">
+                    3. Cuestionario ({preguntas.length} preguntas)
                   </Heading>
                   <Text fontSize="xs" color="blackAlpha.600" mt={0.5}>
                     Cargue alternativas de opción múltiple y seleccione la respuesta correcta (HU-11).
@@ -493,8 +887,7 @@ export default function CrearEvaluacionModal({
             </Button>
             <Button
               size="sm"
-              variant="solid"
-              bg="brand.primary"
+              h="36px"
               isDisabled={!puedeCrear}
               isLoading={guardando}
               loadingText="Guardando..."

@@ -7,6 +7,7 @@ import {
   Button,
   Divider,
   Flex,
+  Heading,
   Icon,
   Modal,
   ModalBody,
@@ -23,10 +24,12 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
-import { Award, CheckCircle2, ChevronRight, RotateCcw, XCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Award, CheckCircle2, ChevronRight, RotateCcw, TrendingUp, XCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   iniciarEvaluacion,
+  modulosCompletos,
   responderEvaluacion,
 } from '../../features/programas/programasService'
 import { useSupabase } from '../../hooks/useSupabase'
@@ -37,30 +40,79 @@ export default function RendirEvaluacionModal({
   test,
   idEmpresa,
   user,
+  avance = null,
   onEvaluacionFinalizada,
   onAbrirCertificado,
+  onRequiereEstudio,
 }) {
   const supabase = useSupabase()
   const toast = useToast()
+  const navigate = useNavigate()
 
   const [respuestas, setRespuestas] = useState({})
   const [enviando, setEnviando] = useState(false)
   const [resultado, setResultado] = useState(null)
+  const sesionIniciada = useRef(null)
 
-  // Al abrir el modal, pasar el estado a 'en_curso' (HU-12)
+  // Solo reinicia al abrir un test nuevo — no cuando el padre refresca datos tras enviar.
   useEffect(() => {
-    if (isOpen && test && idEmpresa && user?.id) {
-      setRespuestas({})
-      setResultado(null)
-      iniciarEvaluacion(supabase, {
-        id_test: test.id_test,
-        id_empresa: idEmpresa,
-        id_usuario: user.id,
-        test_titulo: test.titulo,
-        nombre_usuario: user.fullName || user.firstName || 'Colaborador',
-      }).catch((e) => console.warn('Aviso inicio evaluación:', e?.message))
+    if (!isOpen || !test?.id_test || !idEmpresa || !user?.id) return
+    const clave = `${idEmpresa}:${test.id_test}:${user.id}`
+    if (sesionIniciada.current === clave) return
+
+    if (!modulosCompletos(test.modulos, avance?.progreso_modulos)) {
+      toast({
+        title: 'Estudio incompleto',
+        description: 'Complete todos los niveles antes de rendir la evaluación.',
+        status: 'warning',
+        duration: 5000,
+      })
+      onRequiereEstudio?.(test)
+      onClose?.()
+      return
     }
-  }, [isOpen, test, idEmpresa, user, supabase])
+
+    sesionIniciada.current = clave
+    setRespuestas({})
+    setResultado(null)
+    iniciarEvaluacion(supabase, {
+      id_test: test.id_test,
+      id_empresa: idEmpresa,
+      id_usuario: user.id,
+      test_titulo: test.titulo,
+      nombre_usuario: user.fullName || user.firstName || 'Colaborador',
+      modulos: test.modulos,
+    }).catch((e) => {
+      if (e?.code === 'ESTUDIO_INCOMPLETO') {
+        toast({
+          title: 'Estudio incompleto',
+          description: e.message,
+          status: 'warning',
+          duration: 5000,
+        })
+        onRequiereEstudio?.(test)
+        onClose?.()
+        return
+      }
+      console.warn('Aviso inicio evaluación:', e?.message)
+    })
+  }, [
+    isOpen,
+    test,
+    avance?.progreso_modulos,
+    idEmpresa,
+    user?.id,
+    user?.fullName,
+    user?.firstName,
+    supabase,
+    toast,
+    onClose,
+    onRequiereEstudio,
+  ])
+
+  useEffect(() => {
+    if (!isOpen) sesionIniciada.current = null
+  }, [isOpen])
 
   if (!test) return null
 
@@ -100,9 +152,21 @@ export default function RendirEvaluacionModal({
         test_titulo: test.titulo,
         nombre_usuario: user.fullName || user.firstName || 'Colaborador',
         porcentaje_minimo: porcentajeMinimo,
+        modulos: test.modulos,
       })
 
       setResultado(res)
+      if (res?.persistidoEnNube === false) {
+        toast({
+          title: 'Nota guardada en este dispositivo',
+          description:
+            res.errorNube ||
+            'No se pudo publicar en la nube. Abra Mis programas de nuevo para reintentar la sincronización (el admin no la verá hasta entonces).',
+          status: 'warning',
+          duration: 7000,
+          isClosable: true,
+        })
+      }
       if (onEvaluacionFinalizada) {
         onEvaluacionFinalizada(res)
       }
@@ -129,14 +193,22 @@ export default function RendirEvaluacionModal({
         <ModalHeader borderBottomWidth="1px" borderColor="blackAlpha.100" py={4} bg="brand.soft">
           <Flex align="center" justify="space-between" pr={6}>
             <Box>
-              <Text fontSize="md" fontWeight="bold" color="brand.ink">
+              <Text fontSize="md" fontWeight="semibold" letterSpacing="-0.02em" color="brand.ink">
                 {test.titulo}
               </Text>
               <Text fontSize="xs" color="blackAlpha.600" mt={0.5}>
                 Exigencia mínima: <strong>{porcentajeMinimo}%</strong> de aciertos
               </Text>
             </Box>
-            <Badge colorScheme="blue" fontSize="xs" px={2} py={0.5} borderRadius="full">
+            <Badge
+              bg="brand.wash"
+              color="brand.primary"
+              fontSize="xs"
+              px={2.5}
+              py={0.5}
+              borderRadius="full"
+              fontWeight="semibold"
+            >
               {totalPreguntas} preguntas
             </Badge>
           </Flex>
@@ -165,8 +237,8 @@ export default function RendirEvaluacionModal({
               </Flex>
 
               <Box>
-                <Heading fontSize="xl" color="brand.ink" mb={2}>
-                  {resultado.aprobada ? '¡Felicitaciones! Has Aprobado' : 'No alcanzaste la nota mínima'}
+                <Heading fontSize="xl" fontWeight="semibold" letterSpacing="-0.03em" color="brand.ink" mb={2}>
+                  {resultado.aprobada ? '¡Felicitaciones! Aprobaste' : 'No alcanzaste la nota mínima'}
                 </Heading>
                 <Text fontSize="sm" color="blackAlpha.600" maxW="40ch" mx="auto">
                   {resultado.aprobada
@@ -190,18 +262,19 @@ export default function RendirEvaluacionModal({
                   <Text fontSize="xs" color="blackAlpha.500">
                     Aciertos
                   </Text>
-                  <Text fontSize="xl" fontWeight="bold" color="brand.ink">
+                  <Text fontSize="xl" fontWeight="semibold" letterSpacing="-0.03em" color="brand.ink">
                     {resultado.correctas} / {resultado.total}
                   </Text>
                 </Box>
                 <Divider orientation="vertical" h="40px" />
                 <Box>
                   <Text fontSize="xs" color="blackAlpha.500">
-                    Tu Nota
+                    Tu nota
                   </Text>
                   <Text
                     fontSize="xl"
-                    fontWeight="bold"
+                    fontWeight="semibold"
+                    letterSpacing="-0.03em"
                     color={resultado.aprobada ? 'green.600' : 'orange.600'}
                   >
                     {resultado.porcentajeObtenido}%
@@ -212,34 +285,49 @@ export default function RendirEvaluacionModal({
                   <Text fontSize="xs" color="blackAlpha.500">
                     Requerido
                   </Text>
-                  <Text fontSize="xl" fontWeight="bold" color="brand.ink">
+                  <Text fontSize="xl" fontWeight="semibold" letterSpacing="-0.03em" color="brand.ink">
                     {porcentajeMinimo}%
                   </Text>
                 </Box>
               </Flex>
 
-              {resultado.aprobada ? (
+              <VStack spacing={3} w="full" maxW="360px">
+                {resultado.aprobada ? (
+                  <Button
+                    w="full"
+                    h="40px"
+                    leftIcon={<Award size={18} />}
+                    onClick={() => {
+                      onClose()
+                      if (onAbrirCertificado) onAbrirCertificado(resultado.avance)
+                    }}
+                  >
+                    Ver certificado
+                  </Button>
+                ) : (
+                  <Button
+                    w="full"
+                    h="40px"
+                    variant="outline"
+                    leftIcon={<RotateCcw size={16} />}
+                    onClick={handleReintentar}
+                  >
+                    Reintentar evaluación
+                  </Button>
+                )}
                 <Button
-                  colorScheme="green"
-                  bg="green.600"
-                  _hover={{ bg: 'green.700' }}
-                  leftIcon={<Award size={18} />}
+                  w="full"
+                  h="40px"
+                  variant="ghost"
+                  leftIcon={<TrendingUp size={16} />}
                   onClick={() => {
                     onClose()
-                    if (onAbrirCertificado) onAbrirCertificado(resultado.avance)
+                    navigate('/empleado/programas')
                   }}
                 >
-                  Ver y Descargar Certificado
+                  Ver mis programas
                 </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  leftIcon={<RotateCcw size={16} />}
-                  onClick={handleReintentar}
-                >
-                  Reintentar evaluación
-                </Button>
-              )}
+              </VStack>
             </VStack>
           ) : (
             /* Formulario de Evaluación */
@@ -255,7 +343,8 @@ export default function RendirEvaluacionModal({
                   value={porcentajeRespondido}
                   size="sm"
                   borderRadius="full"
-                  colorScheme="blue"
+                  sx={{ '& > div': { bg: 'brand.primary' } }}
+                  bg="blackAlpha.100"
                 />
               </Box>
 
@@ -279,12 +368,13 @@ export default function RendirEvaluacionModal({
                       borderWidth="1px"
                       borderColor={valorSeleccionado ? 'brand.primary' : 'blackAlpha.100'}
                       borderRadius="xl"
-                      bg={valorSeleccionado ? 'blue.50' : 'white'}
-                      transition="all 0.2s"
+                      bg={valorSeleccionado ? 'brand.wash' : 'white'}
+                      transition="border-color 150ms, background-color 150ms"
                     >
                       <Flex align="flex-start" gap={3} mb={3}>
                         <Badge
-                          colorScheme={valorSeleccionado ? 'blue' : 'gray'}
+                          bg={valorSeleccionado ? 'brand.primary' : 'blackAlpha.100'}
+                          color={valorSeleccionado ? 'white' : 'blackAlpha.600'}
                           borderRadius="full"
                           px={2}
                           py={0.5}
@@ -306,7 +396,7 @@ export default function RendirEvaluacionModal({
                             <Radio
                               key={opt.id_opcion}
                               value={String(opt.id_opcion)}
-                              colorScheme="blue"
+                              color="brand.primary"
                               size="md"
                             >
                               <Text fontSize="sm" color="brand.ink">
@@ -327,13 +417,12 @@ export default function RendirEvaluacionModal({
         {!resultado && (
           <ModalFooter borderTopWidth="1px" borderColor="blackAlpha.100" py={3} bg="brand.soft">
             <Flex w="full" justify="space-between" align="center">
-              <Button size="sm" variant="outline" onClick={onClose}>
+              <Button size="sm" h="36px" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
               <Button
                 size="sm"
-                variant="solid"
-                bg="brand.primary"
+                h="36px"
                 isDisabled={respondidas < totalPreguntas || totalPreguntas === 0}
                 isLoading={enviando}
                 loadingText="Calificando..."
