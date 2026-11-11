@@ -82,9 +82,15 @@ serve(async (req) => {
       method: 'PATCH',
       body: JSON.stringify({
         password: password_nueva,
-        public_metadata: { rol: 'empresa', cuenta_temporal: false },
         first_name: nombre_comercial.split(/\s+/)[0]?.slice(0, 40) || 'Empresa',
         last_name: 'Admin',
+      }),
+    })
+    // Clerk API 2026-05-12: metadata ya no va en PATCH /users
+    await clerk(`/users/${empresa.clerk_user_id}/metadata`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        public_metadata: { rol: 'empresa', cuenta_temporal: false },
       }),
     })
 
