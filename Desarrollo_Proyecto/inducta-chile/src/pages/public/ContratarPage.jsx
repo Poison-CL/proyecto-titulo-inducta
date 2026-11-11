@@ -143,8 +143,8 @@ export default function ContratarPage() {
   const [errorWebpay, setErrorWebpay] = useState(false)
   const [errorPago, setErrorPago] = useState('')
 
-  const errorPago = params.get('error')
-  if (errorPago === 'pago_fallido' || errorPago === 'servidor') {
+  const errorQuery = params.get('error')
+  if (errorQuery === 'pago_fallido' || errorQuery === 'servidor') {
     return <Navigate to="/pago/rechazado" replace />
   }
 
