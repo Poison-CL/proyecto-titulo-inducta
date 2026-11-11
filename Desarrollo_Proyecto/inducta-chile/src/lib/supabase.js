@@ -13,8 +13,10 @@ export const supabasePublico = createClient(env.supabaseUrl, env.supabaseAnonKey
 export function createSupabaseClient(getToken, getOrgId) {
   const resolveClerkToken = async (organizationId) => {
     const orgId = organizationId || (typeof getOrgId === 'function' ? getOrgId() : null)
+    // skipCache: evita JWT viejo sin claims de organización tras cambiar de org
     return getToken({
       template: 'supabase',
+      skipCache: true,
       ...(orgId ? { organizationId: orgId } : {}),
     })
   }

@@ -33,14 +33,25 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    // Evitar pagar de nuevo si el correo ya tiene empresa/cuenta Clerk.
-    const { data: empresaExistente } = await supabaseAdmin
+    // Evitar pagar si el correo ya es dueño, temporal o usuario (admin/trabajador).
+    const estadosCuenta = ['temporal', 'pendiente_verificacion', 'verificada', 'activa']
+    const { data: porContacto } = await supabaseAdmin
       .from('empresa')
       .select('id_empresa, cuenta_estado')
       .eq('email_contacto', email_contacto)
-      .in('cuenta_estado', ['temporal', 'pendiente_verificacion', 'verificada', 'activa'])
+      .in('cuenta_estado', estadosCuenta)
       .limit(1)
       .maybeSingle()
+    const { data: porTemporal } = porContacto
+      ? { data: null }
+      : await supabaseAdmin
+          .from('empresa')
+          .select('id_empresa, cuenta_estado')
+          .eq('email_temporal', email_contacto)
+          .in('cuenta_estado', estadosCuenta)
+          .limit(1)
+          .maybeSingle()
+    const empresaExistente = porContacto || porTemporal
 
     if (empresaExistente) {
       return jsonResponse(
@@ -63,16 +74,45 @@ serve(async (req) => {
       const clerkData = await clerkRes.json().catch(() => [])
       const clerkUser = Array.isArray(clerkData) ? clerkData[0] : clerkData?.data?.[0]
       if (clerkUser?.id) {
+        const { data: usuarioRow } = await supabaseAdmin
+          .from('usuario')
+          .select('id_usuario, rol, id_empresa')
+          .eq('id_usuario', clerkUser.id)
+          .limit(1)
+          .maybeSingle()
+
+        const esTrabajador = usuarioRow && String(usuarioRow.rol || '').toLowerCase().includes('trabaja')
         return jsonResponse(
           {
-            error:
-              'Este correo ya está registrado. Ingrese a Inducta o use otro correo para una cuenta nueva.',
+            error: esTrabajador
+              ? 'Este correo ya pertenece a un trabajador de una empresa en Inducta. Debe ingresar con esa cuenta; no puede contratar un plan nuevo con el mismo correo.'
+              : 'Este correo ya está registrado en Inducta. Ingrese con ese correo o use otro para contratar.',
             code: 'email_en_uso',
           },
           409,
           req,
         )
       }
+    }
+
+    // Fallback sin Clerk: fila en usuario no aplica (sin email). Bloqueo por pago reciente OK.
+    const { data: pagoActivo } = await supabaseAdmin
+      .from('pagos_transbank')
+      .select('orden_compra, estado')
+      .eq('email_contacto', email_contacto)
+      .in('estado', ['autorizado', 'pagado', 'aprobado', 'completado'])
+      .limit(1)
+      .maybeSingle()
+    if (pagoActivo) {
+      return jsonResponse(
+        {
+          error:
+            'Este correo ya tiene un pago Inducta asociado. Ingrese a su cuenta o contacte soporte.',
+          code: 'email_en_uso',
+        },
+        409,
+        req,
+      )
     }
 
     const ufClp = await ufHoyClp()

@@ -324,21 +324,23 @@ function RecursosIntro() {
           </Box>
         </Box>
 
-        <Flex align="center" justify="space-between" pt={6} borderTopWidth="1px" borderColor="blackAlpha.100" gap={4} flexWrap="wrap">
-          <Text fontSize="sm" color="blackAlpha.500">
-            Siguiente
-          </Text>
+        <Flex justify="flex-end" pt={6} borderTopWidth="1px" borderColor="blackAlpha.100">
           <Link
             as={RouterLink}
             to="/recursos/guias"
             display="inline-flex"
-            alignItems="center"
-            gap={1}
-            fontWeight="semibold"
+            flexDirection="column"
+            alignItems="flex-end"
+            gap={0.5}
             color="brand.primary"
-            _hover={{ textDecoration: 'underline' }}
+            _hover={{ textDecoration: 'none', opacity: 0.85 }}
           >
-            Guías de inducción <Icon as={ArrowRight} boxSize={4} />
+            <Text as="span" fontSize="xs" fontWeight="medium" color="blackAlpha.500">
+              Siguiente
+            </Text>
+            <Text as="span" display="inline-flex" alignItems="center" gap={1} fontWeight="semibold">
+              Guías de inducción <Icon as={ArrowRight} boxSize={4} />
+            </Text>
           </Link>
         </Flex>
       </Box>
