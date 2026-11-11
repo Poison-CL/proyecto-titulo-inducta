@@ -155,6 +155,9 @@ export default function RendirEvaluacionModal({
         modulos: test.modulos,
       })
 
+      if (!res?.ok || res.porcentajeObtenido == null) {
+        throw new Error(res?.errorNube || 'No se pudo calificar la evaluación')
+      }
       setResultado(res)
       if (res?.persistidoEnNube === false) {
         toast({
@@ -173,8 +176,10 @@ export default function RendirEvaluacionModal({
     } catch (err) {
       toast({
         title: 'Error al enviar evaluación',
-        description: err.message,
+        description: err.message || 'No se pudo enviar la evaluación',
         status: 'error',
+        duration: 7000,
+        isClosable: true,
       })
     } finally {
       setEnviando(false)
