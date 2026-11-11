@@ -10,7 +10,13 @@ import {
   ROL,
   rolSelectMiembro,
 } from '../../src/lib/authRol.js'
-import { clerkError, PASO, pasoSiguiente, pideCodigoTrasPassword } from '../../src/lib/loginPasos.js'
+import {
+  clerkError,
+  esCorreoTemporal,
+  PASO,
+  pasoSiguiente,
+  pideCodigoTrasPassword,
+} from '../../src/lib/loginPasos.js'
 import { rutaPanel } from '../../src/lib/rutaPanel.js'
 
 const signIn = (...estrategias) => ({
@@ -27,6 +33,13 @@ assert.equal(
   null,
   'una estrategia que no manejamos no habilita ingreso',
 )
+assert.equal(
+  pasoSiguiente(signIn('password', 'email_code'), 'tmp.x@tmp.inductachile.cl'),
+  PASO.PASSWORD,
+  'correo temporal salta el código',
+)
+assert.equal(esCorreoTemporal('tmp.abc@tmp.inductachile.cl'), true)
+assert.equal(esCorreoTemporal('juan@empresa.cl'), false)
 
 assert.equal(pideCodigoTrasPassword('needs_second_factor'), true)
 assert.equal(pideCodigoTrasPassword('needs_client_trust'), true)

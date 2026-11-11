@@ -98,7 +98,7 @@ async function enviarResend(opts: {
       <h1 style="color:#1b22a7;font-size:22px">Pago exitoso</h1>
       <p>Recibimos su pago de <strong>$${Number(opts.monto).toLocaleString('es-CL')}</strong>
       (orden <strong>${opts.orden}</strong>) para el plan <strong>${opts.plan}</strong>.</p>
-      <p><strong>Esta cuenta es temporal.</strong> Debe reemplazar el correo y la contraseña
+      <p><strong>Esta cuenta es temporal.</strong> Debe confirmar correo y contraseña
       en el panel en menos de 24 horas. Si no lo hace, la cuenta se deshabilitará y luego se eliminará.</p>
       <h2 style="font-size:16px;margin-top:24px">Credenciales temporales</h2>
       <ul>
@@ -189,7 +189,15 @@ serve(async (req) => {
 
     const password = claveAleatoria(16)
     const emailTemp = emailTemporal(orden_compra)
-    const frontend = Deno.env.get('FRONTEND_URL') ?? 'http://localhost:5173'
+    // Login con el correo real del pago (Device Trust / códigos sí llegan).
+    // email_temporal queda en BD solo como rastro del alta.
+    const emailLogin = String(email_contacto).trim().toLowerCase()
+    // FRONTEND_URL puede ser lista CORS; links del mail usan el primero.
+    const frontend =
+      String(Deno.env.get('FRONTEND_URL') ?? 'http://localhost:5173')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)[0] || 'http://localhost:5173'
     const adminRole = Deno.env.get('CLERK_ORG_ADMIN_ROLE') || 'org:administrador_inducta'
     const planDias = periodo === 'anual' ? 365 : 30
     const planVence = new Date()
@@ -198,7 +206,7 @@ serve(async (req) => {
     const user = await clerk('/users', {
       method: 'POST',
       body: JSON.stringify({
-        email_address: [emailTemp],
+        email_address: [emailLogin],
         password,
         public_metadata: { rol: 'empresa', cuenta_temporal: true },
         first_name: 'Acceso',
@@ -289,7 +297,7 @@ serve(async (req) => {
         orden: orden_compra,
         monto,
         plan: plan_solicitado,
-        emailTemp,
+        emailTemp: emailLogin,
         password,
         nombre: nombre_comercial,
         frontend,

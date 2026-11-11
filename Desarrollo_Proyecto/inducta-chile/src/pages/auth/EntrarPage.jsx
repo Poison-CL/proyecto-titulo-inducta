@@ -22,8 +22,10 @@ import { useEffect, useState } from 'react'
 import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { RUTAS_AUTH } from '../../lib/authCopy'
 import { isRolValido, ROL, setRolPendiente } from '../../lib/authRol'
+import { supabasePublico } from '../../lib/supabase'
 import {
   clerkError,
+  esCorreoTemporal,
   factorByStrategy,
   PASO,
   pasoSiguiente,
@@ -170,11 +172,11 @@ function LoginCard() {
   const [codeAsSecond, setCodeAsSecond] = useState(false)
 
   const copy = COPY[rol]
-  const canPassword = Boolean(factorByStrategy(signIn, 'password'))
-  const canEmailCode = Boolean(factorByStrategy(signIn, 'email_code'))
-  const RESEND_SEGUNDOS = 60
-
   const emailNormalizado = () => email.trim().toLowerCase()
+  const temporal = esCorreoTemporal(emailNormalizado())
+  const canPassword = Boolean(factorByStrategy(signIn, 'password'))
+  const canEmailCode = Boolean(factorByStrategy(signIn, 'email_code')) && !temporal
+  const RESEND_SEGUNDOS = 60
 
   useEffect(() => {
     setRolPendiente(rol)
@@ -230,7 +232,7 @@ function LoginCard() {
 
       if (await finishIfComplete(result)) return
 
-      const siguiente = pasoSiguiente(result)
+      const siguiente = pasoSiguiente(result, identifier)
 
       if (!siguiente) {
         setError(
@@ -351,6 +353,21 @@ function LoginCard() {
       // Contraseña ok: MFA o Device Trust (dispositivo nuevo) → código al correo.
       // Usar `result` (no el hook): el signIn del hook puede ir atrasado un tick.
       if (pideCodigoTrasPassword(result.status)) {
+        // Correos @tmp… no tienen bandeja: ticket de un solo uso tras verificar clave.
+        if (esCorreoTemporal(emailNormalizado())) {
+          const { data, error: ticketErr } = await supabasePublico.functions.invoke(
+            'login-ticket-temporal',
+            { body: { email: emailNormalizado(), password: clave } },
+          )
+          if (ticketErr || !data?.ticket) {
+            throw new Error(data?.error || ticketErr?.message || 'No pudimos abrir la sesión temporal.')
+          }
+          const ticketResult = await signIn.create({ strategy: 'ticket', ticket: data.ticket })
+          if (await finishIfComplete(ticketResult)) return
+          setError('No pudimos completar el ingreso temporal. Intente de nuevo.')
+          return
+        }
+
         const tieneEmail = result.supportedSecondFactors?.some((f) => f.strategy === 'email_code')
         if (tieneEmail) {
           setCodeAsSecond(true)

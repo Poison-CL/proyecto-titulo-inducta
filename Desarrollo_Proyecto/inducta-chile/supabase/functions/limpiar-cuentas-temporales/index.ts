@@ -5,6 +5,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
  * Cron diario:
  * - > 1 día en temporal/pendiente → deshabilitar (Clerk ban + estado deshabilitada)
  * - > 1 día deshabilitada → borrar fila empresa en Supabase (+ usuario) y borrar org/user Clerk
+ *
+ * Body `{ "force": true }` (mismo secret): borra YA todas las temporal/pendiente/deshabilitada.
  */
 async function clerk(path: string, init: RequestInit = {}) {
   const key = Deno.env.get('CLERK_SECRET_KEY')
@@ -23,14 +25,52 @@ async function clerk(path: string, init: RequestInit = {}) {
   return data
 }
 
+async function borrarEmpresa(
+  supabase: ReturnType<typeof createClient>,
+  e: { id_empresa: string; clerk_user_id?: string | null },
+  resumen: { borradas: number; errores: string[] },
+) {
+  try {
+    await supabase.from('pagos_transbank').update({ id_empresa: null }).eq('id_empresa', e.id_empresa)
+    // Dependencias típicas de una org de prueba
+    await supabase.from('certificado_emitido').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('avance_trabajador').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('opcion_respuesta').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('pregunta').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('test_induccion').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('usuario').delete().eq('id_empresa', e.id_empresa)
+    await supabase.from('empresa').delete().eq('id_empresa', e.id_empresa)
+    resumen.borradas++
+    if (Deno.env.get('CLERK_SECRET_KEY')) {
+      try {
+        if (e.clerk_user_id) await clerk(`/users/${e.clerk_user_id}`, { method: 'DELETE' })
+        await clerk(`/organizations/${e.id_empresa}`, { method: 'DELETE' })
+      } catch (cerr) {
+        resumen.errores.push(`clerk-delete ${e.id_empresa}: ${(cerr as Error).message}`)
+      }
+    }
+  } catch (err) {
+    resumen.errores.push(`delete ${e.id_empresa}: ${(err as Error).message}`)
+  }
+}
+
 serve(async (req) => {
   const secret = Deno.env.get('CRON_SECRET') || Deno.env.get('INTERNAL_FUNCTION_SECRET')
-  // Fail-closed: sin secret no se ejecuta nada (P1-8)
   if (!secret) {
     return new Response(JSON.stringify({ error: 'Falta CRON_SECRET' }), { status: 500 })
   }
   if (req.headers.get('x-inducta-secret') !== secret) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 })
+  }
+
+  let force = false
+  try {
+    if (req.method !== 'GET') {
+      const body = await req.json().catch(() => ({}))
+      force = Boolean(body?.force)
+    }
+  } catch {
+    force = false
   }
 
   const supabase = createClient(
@@ -40,8 +80,21 @@ serve(async (req) => {
 
   const ahora = Date.now()
   const diaMs = 24 * 60 * 60 * 1000
-  // ponytail: misma regla que src/lib/cuentaTemporalLifecycle.js (deshabilitar ≥1d, borrar ≥1d deshabilitada)
-  const resumen = { deshabilitadas: 0, borradas: 0, errores: [] as string[] }
+  const resumen = { force, deshabilitadas: 0, borradas: 0, errores: [] as string[] }
+
+  if (force) {
+    const { data: todas } = await supabase
+      .from('empresa')
+      .select('id_empresa, clerk_user_id, cuenta_estado')
+      .in('cuenta_estado', ['temporal', 'pendiente_verificacion', 'deshabilitada'])
+
+    for (const e of todas || []) {
+      await borrarEmpresa(supabase, e, resumen)
+    }
+    return new Response(JSON.stringify({ ok: true, ...resumen }), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
 
   const { data: temporales } = await supabase
     .from('empresa')
@@ -80,24 +133,7 @@ serve(async (req) => {
   for (const e of deshab || []) {
     const desde = e.cuenta_deshabilitada_en ? new Date(e.cuenta_deshabilitada_en).getTime() : 0
     if (!desde || ahora - desde < diaMs) continue
-    try {
-      // Pago queda como histórico; null antes de borrar empresa
-      await supabase.from('pagos_transbank').update({ id_empresa: null }).eq('id_empresa', e.id_empresa)
-      await supabase.from('usuario').delete().eq('id_empresa', e.id_empresa)
-      await supabase.from('empresa').delete().eq('id_empresa', e.id_empresa)
-      resumen.borradas++
-      // Clerk opcional: si falta secret, la fila ya quedó borrada en Supabase
-      if (Deno.env.get('CLERK_SECRET_KEY')) {
-        try {
-          if (e.clerk_user_id) await clerk(`/users/${e.clerk_user_id}`, { method: 'DELETE' })
-          await clerk(`/organizations/${e.id_empresa}`, { method: 'DELETE' })
-        } catch (cerr) {
-          resumen.errores.push(`clerk-delete ${e.id_empresa}: ${(cerr as Error).message}`)
-        }
-      }
-    } catch (err) {
-      resumen.errores.push(`delete ${e.id_empresa}: ${(err as Error).message}`)
-    }
+    await borrarEmpresa(supabase, e, resumen)
   }
 
   return new Response(JSON.stringify({ ok: true, ...resumen }), {
