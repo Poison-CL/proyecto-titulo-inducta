@@ -128,27 +128,45 @@ serve(async (req) => {
     }
 
     let folio: string | null = null
+    let cert_error: string | null = null
     if (estado === 'aprobada' && id_avance) {
-      try {
-        const { data: cert } = await supabaseAdmin
-          .from('certificado_emitido')
-          .upsert(
-            {
-              id_avance,
-              id_empresa: orgId,
-              id_usuario: auth.userId,
-              id_test,
-              puntaje,
-              porcentaje_minimo,
-              test_titulo: test.titulo,
-            },
-            { onConflict: 'id_avance' },
-          )
-          .select('folio')
-          .maybeSingle()
+      // Solo inserta si no existe (no pisar rol/rut de filas previas)
+      const { error: usrEnsureErr } = await supabaseAdmin.from('usuario').upsert(
+        {
+          id_usuario: auth.userId,
+          id_empresa: orgId,
+          rut: 'CLERK-' + String(auth.userId).slice(-8),
+          nombre_completo: avancePrev?.nombre_usuario || 'Colaborador',
+          rol: 'trabajador',
+          activo: true,
+        },
+        { onConflict: 'id_usuario', ignoreDuplicates: true },
+      )
+      if (usrEnsureErr) console.error('usuario ensure:', usrEnsureErr.message)
+
+      const { data: cert, error: certErr } = await supabaseAdmin
+        .from('certificado_emitido')
+        .upsert(
+          {
+            id_avance,
+            id_empresa: orgId,
+            id_usuario: auth.userId,
+            id_test,
+            puntaje,
+            porcentaje_minimo,
+            test_titulo: test.titulo,
+            archivo_pdf_url: null,
+          },
+          { onConflict: 'id_avance' },
+        )
+        .select('folio')
+        .maybeSingle()
+
+      if (certErr) {
+        console.error('certificado_emitido:', certErr.message)
+        cert_error = certErr.message
+      } else {
         folio = cert?.folio ?? null
-      } catch {
-        // Tabla/columnas de folio pueden faltar hasta migrar 021
       }
     }
 
@@ -163,6 +181,7 @@ serve(async (req) => {
         total,
         porcentaje_minimo,
         folio,
+        ...(cert_error ? { cert_error } : {}),
         avance: { ...row, id_avance },
       },
       200,

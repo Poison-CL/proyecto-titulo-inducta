@@ -69,7 +69,7 @@ export default function Hero() {
             maxW="42ch"
             mb={{ base: 6, md: 8 }}
           >
-            Programas por cargo, avance de cada colaborador y evidencia lista para auditorías, en un solo lugar.
+            Niveles de estudio, cuestionarios, avance del equipo y constancias listas para auditoría, en un solo lugar.
           </Text>
 
           <Flex gap={3} wrap="wrap" justify="center">

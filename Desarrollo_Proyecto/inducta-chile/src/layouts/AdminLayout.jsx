@@ -92,7 +92,12 @@ export default function AdminLayout() {
           </Flex>
         }
         navSections={[navPrimary, navSettings]}
-        ctaNav={{ label: 'Invitar colaborador', to: '/dashboard/equipo', icon: UserPlus }}
+        ctaNav={{
+          label: 'Invitar colaborador',
+          to: '/dashboard/equipo',
+          icon: UserPlus,
+          dataTour: 'cta-invitar',
+        }}
         resolverBusqueda={resolverBusqueda}
         searchPlaceholder="Búsqueda rápida"
         planWidget={
@@ -102,6 +107,7 @@ export default function AdminLayout() {
             cta="Gestionar plan"
             to="/dashboard/configuracion"
             meta={planEstado.etiqueta}
+            dataTour="plan-widget"
           />
         }
         banner={

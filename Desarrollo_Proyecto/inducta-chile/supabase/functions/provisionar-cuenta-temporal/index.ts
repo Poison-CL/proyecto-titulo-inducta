@@ -132,32 +132,19 @@ async function enviarResend(opts: {
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
+  let clerkUserId: string | null = null
+  let clerkOrgId: string | null = null
+
   try {
-    const auth = req.headers.get('Authorization') || ''
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    if (!auth.includes(serviceKey) && auth !== `Bearer ${serviceKey}`) {
-      // Solo el backend (tbk-confirmar) o service role puede provisionar
-      const internal = Deno.env.get('INTERNAL_FUNCTION_SECRET')
-      if (!internal || req.headers.get('x-inducta-secret') !== internal) {
-        return json({ error: 'No autorizado' }, 401)
-      }
+    // Solo tbk-confirmar (x-inducta-secret). No aceptar service key en Authorization.
+    const internal = Deno.env.get('INTERNAL_FUNCTION_SECRET')
+    if (!internal || req.headers.get('x-inducta-secret') !== internal) {
+      return json({ error: 'No autorizado' }, 401)
     }
 
-    const body = await req.json()
-    const {
-      orden_compra,
-      token_transbank,
-      nombre_comercial,
-      email_contacto,
-      plan_solicitado,
-      periodo,
-      monto,
-      id_pago,
-    } = body
-
-    if (!orden_compra || !email_contacto || !nombre_comercial) {
-      return json({ error: 'Faltan datos del pago' }, 400)
-    }
+    const body = await req.json().catch(() => ({}))
+    const id_pago = body?.id_pago
+    if (!id_pago) return json({ error: 'Falta id_pago' }, 400)
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -165,16 +152,42 @@ serve(async (req) => {
     )
 
     // Idempotencia: si el pago ya tiene empresa, no recrear
-    if (id_pago) {
-      const { data: ya } = await supabase
-        .from('empresa')
-        .select('id_empresa, email_temporal, cuenta_estado')
-        .eq('id_pago_origen', id_pago)
-        .maybeSingle()
-      if (ya) return json({ ok: true, already: true, id_empresa: ya.id_empresa })
+    const { data: ya } = await supabase
+      .from('empresa')
+      .select('id_empresa, email_temporal, cuenta_estado')
+      .eq('id_pago_origen', id_pago)
+      .maybeSingle()
+    if (ya) return json({ ok: true, already: true, id_empresa: ya.id_empresa })
+
+    // Datos del pago solo desde la DB (nunca del body del cliente)
+    const { data: pago, error: pagoErr } = await supabase
+      .from('pagos_transbank')
+      .select(
+        'id_pago, orden_compra, token_transbank, email_contacto, nombre_comercial, plan_solicitado, periodo, monto, estado',
+      )
+      .eq('id_pago', id_pago)
+      .maybeSingle()
+
+    if (pagoErr) throw pagoErr
+    if (!pago) return json({ error: 'Pago no encontrado' }, 404)
+    // tbk-confirmar persiste 'pagado' (no 'aprobado')
+    if (pago.estado !== 'pagado' && pago.estado !== 'aprobado') {
+      return json({ error: 'El pago no está aprobado' }, 400)
     }
 
-    const password = claveAleatoria(14)
+    const orden_compra = pago.orden_compra
+    const token_transbank = pago.token_transbank
+    const nombre_comercial = pago.nombre_comercial
+    const email_contacto = pago.email_contacto
+    const plan_solicitado = pago.plan_solicitado || 'basico'
+    const periodo = pago.periodo === 'anual' ? 'anual' : 'mensual'
+    const monto = pago.monto ?? 0
+
+    if (!orden_compra || !email_contacto || !nombre_comercial) {
+      return json({ error: 'Faltan datos del pago en la base' }, 400)
+    }
+
+    const password = claveAleatoria(16)
     const emailTemp = emailTemporal(orden_compra)
     const frontend = Deno.env.get('FRONTEND_URL') ?? 'http://localhost:5173'
     const adminRole = Deno.env.get('CLERK_ORG_ADMIN_ROLE') || 'org:administrador_inducta'
@@ -187,24 +200,23 @@ serve(async (req) => {
       body: JSON.stringify({
         email_address: [emailTemp],
         password,
-        skip_password_checks: true,
         public_metadata: { rol: 'empresa', cuenta_temporal: true },
         first_name: 'Acceso',
         last_name: 'Temporal',
       }),
     })
+    clerkUserId = user.id
 
-    // created_by ya deja al usuario como admin de la org; no re-crear membership
     const org = await clerk('/organizations', {
       method: 'POST',
       body: JSON.stringify({
-        name: nombre_comercial.slice(0, 80),
+        name: String(nombre_comercial).slice(0, 80),
         created_by: user.id,
-        public_metadata: { plan: plan_solicitado || 'basico' },
+        public_metadata: { plan: plan_solicitado },
       }),
     })
+    clerkOrgId = org.id
 
-    // Opcional: alinear rol custom si existe en la instancia
     try {
       await clerk(`/organizations/${org.id}/memberships/${user.id}`, {
         method: 'PATCH',
@@ -222,29 +234,41 @@ serve(async (req) => {
         email_contacto,
         email_temporal: emailTemp,
         clerk_user_id: user.id,
-        plan: plan_solicitado || 'basico',
-        periodo: periodo === 'anual' ? 'anual' : 'mensual',
+        plan: plan_solicitado,
+        periodo,
         plan_vence_en: planVence.toISOString().slice(0, 10),
         cuenta_estado: 'temporal',
         cuenta_temporal_creada_en: new Date().toISOString(),
         modal_temporal_visto: false,
-        id_pago_origen: id_pago ?? null,
+        id_pago_origen: id_pago,
       })
       .select('id_empresa')
       .single()
 
-    if (empErr) throw empErr
+    if (empErr) {
+      // Compensar huérfanos en Clerk si el insert falla (UNIQUE, etc.)
+      try {
+        if (clerkOrgId) await clerk(`/organizations/${clerkOrgId}`, { method: 'DELETE' })
+      } catch (e) {
+        console.error('rollback org:', (e as Error).message)
+      }
+      try {
+        if (clerkUserId) await clerk(`/users/${clerkUserId}`, { method: 'DELETE' })
+      } catch (e) {
+        console.error('rollback user:', (e as Error).message)
+      }
+      throw empErr
+    }
 
     if (token_transbank) {
       await supabase
         .from('pagos_transbank')
         .update({ id_empresa: org.id })
         .eq('token_transbank', token_transbank)
-    } else if (orden_compra) {
+    } else {
       await supabase.from('pagos_transbank').update({ id_empresa: org.id }).eq('orden_compra', orden_compra)
     }
 
-    // rut es NOT NULL en schema; placeholder hasta verificar cuenta
     const { error: usrErr } = await supabase.from('usuario').upsert(
       {
         id_usuario: user.id,
@@ -263,16 +287,15 @@ serve(async (req) => {
       emailResult = (await enviarResend({
         to: email_contacto,
         orden: orden_compra,
-        monto: monto ?? 0,
-        plan: plan_solicitado || 'basico',
+        monto,
+        plan: plan_solicitado,
         emailTemp,
         password,
         nombre: nombre_comercial,
         frontend,
       })) as Record<string, unknown>
     } catch (mailErr) {
-      // Cuenta ya creada: no revertir por fallo de correo
-      console.error('Resend falló:', (mailErr as Error).message)
+      console.error('SMTP falló:', (mailErr as Error).message)
       emailResult = { error: (mailErr as Error).message }
     }
 
@@ -281,10 +304,9 @@ serve(async (req) => {
       id_empresa: empresa.id_empresa,
       email_temporal: emailTemp,
       email: emailResult,
-      // La contraseña solo viaja por correo; no la devolvemos al cliente público.
     })
   } catch (error) {
     console.error('provisionar-cuenta-temporal:', error)
-    return json({ error: error.message || String(error) }, 400)
+    return json({ error: (error as Error).message || String(error) }, 400)
   }
 })

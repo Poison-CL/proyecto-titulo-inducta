@@ -35,7 +35,7 @@ export default function CertificadoModal({
   const nombreEmpresa = empresa?.nombre_comercial || 'Empresa'
   const nombrePrograma = avance.test_titulo || 'Inducción corporativa'
   const fechaTexto = avance.fecha_evaluacion ? fechaCortaEs(avance.fecha_evaluacion) : '—'
-  const puntaje = avance.puntaje ?? 100
+  const puntaje = Number.isFinite(Number(avance.puntaje)) ? Number(avance.puntaje) : null
   const puntajeMinimo = avance.porcentaje_minimo ?? 70
   const logoEmpresa = logoEmpresaUrl || empresa?.logo_url || null
 
@@ -245,7 +245,7 @@ export default function CertificadoModal({
               flexWrap="wrap"
               position="relative"
             >
-              <Dato label="Resultado" valor={`${puntaje}%`} />
+              <Dato label="Resultado" valor={puntaje == null ? '—' : `${puntaje}%`} />
               <Dato label="Exigencia" valor={`${puntajeMinimo}%`} />
               <Dato label="Fecha" valor={fechaTexto} />
               <Dato label="Estado" valor="Aprobado" />

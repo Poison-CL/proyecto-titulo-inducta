@@ -18,10 +18,10 @@ import {
 // Decoración del hero: datos inventados, no vienen de la API.
 
 const iconTile = [
-  { label: 'Inducción', icon: ClipboardList },
-  { label: 'Seguridad', icon: ShieldCheck },
-  { label: 'Documentos', icon: FileText },
-  { label: 'Certificados', icon: Award },
+  { label: 'Estudiar niveles', icon: ClipboardList, done: true },
+  { label: 'Video YouTube', icon: FileText, done: true },
+  { label: 'Rendir prueba', icon: ShieldCheck, done: false, cta: 'Rendir' },
+  { label: 'Constancia', icon: Award, done: false },
 ]
 
 export function PhoneMock() {
@@ -55,7 +55,7 @@ export function PhoneMock() {
             </Box>
             <Box>
               <Text fontSize="11px" color="blackAlpha.600" lineHeight="1.1">
-                ¡Buen día!
+                Mis programas
               </Text>
               <Text fontSize="sm" fontWeight="bold" color="brand.ink" lineHeight="1.2">
                 Fabiana M.
@@ -71,19 +71,22 @@ export function PhoneMock() {
         <Box bg="brand.soft" borderRadius="lg" px={3} py={2.5} mb={3}>
           <Flex justify="space-between" align="center" mb={1}>
             <Text fontSize="11px" fontWeight="semibold" color="brand.ink">
-              Tu inducción
+              Estudio completado
             </Text>
             <Text fontSize="11px" fontWeight="bold" color="brand.primary">
-              62%
+              100%
             </Text>
           </Flex>
           <Progress
-            value={62}
+            value={100}
             size="sm"
             borderRadius="full"
             bg="blackAlpha.100"
             sx={{ '& > div': { bg: 'brand.accent' } }}
           />
+          <Text fontSize="10px" color="blackAlpha.600" mt={1.5}>
+            Cuestionario desbloqueado
+          </Text>
         </Box>
 
         <VStack align="stretch" spacing={2}>
@@ -113,7 +116,17 @@ export function PhoneMock() {
               <Text flex="1" fontSize="xs" fontWeight="semibold" color="brand.ink">
                 {item.label}
               </Text>
-              <Icon as={CheckCircle2} boxSize={4} color="brand.accent" />
+              {item.done ? (
+                <Icon as={CheckCircle2} boxSize={4} color="brand.accent" />
+              ) : item.cta ? (
+                <Text fontSize="10px" fontWeight="semibold" color="brand.primary">
+                  {item.cta}
+                </Text>
+              ) : (
+                <Text fontSize="10px" color="blackAlpha.400">
+                  —
+                </Text>
+              )}
             </HStack>
           ))}
         </VStack>
@@ -160,7 +173,7 @@ export function DesktopMock() {
         pr={4}
         bg="white"
       >
-        {['Programas', 'Avance', 'Evidencia'].map((tab, i) => (
+        {['Evaluaciones', 'Avances', 'Equipo'].map((tab, i) => (
           <Text
             key={tab}
             fontSize="xs"
@@ -180,12 +193,12 @@ export function DesktopMock() {
       <Grid templateColumns="1.15fr 0.95fr" gap={3} pl={PL} pr={3.5} py={3.5}>
         <Box>
           <Text fontSize="11px" color="blackAlpha.600" mb={2} fontWeight="medium">
-            Completados este mes
+            Avances del equipo
           </Text>
           {[
-            { name: 'Inducción general', meta: '148 / 160', pct: 92 },
-            { name: 'Seguridad laboral', meta: '125 / 160', pct: 78 },
-            { name: 'Onboarding área', meta: '86 / 160', pct: 54 },
+            { name: 'Inducción general', meta: '148 aprobadas · 12 en curso', pct: 92 },
+            { name: 'Seguridad + EPP (video)', meta: '125 aprobadas · 28 estudiando', pct: 78 },
+            { name: 'Ley Karin', meta: '86 aprobadas · 40 pendientes', pct: 54 },
           ].map((row) => (
             <Box key={row.name} mb={2} p={2} borderRadius="md" bg="brand.soft" _last={{ mb: 0 }}>
               <Flex justify="space-between" mb={0.5}>
@@ -260,6 +273,7 @@ export function DashboardPanelMock() {
   const empresa = 'Constructora Sur'
   const navPrimary = [
     { label: 'Inicio', icon: Home, active: true },
+    { label: 'Programas', icon: ClipboardList, active: false },
     { label: 'Equipo', icon: Users, active: false },
   ]
   const navSettings = [{ label: 'Configuración', icon: Settings2, active: false }]
@@ -267,22 +281,22 @@ export function DashboardPanelMock() {
     {
       icon: Users,
       titulo: 'Gestione el equipo',
-      bajada: 'Invite colaboradores y defina quién administra la empresa.',
+      bajada: 'Invite colaboradores y defina quién administra la empresa desde el panel.',
       cta: 'Ir a Equipo',
       primary: true,
     },
     {
       icon: Settings2,
       titulo: 'Plan y configuración',
-      bajada: 'Revise el vencimiento del plan y actualice los datos de contacto.',
+      bajada: 'Revise el vencimiento del plan, renueve y actualice los datos de contacto.',
       cta: 'Abrir configuración',
       primary: false,
     },
     {
       icon: ClipboardList,
-      titulo: 'Programas',
-      bajada: 'Inducciones y capacitaciones para su organización.',
-      cta: 'Ver inicio',
+      titulo: 'Programas y Evaluaciones',
+      bajada: 'Cree niveles de estudio, cuestionarios y supervise la acreditación y avances del equipo.',
+      cta: 'Gestionar programas',
       primary: false,
     },
   ]

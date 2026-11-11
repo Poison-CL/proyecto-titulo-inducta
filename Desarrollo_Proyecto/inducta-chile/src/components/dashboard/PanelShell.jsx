@@ -205,6 +205,7 @@ export default function PanelShell({
                 color="brand.ink"
                 borderRadius="md"
                 leftIcon={CtaIcon ? <CtaIcon size={16} strokeWidth={1.75} /> : undefined}
+                data-tour={ctaNav.dataTour}
                 _hover={{ bg: 'brand.soft', borderColor: 'blackAlpha.300' }}
               >
                 {ctaNav.label}
@@ -278,7 +279,7 @@ export default function PanelShell({
   )
 }
 
-export function PlanWidget({ titulo, planLabel, cta, to, meta }) {
+export function PlanWidget({ titulo, planLabel, cta, to, meta, dataTour }) {
   return (
     <Box
       borderRadius="lg"
@@ -287,6 +288,7 @@ export function PlanWidget({ titulo, planLabel, cta, to, meta }) {
       borderWidth="1px"
       borderColor="blackAlpha.100"
       backgroundImage="linear-gradient(145deg, rgba(238,240,252,1) 0%, rgba(250,250,250,1) 100%)"
+      data-tour={dataTour}
     >
       <Text fontSize="xs" color="blackAlpha.600" mb={0.5}>
         {titulo}
