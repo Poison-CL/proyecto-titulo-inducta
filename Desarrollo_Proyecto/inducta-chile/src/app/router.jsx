@@ -23,6 +23,7 @@ import ArticuloPage from '../pages/public/ArticuloPage'
 import ContactoPage from '../pages/public/ContactoPage'
 import ContratarPage from '../pages/public/ContratarPage'
 import DashboardPage from '../pages/app/DashboardPage'
+import ProgramasPage from '../pages/app/ProgramasPage'
 import ConfiguracionPage from '../pages/app/ConfiguracionPage'
 import EquipoPage from '../pages/app/EquipoPage'
 import EmpleadoDashboardPage from '../pages/empleado/EmpleadoDashboardPage'
@@ -145,6 +146,8 @@ export function AppRouter() {
         <Route path="/dashboard" element={<ProtectedApp />}>
           <Route index element={<DashboardPage />} />
           <Route path="equipo" element={<EquipoPage />} />
+          <Route path="programas" element={<ProgramasPage />} />
+          <Route path="avances" element={<Navigate to="/dashboard/programas?tab=avances" replace />} />
           <Route path="configuracion" element={<ConfiguracionPage />} />
         </Route>
 

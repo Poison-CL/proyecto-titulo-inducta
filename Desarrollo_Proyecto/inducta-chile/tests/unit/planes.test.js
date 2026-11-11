@@ -7,6 +7,8 @@ import {
   montoPlan,
   puedeInvitar,
   precioFinalClp,
+  cuposEvaluacionesDisponibles,
+  puedeCrearEvaluacion,
 } from '../../src/lib/planes.js'
 
 assert.equal(PLANES.length, 4, 'hay 4 planes')
@@ -44,6 +46,26 @@ assert.equal(puedeInvitar(demo, 4, 0), true)
 // Plus+ sin límite
 assert.equal(cuposDisponibles(plusplus, 999, 10), null)
 assert.equal(puedeInvitar(plusplus, 999, 10), true)
+
+// HU-16: Tope de evaluaciones por plan
+assert.equal(demo.maxEvaluaciones, 1)
+assert.equal(basico.maxEvaluaciones, 5)
+assert.equal(plus.maxEvaluaciones, null)
+assert.equal(plusplus.maxEvaluaciones, null)
+
+assert.equal(cuposEvaluacionesDisponibles(demo, 0), 1)
+assert.equal(puedeCrearEvaluacion(demo, 0), true)
+assert.equal(cuposEvaluacionesDisponibles(demo, 1), 0)
+assert.equal(puedeCrearEvaluacion(demo, 1), false)
+
+assert.equal(cuposEvaluacionesDisponibles(basico, 4), 1)
+assert.equal(puedeCrearEvaluacion(basico, 4), true)
+assert.equal(cuposEvaluacionesDisponibles(basico, 5), 0)
+assert.equal(puedeCrearEvaluacion(basico, 5), false)
+
+assert.equal(cuposEvaluacionesDisponibles(plus, 50), null)
+assert.equal(puedeCrearEvaluacion(plus, 50), true)
+
 
 assert.equal(precioFinalClp(1.5, 38000), Math.round(1.5 * 38000) + Math.round(1.5 * 38000 * 0.19))
 

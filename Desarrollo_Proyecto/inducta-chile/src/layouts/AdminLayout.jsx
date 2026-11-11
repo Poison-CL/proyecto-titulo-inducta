@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { OrganizationSwitcher, useOrganization } from '@clerk/clerk-react'
-import { CircleHelp, Home, Settings2, UserPlus, Users } from 'lucide-react'
+import { CircleHelp, ClipboardList, Home, Settings2, UserPlus, Users } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'

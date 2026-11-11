@@ -63,10 +63,10 @@ export default function DashboardPage() {
           />
           <AccionCard
             icon={ClipboardList}
-            titulo="Programas"
-            bajada="Inducciones y capacitaciones: hoy se gestionan con el equipo Inducta. Revise guías y demos."
-            cta="Ver recursos"
-            to="/recursos/capacitaciones"
+            titulo="Programas y Evaluaciones"
+            bajada="Cree inducciones, defina cuestionarios de evaluación y supervise la acreditación y avances del equipo."
+            cta="Gestionar programas"
+            to="/dashboard/programas"
           />
         </Grid>
       )}
