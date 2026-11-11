@@ -205,10 +205,18 @@ export default function EquipoPage() {
         rolInvitar === rolAdmin || esAdminEmpresa({ role: rolInvitar })
           ? rolAdmin
           : rolTrabajador
-      await organization.inviteMember({ emailAddress: correo, role })
+      // Correo lo envía Clerk (no el SMTP de Inducta). En instancia de desarrollo
+      // puede ir a spam o quedar limitado; el invitado también puede entrar en /entrar.
+      await organization.inviteMember({
+        emailAddress: correo,
+        role,
+        redirectUrl: `${window.location.origin}/entrar?rol=empleado`,
+      })
       setEmail('')
       setRolInvitar(rolTrabajador)
-      setOk(`Invitación enviada a ${correo} como ${etiquetaOrgRol(role)}.`)
+      setOk(
+        `Invitación creada para ${correo} (${etiquetaOrgRol(role)}). Clerk envía el correo; si no llega, que revise spam o entre en Inducta con ese correo.`,
+      )
       await refrescar()
     } catch (err) {
       setError(mensajeErrorClerk(err))
@@ -312,7 +320,7 @@ export default function EquipoPage() {
             bajada={
               bloqueoTemporal
                 ? 'Complete sus datos reales antes de invitar.'
-                : 'Recibirá un correo para unirse a la organización.'
+                : 'Clerk envía el correo de invitación. Si no llega, revise spam o que la persona entre en /entrar con ese correo.'
             }
             footer={
               <Button

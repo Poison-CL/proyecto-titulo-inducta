@@ -1,12 +1,14 @@
 import { useOrganization } from '@clerk/clerk-react'
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useSupabase } from '../../hooks/useSupabase'
 import { CUENTA, esCuentaDeshabilitada, esCuentaTemporal } from '../../lib/cuentaEstado'
 
 const CAMPOS =
   'id_empresa, nombre_comercial, email_contacto, email_temporal, plan, periodo, plan_vence_en, cuenta_estado, cuenta_temporal_creada_en, modal_temporal_visto, clerk_user_id'
 
-export function useEmpresaCuenta() {
+const EmpresaCuentaContext = createContext(null)
+
+export function EmpresaCuentaProvider({ children }) {
   const { organization } = useOrganization()
   const supabase = useSupabase()
   const [empresa, setEmpresa] = useState(null)
@@ -44,16 +46,29 @@ export function useEmpresaCuenta() {
 
   const estado = empresa?.cuenta_estado || CUENTA.VERIFICADA
 
-  return {
-    organization,
-    empresa,
-    loading,
-    error,
-    cargar,
-    marcarModalVisto,
-    estado,
-    esTemporal: esCuentaTemporal(estado),
-    esDeshabilitada: esCuentaDeshabilitada(estado),
-    puedeEquipo: estado === CUENTA.VERIFICADA,
+  const value = useMemo(
+    () => ({
+      organization,
+      empresa,
+      loading,
+      error,
+      cargar,
+      marcarModalVisto,
+      estado,
+      esTemporal: esCuentaTemporal(estado),
+      esDeshabilitada: esCuentaDeshabilitada(estado),
+      puedeEquipo: estado === CUENTA.VERIFICADA,
+    }),
+    [organization, empresa, loading, error, cargar, marcarModalVisto, estado],
+  )
+
+  return <EmpresaCuentaContext.Provider value={value}>{children}</EmpresaCuentaContext.Provider>
+}
+
+export function useEmpresaCuenta() {
+  const ctx = useContext(EmpresaCuentaContext)
+  if (!ctx) {
+    throw new Error('useEmpresaCuenta debe usarse dentro de EmpresaCuentaProvider')
   }
+  return ctx
 }

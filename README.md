@@ -20,8 +20,13 @@
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres-3FCF8E?style=flat-square&logo=supabase&logoColor=white">
   <img alt="Clerk" src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white">
   <img alt="Transbank" src="https://img.shields.io/badge/Transbank-Webpay-E30613?style=flat-square">
+  <img alt="Render" src="https://img.shields.io/badge/Render-Deploy-46E3B7?style=flat-square&logo=render&logoColor=white">
   <img alt="Podman" src="https://img.shields.io/badge/Podman-Compose-892CA0?style=flat-square&logo=podman&logoColor=white">
   <img alt="Uso" src="https://img.shields.io/badge/Uso-Académico-0B6E4F?style=flat-square">
+</p>
+
+<p align="center">
+  <a href="https://inducta-chile.onrender.com"><img alt="Demo en vivo" src="https://img.shields.io/badge/Demo-inducta--chile.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -31,6 +36,7 @@
   <a href="#equipo">Equipo</a> ·
   <a href="#stack-tecnológico">Stack</a> ·
   <a href="#inicio-rápido">Inicio rápido</a> ·
+  <a href="#despliegue">Despliegue</a> ·
   <a href="#arquitectura">Arquitectura</a>
 </p>
 
@@ -99,17 +105,28 @@ Capturas de la app en desarrollo.
 
 - Home con hero, mockup del panel, sección **Cómo funciona** (4 pasos) y FAQ
 - **Hub de recursos** (`/recursos`): búsqueda, guías, documentación, capacitaciones, cumplimiento y soporte
-- **Precios** mensuales/anuales en UF + IVA, contratación y resultados de pago Webpay
+- **Precios** mensuales/anuales en UF + IVA, contratación (boleta/factura) y resultados de pago Webpay
 - Contacto y soporte público
+
+### Contratación y pagos (Webpay)
+
+- Flujo `/contratar` → confirmación → **Webpay Plus** (Transbank, ambiente de integración o producción según secrets)
+- Monto calculado en servidor con UF del día (cascada `mindicador.cl` → `indicadores.cl` → fallback)
+- Tras pago autorizado: alta automática de **cuenta temporal** (Clerk org + usuario + fila `empresa`)
+- Correo SMTP con credenciales de acceso; ventana de **24 h** para completar datos reales
+- Antiduplicado: no se inicia un nuevo cobro si el correo ya está vinculado a una cuenta o usuario Clerk
+- Pantallas `/pago/exitoso`, `/pago/rechazado`, `/pago/anulado`
 
 ### Acceso y paneles
 
 - Login custom **Empresa / Empleado** (`/entrar`) con Clerk Organizations (sin registro público)
+- Código o contraseña; en cuentas `@tmp…` se omite el código (no hay bandeja) y se completa con ticket seguro
+- Tours guiados (Intro.js) en panel empresa y empleado
 - Post-login y pantallas de ayuda si falta empresa o membresía
 - **Panel empresa** (`/dashboard`): Programas (evaluaciones + niveles texto/YouTube), Avances, Equipo, Configuración
 - **Panel empleado** (`/empleado`): Mis programas (estudiar → rendir), Mis certificados, perfil
 - Gate de estudio: si hay niveles, el cuestionario solo se desbloquea al 100 %
-- Constancias al aprobar; matriz de avances exportable a CSV
+- Calificación de evaluaciones en servidor (`publicar-avance`); constancias al aprobar; CSV de avances
 - Panel admin de plataforma (`/admin`): resumen, tickets, empresas, pagos, usuarios
 
 ### Rutas principales
@@ -118,16 +135,30 @@ Capturas de la app en desarrollo.
 | --- | --- |
 | `/` | Home marketing |
 | `/precios` · `/contratar` | Planes y contratación |
+| `/pago/*` | Resultado Webpay (exitoso / rechazado / anulado) |
 | `/recursos/*` | Hub de docs, guías y soporte |
 | `/entrar` | Ingreso (empresa o empleado) |
 | `/dashboard` | Panel de la organización |
 | `/dashboard/programas` | Evaluaciones, niveles de estudio y Avances |
 | `/dashboard/equipo` | Invitaciones y roles |
-| `/dashboard/configuracion` | Plan y datos de contacto |
+| `/dashboard/configuracion` | Plan, datos y completar cuenta temporal |
 | `/empleado` | Inicio del colaborador |
 | `/empleado/programas` | Estudiar y rendir inducciones |
 | `/empleado/certificados` | Constancias |
 | `/admin/*` | Administración de la plataforma |
+
+### Edge Functions (Supabase)
+
+| Función | Rol |
+| --- | --- |
+| `tbk-iniciar` / `tbk-confirmar` | Crear y confirmar transacción Webpay |
+| `provisionar-cuenta-temporal` | Alta post-pago + correo SMTP |
+| `completar-cuenta-temporal` | Pasar de temporal a verificada |
+| `limpiar-cuentas-temporales` | Cron: deshabilitar / borrar vencidas |
+| `login-ticket-temporal` | Ticket Clerk para login sin código en `@tmp…` |
+| `publicar-avance` | Calificar y publicar avance en servidor |
+| `responder-contacto` | Respuestas a tickets desde admin |
+| `admin-reset-password` | Reset de clave (admin plataforma) |
 
 Código de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md)
 
@@ -185,11 +216,12 @@ Código de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proy
 
 | Capa | Tecnología |
 | --- | --- |
-| Frontend | React 19, Vite 8, Chakra UI, React Router 7, Framer Motion / Motion |
-| Autenticación | Clerk (organizaciones, roles, login custom) |
-| Datos | Supabase (PostgreSQL, RLS, Storage, Edge Functions) |
+| Frontend | React 19, Vite 8, Chakra UI, React Router 7, Motion, Intro.js |
+| Autenticación | Clerk (organizaciones, roles, login custom, Device Trust) |
+| Datos | Supabase (PostgreSQL, RLS, Storage, Edge Functions Deno) |
 | Pagos | Transbank Webpay Plus |
-| Contenedor | Podman + Compose |
+| Correo | SMTP (cPanel) desde Edge Functions |
+| Deploy | Render (Docker / `Containerfile`) · Podman Compose en local |
 
 ---
 
@@ -281,7 +313,7 @@ npm run dev
 
 Aplicación en [http://localhost:5173/](http://localhost:5173/)
 
-### 3B. Demo / deploy (Podman)
+### 3B. Demo local (Podman)
 
 ```powershell
 podman machine start
@@ -296,21 +328,54 @@ podman compose down
 
 ---
 
+## Despliegue
+
+### Producción (Render)
+
+Demo pública: **[https://inducta-chile.onrender.com](https://inducta-chile.onrender.com)**
+
+| Ítem | Valor |
+| --- | --- |
+| Servicio | Web Service Docker (`Containerfile` en `Desarrollo_Proyecto/inducta-chile`) |
+| Auto-deploy | Commit a la rama configurada en Render |
+| Build | `npm run build` con `VITE_CLERK_*` y `VITE_SUPABASE_*` como build args / env |
+| Runtime | nginx sirve `dist/` en el puerto de Render (`$PORT`) |
+
+En Clerk, agregar el origen `https://inducta-chile.onrender.com`.  
+En Supabase Edge, `FRONTEND_URL` puede ser lista coma-separada (CORS); los redirects de Webpay usan el **primer** origen.
+
+Secrets típicos en Supabase (no van al frontend): `CLERK_SECRET_KEY`, `FRONTEND_URL`, `INTERNAL_FUNCTION_SECRET` / `CRON_SECRET`, `TBK_*`, `SMTP_*`.
+
+### Contenedor local
+
+Ver Podman arriba y [INSTALACION-PODMAN.md](Desarrollo%20de%20Documentacion/INSTALACION-PODMAN.md).
+
+---
+
 ## Arquitectura
 
 Archivos en `assets/diagrams/`.
 
 ### Vista de sistema
 
-React → Clerk (JWT + `org_id`) → Supabase (API, RLS, Postgres), con pagos vía Edge Functions → Transbank y archivos en Storage.
+Cliente en **Render** (o local) → Clerk (JWT + `org_id`) → Supabase (API, RLS, Postgres, Edge Functions) → Transbank Webpay y SMTP; archivos en Storage.
 
 <p align="center">
   <img src="assets/diagrams/arquitectura-inducta.png" alt="Arquitectura Inducta Chile" width="900">
 </p>
 
+### Flujo de contratación (resumen)
+
+1. Usuario elige plan en `/precios` y completa datos en `/contratar`.
+2. `tbk-iniciar` valida correo libre, calcula monto en UF+IVA y crea la transacción Webpay.
+3. Tras el pago, `tbk-confirmar` marca `pagado` y llama a `provisionar-cuenta-temporal`.
+4. Se crea org/usuario en Clerk, fila `empresa` (estado `temporal`) y se envía el correo con acceso.
+5. En `/dashboard/configuracion` completa datos → `completar-cuenta-temporal` (estado `verificada`).
+6. Cron `limpiar-cuentas-temporales`: a las 24 h deshabilita; luego borra en Supabase y Clerk.
+
 ### Modelo de datos
 
-Multi-tenant con `empresa` como raíz: usuarios, tests de inducción, preguntas, avances, certificados y pagos Transbank.
+Multi-tenant con `empresa` como raíz (incl. ciclo `temporal` → `verificada` / `deshabilitada`): usuarios, tests de inducción, preguntas, avances, certificados y pagos Transbank.
 
 <p align="center">
   <img src="assets/diagrams/modelo-datos-inducta.png" alt="Modelo de datos Inducta Chile" width="900">
@@ -347,6 +412,7 @@ El contenedor `web` corre en la máquina del desarrollador; Clerk, Supabase y Tr
 | Recurso | Enlace |
 | --- | --- |
 | Código fuente | [github.com/Poison-CL/proyecto-titulo-inducta](https://github.com/Poison-CL/proyecto-titulo-inducta) |
+| Demo en vivo | [inducta-chile.onrender.com](https://inducta-chile.onrender.com) |
 | Contribuciones | [@Poison-CL](https://github.com/Poison-CL) · [@haelfert-ux](https://github.com/haelfert-ux) |
 
 ---

@@ -11,6 +11,7 @@ import { useCallback } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
 import PanelShell, { PlanWidget } from '../components/dashboard/PanelShell'
+import { EmpresaCuentaProvider } from '../features/empresa/useEmpresaCuenta'
 import { EmpleadoTour } from '../features/tour/EmpleadoTour'
 import { esAdminEmpresa, etiquetaOrgRol } from '../lib/authRol'
 import { esAdminPlataforma, esOrgInducta } from '../lib/orgInducta'
@@ -22,6 +23,14 @@ import { resolverBusquedaEmpleado } from '../lib/panelBusqueda'
  * Abajo: empresa a la que pertenece.
  */
 export default function EmpleadoLayout() {
+  return (
+    <EmpresaCuentaProvider>
+      <EmpleadoLayoutInner />
+    </EmpresaCuentaProvider>
+  )
+}
+
+function EmpleadoLayoutInner() {
   const { membership, organization, isLoaded } = useOrganization()
 
   const resolverBusqueda = useCallback((consulta) => resolverBusquedaEmpleado(consulta), [])

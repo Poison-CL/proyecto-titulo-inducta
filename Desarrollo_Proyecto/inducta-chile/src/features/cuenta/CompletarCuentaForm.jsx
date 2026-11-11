@@ -11,8 +11,9 @@ export function CompletarCuentaForm({ onSubmit, isLoading }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
-    if (!nombreComercial.trim() || !email.trim() || password.length < 8) {
-      setError('Complete nombre, correo válido y contraseña de al menos 8 caracteres.')
+    // ponytail: mismo mínimo que completar-cuenta-temporal / política Clerk
+    if (!nombreComercial.trim() || !email.trim() || password.length < 15) {
+      setError('Complete nombre, correo válido y contraseña de al menos 15 caracteres.')
       return
     }
     if (password !== password2) {
@@ -52,8 +53,12 @@ export function CompletarCuentaForm({ onSubmit, isLoading }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
+          minLength={15}
           h="44px"
         />
+        <Text fontSize="xs" color="blackAlpha.600" mt={1}>
+          Mínimo 15 caracteres.
+        </Text>
       </FormControl>
       <FormControl isRequired>
         <FormLabel fontSize="sm">Confirmar contraseña</FormLabel>
