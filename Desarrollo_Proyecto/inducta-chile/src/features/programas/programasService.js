@@ -470,8 +470,14 @@ export async function crearEvaluacion(supabase, { id_empresa, titulo, porcentaje
     }))
 
     if (opcionesPayload.length) {
-      const { error: errOpt } = await supabase.from('opcion_respuesta').insert(opcionesPayload)
-      if (errOpt) throw new Error(errOpt.message)
+      // es_correcta sin SELECT para authenticated (mig 024): insert directo puede fallar.
+      const { error: errOpt } = await supabase.rpc('admin_insertar_opciones', {
+        p_rows: opcionesPayload,
+      })
+      if (errOpt) {
+        const { error: errOpt2 } = await supabase.from('opcion_respuesta').insert(opcionesPayload)
+        if (errOpt2) throw new Error(errOpt.message || errOpt2.message)
+      }
     }
 
     preguntasGuardadas.push({

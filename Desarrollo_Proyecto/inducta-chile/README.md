@@ -166,7 +166,11 @@ inducta-chile/
 ### Seguridad y pagos
 - Clerk Organizations (JWT + `org_id`) + RLS en Supabase
 - Calificación y publicación de avance vía Edge Function `publicar-avance` (no se confía en el cliente)
-- Webpay: monto calculado en servidor (`tbk-iniciar` / `tbk-confirmar`)
+- Webpay: monto en servidor (`tbk-iniciar` / `tbk-confirmar`); UF con cascada mindicador → indicadores.cl → fallback
+- Cuenta temporal post-pago + SMTP; antiduplicado de correo al iniciar cobro
+- Login `@tmp…` sin código (ticket `login-ticket-temporal`)
+
+Demo en Render: https://inducta-chile.onrender.com
 
 Documentación de usuario: artículos en `src/lib/recursos.js` (visibles en `/recursos`).
 
@@ -181,6 +185,7 @@ Edge Functions que deben permanecer en el proyecto Supabase:
 - `provisionar-cuenta-temporal`
 - `completar-cuenta-temporal`
 - `limpiar-cuentas-temporales`
+- `login-ticket-temporal`
 - `responder-contacto`
 - `admin-reset-password`
 - `publicar-avance`

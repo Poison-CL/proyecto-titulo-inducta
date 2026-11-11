@@ -6,7 +6,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
 import PanelShell, { PlanWidget } from '../components/dashboard/PanelShell'
 import { ModalCuentaTemporal } from '../features/cuenta/ModalCuentaTemporal'
-import { useEmpresaCuenta } from '../features/empresa/useEmpresaCuenta'
+import { EmpresaCuentaProvider, useEmpresaCuenta } from '../features/empresa/useEmpresaCuenta'
 import { DashboardTour } from '../features/tour/DashboardTour'
 import { useSupabase } from '../hooks/useSupabase'
 import { esAdminEmpresa } from '../lib/authRol'
@@ -16,6 +16,14 @@ import { estadoPlan, getPlan } from '../lib/planes'
 import { clerkAppearance } from '../theme/clerkAppearance'
 
 export default function AdminLayout() {
+  return (
+    <EmpresaCuentaProvider>
+      <AdminLayoutInner />
+    </EmpresaCuentaProvider>
+  )
+}
+
+function AdminLayoutInner() {
   const { organization, membership, memberships, invitations } = useOrganization({
     memberships: { infinite: true },
     invitations: { infinite: true },
@@ -136,7 +144,10 @@ export default function AdminLayout() {
         isOpen={modalAbierto}
         idEmpresa={organization?.id}
         onCerrar={cerrarModal}
-        onCompletado={() => cargar()}
+        onCompletado={async () => {
+          setModalAbierto(false)
+          await cargar()
+        }}
       />
     </>
   )

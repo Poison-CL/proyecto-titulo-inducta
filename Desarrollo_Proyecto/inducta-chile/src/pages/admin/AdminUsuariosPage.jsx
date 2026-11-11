@@ -91,10 +91,10 @@ export default function AdminUsuariosPage() {
 
   async function resetPassword(ev) {
     ev.preventDefault()
-    if (!userId.trim() || password.length < 8) {
+    if (!userId.trim() || password.length < 15) {
       toast({
         title: 'Datos incompletos',
-        description: 'Indique el id de usuario Clerk y una contraseña de al menos 8 caracteres.',
+        description: 'Indique el id de usuario Clerk y una contraseña de al menos 15 caracteres.',
         status: 'error',
         duration: 4000,
       })
