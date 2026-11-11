@@ -11,11 +11,23 @@ export const supabasePublico = createClient(env.supabaseUrl, env.supabaseAnonKey
  * @param getOrgId - () => orgId activa (para que el claim org_id / o.id viaje en el token)
  */
 export function createSupabaseClient(getToken, getOrgId) {
+  const resolveOrgId = (organizationId) =>
+    organizationId || (typeof getOrgId === 'function' ? getOrgId() : null)
+
+  // JWT template supabase → PostgREST/RLS
   const resolveClerkToken = async (organizationId) => {
-    const orgId = organizationId || (typeof getOrgId === 'function' ? getOrgId() : null)
-    // skipCache: evita JWT viejo sin claims de organización tras cambiar de org
+    const orgId = resolveOrgId(organizationId)
     return getToken({
       template: 'supabase',
+      skipCache: true,
+      ...(orgId ? { organizationId: orgId } : {}),
+    })
+  }
+
+  // Sesión Clerk (sin template) → Edge Functions con requireClerkAuth (azp + org)
+  const resolveClerkSessionToken = async (organizationId) => {
+    const orgId = resolveOrgId(organizationId)
+    return getToken({
       skipCache: true,
       ...(orgId ? { organizationId: orgId } : {}),
     })
@@ -36,7 +48,7 @@ export function createSupabaseClient(getToken, getOrgId) {
     },
   })
 
-  // Usado por programasService para edge functions (publicar-avance)
   client.__getClerkToken = resolveClerkToken
+  client.__getClerkSessionToken = resolveClerkSessionToken
   return client
 }

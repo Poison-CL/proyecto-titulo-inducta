@@ -637,21 +637,28 @@ export async function eliminarEvaluacion(supabase, id_test, id_empresa) {
   return { ok: true }
 }
 
-async function publicarAvanceViaEdge(supabase, row) {
-  const baseUrl = import.meta.env.VITE_SUPABASE_URL
-  const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
-  if (!baseUrl || !anon || !row?.id_empresa || !row?.id_usuario) {
-    return { ok: false, error: 'Sin config para edge publicar-avance' }
-  }
-
-  let clerkToken = null
+async function clerkTokenParaEdge(supabase, id_empresa) {
   try {
+    if (typeof supabase?.__getClerkSessionToken === 'function') {
+      const session = await supabase.__getClerkSessionToken(id_empresa)
+      if (session) return session
+    }
     if (typeof supabase?.__getClerkToken === 'function') {
-      clerkToken = await supabase.__getClerkToken(row.id_empresa)
+      return await supabase.__getClerkToken(id_empresa)
     }
   } catch (e) {
-    console.warn('publicarAvanceViaEdge token:', e?.message)
+    console.warn('clerkTokenParaEdge:', e?.message)
   }
+  return null
+}
+
+/** Califica en servidor (service role lee es_correcta). */
+async function calificarViaPublicarAvance(supabase, { id_test, id_empresa, respuestas }) {
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL
+  const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
+  if (!baseUrl || !anon) return { ok: false, error: 'Sin config para edge publicar-avance' }
+
+  const clerkToken = await clerkTokenParaEdge(supabase, id_empresa)
   if (!clerkToken) return { ok: false, error: 'Sin JWT Clerk para publicar avance' }
 
   const res = await fetch(`${baseUrl}/functions/v1/publicar-avance`, {
@@ -662,15 +669,46 @@ async function publicarAvanceViaEdge(supabase, row) {
       Authorization: `Bearer ${clerkToken}`,
     },
     body: JSON.stringify({
+      id_test: Number(id_test),
+      id_empresa,
+      respuestas,
+    }),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok || !body?.ok) {
+    return {
+      ok: false,
+      error: body?.error || `Edge publicar-avance ${res.status}`,
+      code: body?.code,
+      status: res.status,
+    }
+  }
+  return body
+}
+
+async function publicarAvanceViaEdge(supabase, row) {
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL
+  const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
+  if (!baseUrl || !anon || !row?.id_empresa || !row?.id_usuario) {
+    return { ok: false, error: 'Sin config para edge publicar-avance' }
+  }
+
+  const clerkToken = await clerkTokenParaEdge(supabase, row.id_empresa)
+  if (!clerkToken) return { ok: false, error: 'Sin JWT Clerk para publicar avance' }
+
+  // Sync de avance local: el edge espera respuestas; sin ellas no califica.
+  // Se mantiene el upsert directo; este helper solo se usa como último recurso legacy.
+  const res = await fetch(`${baseUrl}/functions/v1/publicar-avance`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: anon,
+      Authorization: `Bearer ${clerkToken}`,
+    },
+    body: JSON.stringify({
       id_test: Number(row.id_test),
       id_empresa: row.id_empresa,
-      id_usuario: row.id_usuario,
-      estado: row.estado,
-      fecha_evaluacion: row.fecha_evaluacion || new Date().toISOString(),
-      puntaje: row.puntaje ?? null,
-      intentos: row.intentos ?? 1,
-      nombre_usuario: row.nombre_usuario || null,
-      test_titulo: row.test_titulo || null,
+      respuestas: row.respuestas || {},
     }),
   })
   const body = await res.json().catch(() => ({}))
@@ -1102,18 +1140,21 @@ export async function responderEvaluacion(
   )
 
   if (supabase) {
-    const { data, error } = await supabase.functions.invoke('publicar-avance', {
-      body: { id_test: numTest, respuestas: respuestasSeleccionadas },
+    const data = await calificarViaPublicarAvance(supabase, {
+      id_test: numTest,
+      id_empresa,
+      respuestas: respuestasSeleccionadas,
     })
-    if (error || !data?.ok) {
+    if (!data?.ok) {
       if (data?.code === 'ESTUDIO_INCOMPLETO') {
         const err = new Error(data.error || 'Debe completar el estudio antes de rendir la evaluación')
         err.code = 'ESTUDIO_INCOMPLETO'
         throw err
       }
-      const errorNube = error?.message || data?.error || 'No se pudo publicar el avance en el servidor'
+      const errorNube = data?.error || 'No se pudo publicar el avance en el servidor'
       console.warn('responderEvaluacion publicar-avance:', errorNube)
-      return { ok: false, persistidoEnNube: false, errorNube }
+      // No devolver resultado vacío (undefined%): el servidor califica con es_correcta.
+      throw new Error(errorNube)
     }
 
     const aprobada = Boolean(data.aprobada)

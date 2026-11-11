@@ -38,20 +38,53 @@ function estudioCompleto(modulos: Modulo[] | null | undefined, progreso: { compl
   return ids.every((id) => done.has(id))
 }
 
+async function usuarioPerteneceAOrg(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  userId: string,
+  orgId: string,
+): Promise<boolean> {
+  const { data: miembro } = await supabaseAdmin
+    .from('usuario')
+    .select('id_empresa')
+    .eq('id_usuario', userId)
+    .eq('id_empresa', orgId)
+    .maybeSingle()
+  if (miembro) return true
+
+  const { data: dueño } = await supabaseAdmin
+    .from('empresa')
+    .select('id_empresa')
+    .eq('id_empresa', orgId)
+    .eq('clerk_user_id', userId)
+    .maybeSingle()
+  if (dueño) return true
+
+  const clerkKey = Deno.env.get('CLERK_SECRET_KEY')
+  if (!clerkKey) return false
+  const membRes = await fetch(
+    `https://api.clerk.com/v1/users/${encodeURIComponent(userId)}/organization_memberships`,
+    { headers: { Authorization: `Bearer ${clerkKey}` } },
+  )
+  const membData = await membRes.json().catch(() => null)
+  const list = Array.isArray(membData) ? membData : membData?.data || []
+  return list.some((m: { organization?: { id?: string } }) => m?.organization?.id === orgId)
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req)
 
   try {
-    const auth = await requireClerkAuth(req, { requireOrg: true })
+    // requireOrg false: el JWT template a veces no trae org; se resuelve con el test
+    const auth = await requireClerkAuth(req, { requireOrg: false })
     const body = await req.json().catch(() => ({}))
     const id_test = Number(body.id_test)
     const respuestas = body.respuestas && typeof body.respuestas === 'object' ? body.respuestas : null
+    const idEmpresaBody = body.id_empresa != null ? String(body.id_empresa).trim() : ''
 
     if (!id_test || !respuestas) {
       return jsonResponse({ error: 'Envíe id_test y respuestas' }, 400, req)
     }
 
-    const orgId = auth.orgId!
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -67,11 +100,20 @@ serve(async (req) => {
 
     if (testErr) return jsonResponse({ error: testErr.message }, 500, req)
     if (!test) return jsonResponse({ error: 'Evaluación no encontrada' }, 404, req)
-    if (String(test.id_empresa) !== orgId) {
-      return jsonResponse({ error: 'La evaluación no pertenece a su organización' }, 403, req)
-    }
     if (test.estado !== 'activo') {
       return jsonResponse({ error: 'La evaluación no está publicada' }, 403, req)
+    }
+
+    const orgDelTest = String(test.id_empresa)
+    let orgId = auth.orgId || idEmpresaBody || orgDelTest
+    if (orgId !== orgDelTest) {
+      return jsonResponse({ error: 'La evaluación no pertenece a su organización' }, 403, req)
+    }
+    // JWT sin org_id: confirmar que el usuario es miembro (Clerk / BD)
+    if (!auth.orgId || auth.orgId !== orgDelTest) {
+      const ok = await usuarioPerteneceAOrg(supabaseAdmin, auth.userId, orgDelTest)
+      if (!ok) return jsonResponse({ error: 'No pertenece a la organización de esta evaluación' }, 403, req)
+      orgId = orgDelTest
     }
 
     const { data: avancePrev } = await supabaseAdmin

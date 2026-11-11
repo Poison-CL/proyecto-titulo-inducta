@@ -53,7 +53,12 @@ export async function requireClerkAuth(req: Request, opts?: { requireOrg?: boole
       authorizedParties,
     })) as Record<string, unknown>
   } catch {
-    throw new AuthError('Sesión inválida o expirada', 401)
+    // Template JWT (p.ej. supabase) a veces no trae azp = FRONTEND_URL
+    try {
+      payload = (await verifyToken(token, { secretKey })) as Record<string, unknown>
+    } catch {
+      throw new AuthError('Sesión inválida o expirada', 401)
+    }
   }
 
   const userId = typeof payload.sub === 'string' ? payload.sub : null
