@@ -179,7 +179,8 @@ export async function publicarEvaluacionesLocalesPendientes(_supabase, _id_empre
 /**
  * Obtiene el detalle completo de un test con sus preguntas y opciones.
  */
-export async function getEvaluacionConPreguntas(supabase, id_test, id_empresa) {
+/** @param {{ incluirCorrectas?: boolean }} [opts] incluirCorrectas: admin vía RPC (no expone columna al trabajador) */
+export async function getEvaluacionConPreguntas(supabase, id_test, id_empresa, opts = {}) {
   if (!id_test) return null
   const numId = Number(id_test)
   const locales = getLocalTests(id_empresa)
@@ -187,13 +188,12 @@ export async function getEvaluacionConPreguntas(supabase, id_test, id_empresa) {
 
   try {
     if (supabase) {
-      // 1 query con embed (sin N+1 por pregunta)
       let testData = null
       let errT = null
       ;({ data: testData, error: errT } = await supabase
         .from('test_induccion')
         .select(
-          'id_test, id_empresa, titulo, porcentaje_aprobacion, estado, modulos, pregunta(id_pregunta, enunciado, opcion_respuesta(id_opcion, texto_opcion, es_correcta))',
+          'id_test, id_empresa, titulo, porcentaje_aprobacion, estado, modulos, pregunta(id_pregunta, enunciado, opcion_respuesta(id_opcion, texto_opcion))',
         )
         .eq('id_test', numId)
         .maybeSingle())
@@ -202,7 +202,7 @@ export async function getEvaluacionConPreguntas(supabase, id_test, id_empresa) {
         ;({ data: testData, error: errT } = await supabase
           .from('test_induccion')
           .select(
-            'id_test, id_empresa, titulo, porcentaje_aprobacion, estado, pregunta(id_pregunta, enunciado, opcion_respuesta(id_opcion, texto_opcion, es_correcta))',
+            'id_test, id_empresa, titulo, porcentaje_aprobacion, estado, pregunta(id_pregunta, enunciado, opcion_respuesta(id_opcion, texto_opcion))',
           )
           .eq('id_test', numId)
           .maybeSingle())
@@ -210,11 +210,29 @@ export async function getEvaluacionConPreguntas(supabase, id_test, id_empresa) {
 
       if (!errT && testData) {
         const preguntasRaw = Array.isArray(testData.pregunta) ? testData.pregunta : []
-        const preguntasConOpciones = preguntasRaw.map((p) => ({
+        let preguntasConOpciones = preguntasRaw.map((p) => ({
           id_pregunta: p.id_pregunta,
           enunciado: p.enunciado,
           opciones: Array.isArray(p.opcion_respuesta) ? p.opcion_respuesta : [],
         }))
+
+        if (opts.incluirCorrectas) {
+          const { data: conCorrecta, error: rpcErr } = await supabase.rpc('opciones_con_correcta', {
+            p_id_test: numId,
+          })
+          if (!rpcErr && Array.isArray(conCorrecta)) {
+            const byPregunta = new Map()
+            for (const o of conCorrecta) {
+              if (!byPregunta.has(o.id_pregunta)) byPregunta.set(o.id_pregunta, [])
+              byPregunta.get(o.id_pregunta).push(o)
+            }
+            preguntasConOpciones = preguntasConOpciones.map((p) => ({
+              ...p,
+              opciones: byPregunta.get(p.id_pregunta) || p.opciones,
+            }))
+          }
+        }
+
         const { pregunta: _p, ...rest } = testData
         if (preguntasConOpciones.length > 0 || localMatch) {
           return {

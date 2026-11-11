@@ -18,13 +18,12 @@ export class AuthError extends Error {
   }
 }
 
-function parties(): string[] | undefined {
+function parties(): string[] {
   const raw = Deno.env.get('FRONTEND_URL') || ''
-  const list = raw
+  return raw
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  return list.length ? list : undefined
 }
 
 export async function requireClerkAuth(req: Request, opts?: { requireOrg?: boolean }): Promise<ClerkAuth> {
@@ -42,11 +41,16 @@ export async function requireClerkAuth(req: Request, opts?: { requireOrg?: boole
     throw new AuthError('Falta CLERK_SECRET_KEY en el servidor', 500)
   }
 
+  const authorizedParties = parties()
+  if (!authorizedParties.length) {
+    throw new AuthError('Falta FRONTEND_URL en el servidor', 500)
+  }
+
   let payload: Record<string, unknown>
   try {
     payload = (await verifyToken(token, {
       secretKey,
-      authorizedParties: parties(),
+      authorizedParties,
     })) as Record<string, unknown>
   } catch {
     throw new AuthError('Sesión inválida o expirada', 401)

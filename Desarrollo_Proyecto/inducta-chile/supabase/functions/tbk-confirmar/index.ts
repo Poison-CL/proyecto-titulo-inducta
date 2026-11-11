@@ -197,9 +197,13 @@ serve(async (req) => {
         try {
           const prov = await provisionarCuentaTemporal(pago)
           if (prov?.ok) qs += '&cuenta=temporal'
-          else console.error('provisionar falló:', prov)
+          else {
+            console.error('provisionar falló:', prov)
+            qs += '&cuenta=error'
+          }
         } catch (e) {
           console.error('provisionar exception:', e)
+          qs += '&cuenta=error'
         }
       }
 

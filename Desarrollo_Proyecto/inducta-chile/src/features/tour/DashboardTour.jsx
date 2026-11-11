@@ -3,14 +3,14 @@ import introJs from 'intro.js'
 import 'intro.js/introjs.css'
 import './dashboardTour.css'
 
-const KEY = 'inducta_tour_dashboard_visto'
+// v2: incluye Programas, niveles/avances y textos al día
+const KEY = 'inducta_tour_dashboard_v2'
 
 export function DashboardTour({ enabled }) {
   const started = useRef(false)
 
   useEffect(() => {
     if (!enabled) {
-      // Permitir reintento cuando vuelva enabled (p. ej. tras loading o cerrar modal)
       started.current = false
       return undefined
     }
@@ -38,27 +38,51 @@ export function DashboardTour({ enabled }) {
         steps: [
           {
             title: 'Bienvenido a Inducta',
-            intro: 'Este recorrido rápido le muestra lo esencial del panel de su empresa.',
+            intro:
+              'Recorrido rápido del panel de empresa: inducciones con estudio, equipo, avances y plan.',
           },
           {
             element: '[data-tour="nav-inicio"]',
-            intro: 'Desde Inicio ve el resumen y los accesos principales.',
+            title: 'Inicio',
+            intro: 'Resumen del día y accesos a Equipo, Configuración y Programas.',
+            position: 'right',
+          },
+          {
+            element: '[data-tour="nav-programas"]',
+            title: 'Programas',
+            intro:
+              'Cree evaluaciones, agregue niveles (texto o YouTube) y revise Avances del equipo. El colaborador debe completar el estudio antes de rendir.',
             position: 'right',
           },
           {
             element: '[data-tour="nav-equipo"]',
-            intro: 'En Equipo invita colaboradores y gestiona roles (solo administradores).',
+            title: 'Equipo',
+            intro: 'Invite colaboradores por correo y gestione quién administra la empresa (respeta el cupo del plan).',
+            position: 'right',
+          },
+          {
+            element: '[data-tour="cta-invitar"]',
+            title: 'Invitar',
+            intro: 'Atajo para dar de alta a un colaborador sin salir del panel.',
             position: 'right',
           },
           {
             element: '[data-tour="nav-config"]',
-            intro: 'En Configuración revise el plan, renovaciones y datos de la empresa.',
+            title: 'Configuración',
+            intro: 'Plan, renovación y datos de contacto de la empresa.',
             position: 'right',
           },
           {
+            element: '[data-tour="plan-widget"]',
+            title: 'Su plan',
+            intro: 'Aquí ve el plan actual y puede ir a gestionarlo.',
+            position: 'top',
+          },
+          {
             element: '[data-tour="dash-resumen"]',
+            title: 'Acciones',
             intro:
-              'Aquí se concentran las acciones del día a día. Puede repetir el tour borrando el aviso desde el navegador si lo necesita.',
+              'Use las tarjetas para ir a Equipo, Configuración o Programas. Empiece por Programas para crear su primera inducción con estudio y cuestionario.',
             position: 'bottom',
           },
         ].filter((s) => !s.element || document.querySelector(s.element)),
@@ -73,7 +97,6 @@ export function DashboardTour({ enabled }) {
     return () => {
       cancelled = true
       clearTimeout(t)
-      // Si el timeout no llegó a arrancar Intro, no dejar started trabado
       if (!document.querySelector('.introjs-overlay')) {
         started.current = false
       }
