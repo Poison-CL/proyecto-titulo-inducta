@@ -28,7 +28,6 @@ import ConfiguracionPage from '../pages/app/ConfiguracionPage'
 import EquipoPage from '../pages/app/EquipoPage'
 import EmpleadoDashboardPage from '../pages/empleado/EmpleadoDashboardPage'
 import EmpleadoProgramasPage from '../pages/empleado/EmpleadoProgramasPage'
-import EmpleadoProgresosPage from '../pages/empleado/EmpleadoProgresosPage'
 import EmpleadoCertificadosPage from '../pages/empleado/EmpleadoCertificadosPage'
 import EmpleadoPerfilPage from '../pages/empleado/EmpleadoPerfilPage'
 import CuentaDeshabilitadaPage from '../pages/CuentaDeshabilitadaPage'
@@ -155,7 +154,7 @@ export function AppRouter() {
         <Route path="/empleado" element={<ProtectedEmpleado />}>
           <Route index element={<EmpleadoDashboardPage />} />
           <Route path="programas" element={<EmpleadoProgramasPage />} />
-          <Route path="progreso" element={<EmpleadoProgresosPage />} />
+          <Route path="progreso" element={<Navigate to="/empleado/programas" replace />} />
           <Route path="certificados" element={<EmpleadoCertificadosPage />} />
           <Route path="perfil" element={<EmpleadoPerfilPage />} />
         </Route>

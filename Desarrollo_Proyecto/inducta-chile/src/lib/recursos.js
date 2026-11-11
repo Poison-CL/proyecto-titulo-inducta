@@ -11,24 +11,42 @@ export const PAGINAS = {
   capacitaciones: {
     titulo: 'Capacitaciones',
     bajada:
-      'Su empresa crea sus propias capacitaciones y pruebas. Inducta Chile le da la plataforma para armarlas, asignarlas y medirlas.',
+      'Su empresa crea niveles de estudio (texto y YouTube), cuestionarios y revisa avances. Inducta Chile da la plataforma; el contenido es suyo.',
     secciones: [
       {
         titulo: 'Cómo se arma una capacitación',
         numerada: true,
         items: [
-          { t: 'Cree el contenido', d: 'Escriba las etapas con el material que su equipo necesita aprender.' },
-          { t: 'Agregue una prueba', d: 'Arme las preguntas con las que comprobará lo aprendido.' },
-          { t: 'Asígnela por cargo o área', d: 'Cada colaborador ve solo las capacitaciones que le corresponden.' },
-          { t: 'Revise los resultados', d: 'Vea quién la completó, cómo le fue en la prueba y en qué fecha.' },
+          {
+            t: 'Cree la evaluación',
+            d: 'En Programas → Nueva evaluación: título, exigencia de aprobación y preguntas.',
+          },
+          {
+            t: 'Agregue niveles de estudio',
+            d: 'Estructura Nivel → Lección → contenido (texto o video de YouTube). Completar el estudio desbloquea el cuestionario.',
+          },
+          {
+            t: 'Publique',
+            d: 'Deje la evaluación en estado Publicada para que los colaboradores la vean en Mis programas.',
+          },
+          {
+            t: 'Revise avances y constancias',
+            d: 'En la pestaña Avances ve quién estudió, rindió y aprobó. Quienes aprueban pueden descargar su constancia.',
+          },
         ],
       },
       {
         titulo: 'Lo que decide su empresa',
         items: [
-          { t: 'El contenido', d: 'Qué se enseña y en qué orden. El material es suyo; nosotros no lo creamos ni lo modificamos.' },
-          { t: 'Las preguntas', d: 'Qué se evalúa en cada prueba.' },
-          { t: 'A quién se asigna', d: 'Por cargo, por área o a personas específicas.' },
+          {
+            t: 'El contenido',
+            d: 'Qué se enseña, el orden de niveles y si usa textos o videos. Inducta no crea ni modifica su material.',
+          },
+          { t: 'Las preguntas', d: 'Qué se evalúa y el porcentaje mínimo para aprobar.' },
+          {
+            t: 'El tope del plan',
+            d: 'Demo: 1 evaluación. Básico: hasta 5. Plus y Plus+: sin límite de evaluaciones.',
+          },
         ],
       },
     ],
@@ -36,15 +54,18 @@ export const PAGINAS = {
   cumplimiento: {
     titulo: 'Cumplimiento',
     bajada:
-      'Cada inducción y capacitación deja registro. Cuando le pidan evidencia en una auditoría o fiscalización, ya la tiene.',
+      'Cada inducción deja registro de estudio, nota y constancia. Cuando le pidan evidencia en una auditoría, ya la tiene.',
     secciones: [
       {
         titulo: 'Qué queda registrado',
         items: [
-          { t: 'Quién', d: 'El colaborador, su cargo y su área.' },
-          { t: 'Qué', d: 'El programa asignado y sus contenidos.' },
-          { t: 'Cuándo', d: 'La fecha en que completó cada etapa.' },
-          { t: 'Resultado', d: 'Si terminó el programa y cómo le fue en las pruebas.' },
+          { t: 'Quién', d: 'El colaborador y su organización.' },
+          { t: 'Qué', d: 'El programa, niveles completados y el cuestionario.' },
+          { t: 'Cuándo', d: 'La fecha de evaluación y el progreso de estudio.' },
+          {
+            t: 'Resultado',
+            d: 'Estado (pendiente, en curso, aprobada o reprobada), puntaje y constancia al aprobar.',
+          },
         ],
       },
       {
@@ -75,24 +96,24 @@ export const ARTICULOS = [
     tipo: 'guias',
     categoria: 'Antes del ingreso',
     titulo: 'Checklist para el primer día de un colaborador',
-    resumen: 'Lo que conviene tener listo antes de que la persona llegue: accesos, programa asignado y responsable.',
-    fecha: '2026-10-01',
+    resumen: 'Lo que conviene tener listo antes de que la persona llegue: acceso, programa publicado y responsable.',
+    fecha: '2026-11-11',
     minutos: 4,
     cuerpo: [
       'El primer día define cómo la persona percibe a la empresa. Una inducción ordenada empieza antes de que llegue.',
       { h: 'Una semana antes' },
       {
         lista: [
-          'Cree su acceso en el panel con el correo que usará.',
-          'Asigne el programa de inducción que corresponde a su cargo.',
+          'Invítelo desde Equipo con el correo que usará (respeete el cupo de su plan).',
+          'Publique el programa de inducción con niveles de estudio y cuestionario.',
           'Defina quién lo acompañará durante la primera semana.',
         ],
       },
       { h: 'El mismo día' },
       {
         lista: [
-          'Confirme que puede entrar a la plataforma desde su correo.',
-          'Revise con la persona el programa asignado y los plazos.',
+          'Confirme que puede entrar desde Ingresar → Empleado.',
+          'Revise con la persona Mis programas: estudio primero, luego la prueba.',
           'Deje claro a quién preguntar si algo no queda claro.',
         ],
       },
@@ -104,17 +125,19 @@ export const ARTICULOS = [
     tipo: 'guias',
     categoria: 'Diseño del programa',
     titulo: 'Cómo armar un programa de inducción por cargo',
-    resumen: 'Separar lo general de lo específico para que cada persona vea solo lo que necesita.',
-    fecha: '2026-09-24',
+    resumen: 'Separe lo general de lo específico y organícelo en niveles cortos con texto o video.',
+    fecha: '2026-11-11',
     minutos: 6,
     cuerpo: [
-      'Un buen programa no intenta enseñar todo. Separa lo que toda la empresa debe saber de lo que cada cargo necesita para trabajar.',
+      'Un buen programa no intenta enseñar todo. Separa lo que toda la empresa debe saber de lo que cada cargo necesita.',
       { h: 'Parte general' },
-      'Misión, normas internas, beneficios y seguridad básica. Se asigna a todos y se revisa una vez al año.',
+      'Misión, normas internas, beneficios y seguridad básica. Un nivel con una o dos lecciones basta para empezar.',
       { h: 'Parte del cargo' },
-      'Procesos, herramientas y responsabilidades propias del puesto. Conviene que la escriba el jefe directo, no recursos humanos.',
-      { h: 'Etapas cortas' },
-      'Divida el programa en etapas que se puedan completar en una sesión. Así el avance se ve día a día y es más fácil detectar quién se atrasó.',
+      'Procesos, herramientas y riesgos del puesto. Conviene que el contenido lo escriba el jefe directo.',
+      { h: 'Niveles y lecciones' },
+      'Use Nivel → Lección → contenido (texto o YouTube). Etapas cortas se completan en una sesión y el colaborador ve su progreso en porcentaje.',
+      { h: 'Cuestionario al final' },
+      'El cuestionario se desbloquea solo cuando completa el estudio. Defina la exigencia (por ejemplo 75 %) al crear la evaluación.',
     ],
   },
   {
@@ -122,16 +145,16 @@ export const ARTICULOS = [
     tipo: 'guias',
     categoria: 'Durante el ingreso',
     titulo: 'Seguimiento del primer mes: qué mirar y cuándo',
-    resumen: 'Tres momentos para revisar el avance sin perseguir a nadie.',
-    fecha: '2026-09-15',
+    resumen: 'Tres momentos para revisar Avances sin perseguir a nadie.',
+    fecha: '2026-11-11',
     minutos: 3,
     cuerpo: [
-      'El panel muestra el avance de cada colaborador. La clave es mirarlo en los momentos correctos.',
+      'En Programas → Avances ve el estado de cada colaborador por inducción (pendiente, en curso, aprobada o reprobada).',
       {
         lista: [
-          'Día 3: ¿empezó el programa? Si no, suele ser un problema de acceso.',
-          'Día 10: ¿completó la parte general? Es el mejor momento para una conversación corta.',
-          'Día 30: ¿terminó la parte del cargo? La evidencia queda lista para auditoría.',
+          'Día 3: ¿abrió el estudio? Si no, suele ser un problema de acceso o invitación.',
+          'Día 10: ¿completó los niveles? Es el mejor momento para una conversación corta.',
+          'Día 30: ¿aprobó el cuestionario? La constancia queda disponible para el colaborador.',
         ],
       },
     ],
@@ -141,41 +164,86 @@ export const ARTICULOS = [
     tipo: 'guias',
     categoria: 'Normativa',
     titulo: 'Inducción de seguridad: qué debe quedar registrado',
-    resumen: 'Qué guardar para demostrar que la persona recibió la inducción de seguridad.',
-    fecha: '2026-09-02',
+    resumen: 'Qué guardar para demostrar que la persona estudió y rindió la inducción de seguridad.',
+    fecha: '2026-11-11',
     minutos: 5,
     cuerpo: [
       'En una fiscalización no basta con decir que la inducción se hizo. Hay que poder mostrarlo.',
       { h: 'Lo mínimo' },
       {
         lista: [
-          'Quién recibió la inducción y en qué fecha.',
-          'Qué contenidos incluía.',
-          'Que la persona completó cada etapa.',
+          'Quién recibió la inducción y en qué fecha rindió.',
+          'Qué contenidos incluía (niveles, textos o videos).',
+          'Que la persona completó el estudio y el resultado del cuestionario.',
         ],
       },
-      'Inducta Chile guarda ese registro por cada colaborador y programa, sin planillas aparte.',
+      'Inducta Chile guarda ese registro por colaborador y programa. Al aprobar, el colaborador puede abrir su constancia desde Mis certificados.',
     ],
   },
   {
     slug: 'crear-accesos',
     tipo: 'documentacion',
     categoria: 'Panel de empresa',
-    titulo: 'Crear accesos para colaboradores',
-    resumen: 'Cómo dar de alta a una persona para que entre con su correo.',
-    fecha: '2026-10-08',
-    minutos: 2,
+    titulo: 'Invitar colaboradores (Equipo)',
+    resumen: 'Cómo dar de alta a una persona desde el panel para que entre con su correo.',
+    fecha: '2026-11-11',
+    minutos: 3,
     cuerpo: [
-      'Los accesos se crean desde el panel de su empresa. Cada colaborador entra con su correo y ve solo los programas asignados a su cargo.',
+      'Los accesos se gestionan en Dashboard → Equipo. Cada colaborador entra con su correo y ve las inducciones publicadas de su empresa.',
       { h: 'Pasos' },
       {
         lista: [
-          'Entre al panel con su cuenta de empresa.',
-          'Agregue el correo del colaborador.',
-          'Asigne el programa que le corresponde.',
+          'Entre al panel con una cuenta administradora de la empresa.',
+          'En Equipo, invite el correo del colaborador.',
+          'Revise los cupos de su plan (Demo 5, Básico 50, Plus 250, Plus+ sin límite).',
         ],
       },
-      'La persona entra desde Ingresar, eligiendo Empleado, y verifica su correo con un código o contraseña.',
+      'La persona entra desde Ingresar → Empleado y verifica con código o contraseña.',
+    ],
+  },
+  {
+    slug: 'niveles-de-estudio',
+    tipo: 'documentacion',
+    categoria: 'Programas',
+    titulo: 'Niveles de estudio: texto y YouTube',
+    resumen: 'Cómo armar Nivel → Lección → contenido y exigir estudio antes del cuestionario.',
+    fecha: '2026-11-11',
+    minutos: 4,
+    cuerpo: [
+      'Cada evaluación puede incluir niveles de estudio opcionales. Si agrega contenidos, el colaborador debe completarlos antes de rendir.',
+      { h: 'Estructura' },
+      {
+        lista: [
+          'Nivel: bloque temático (por ejemplo Introducción o EPP).',
+          'Lección: subsección dentro del nivel.',
+          'Contenido: texto o enlace de YouTube (watch, youtu.be o embed).',
+        ],
+      },
+      { h: 'Dónde se edita' },
+      'Al crear una evaluación (paso Niveles) o después con Agregar niveles / Editar niveles en la lista de Programas.',
+      { h: 'Sin niveles' },
+      'Si no agrega niveles, el cuestionario queda disponible de inmediato.',
+    ],
+  },
+  {
+    slug: 'rendir-como-empleado',
+    tipo: 'documentacion',
+    categoria: 'Panel del empleado',
+    titulo: 'Estudiar y rendir como colaborador',
+    resumen: 'Flujo en Mis programas: estudio, desbloqueo del cuestionario y constancia.',
+    fecha: '2026-11-11',
+    minutos: 3,
+    cuerpo: [
+      'En el panel del empleado, Mis programas lista las inducciones publicadas.',
+      {
+        lista: [
+          'Si hay niveles pendientes: aparece Estudiar. Complete cada contenido (Completar y seguir).',
+          'Cuando el estudio llega a 100 %: puede Rendir la evaluación.',
+          'Si aprueba: Constancia y Mis certificados.',
+          'Si ya había aprobado y se agregaron niveles después: Ver estudio para revisar el material.',
+        ],
+      },
+      'No es posible enviar el cuestionario sin completar el estudio cuando la inducción tiene módulos.',
     ],
   },
   {
@@ -183,18 +251,18 @@ export const ARTICULOS = [
     tipo: 'documentacion',
     categoria: 'Acceso',
     titulo: 'Ingresar como empresa o como empleado',
-    resumen: 'La diferencia entre ambos accesos y cuál usar.',
-    fecha: '2026-10-05',
+    resumen: 'La diferencia entre ambos accesos y a qué panel llega cada uno.',
+    fecha: '2026-11-11',
     minutos: 2,
     cuerpo: [
       'En la pantalla de ingreso hay dos opciones.',
       {
         lista: [
-          'Empresa: para quien administra programas, accesos y avance.',
-          'Empleado: para quien realiza la inducción o capacitación.',
+          'Empresa: administra Programas, Equipo, Avances y Configuración (`/dashboard`).',
+          'Empleado: estudia, rinde y descarga constancias (`/empleado`).',
         ],
       },
-      'En ambos casos se ingresa el correo y luego se verifica con un código o con contraseña.',
+      'En ambos casos se ingresa el correo y luego se verifica con un código o con contraseña. No hay registro público: los accesos los crea la empresa o Inducta según el plan.',
     ],
   },
   {
@@ -203,10 +271,10 @@ export const ARTICULOS = [
     categoria: 'Acceso',
     titulo: 'No me llega el código de verificación',
     resumen: 'Qué revisar si el código para ingresar no aparece en su correo.',
-    fecha: '2026-10-03',
+    fecha: '2026-11-11',
     minutos: 2,
     cuerpo: [
-      'Al ingresar con su correo, Inducta Chile le envía un código para verificar que es usted.',
+      'Al ingresar con su correo, Inducta Chile le envía un código para verificar que es usted. En dispositivos nuevos también puede pedirse un código tras la contraseña (confianza del dispositivo).',
       {
         lista: [
           'Revise las carpetas de spam y promociones.',
@@ -215,38 +283,71 @@ export const ARTICULOS = [
           'Si su cuenta tiene contraseña, también puede ingresar con ella.',
         ],
       },
-      'Si después de esto el código sigue sin llegar, escríbanos desde Contacto.',
+      'Si después de esto el código sigue sin llegar, escríbanos desde Contacto o Soporte.',
     ],
   },
   {
     slug: 'leer-el-avance',
     tipo: 'documentacion',
     categoria: 'Panel de empresa',
-    titulo: 'Cómo leer el avance del equipo',
-    resumen: 'Qué significa cada porcentaje del panel y cómo se calcula.',
-    fecha: '2026-09-28',
+    titulo: 'Cómo leer Avances del equipo',
+    resumen: 'Estados, notas y exportación desde Programas.',
+    fecha: '2026-11-11',
     minutos: 3,
     cuerpo: [
-      'El panel muestra, por programa, cuántos colaboradores lo completaron sobre el total asignado.',
-      'El porcentaje de cumplimiento resume todos los programas: indica qué parte del equipo está al día con lo que tiene asignado.',
-      'Si un número no calza, revise primero que cada persona tenga el programa correcto asignado.',
+      'En Dashboard → Programas → Avances ve una matriz de trabajadores e inducciones (sin incluir administradores de la empresa).',
+      {
+        lista: [
+          'Pendiente: aún no inicia.',
+          'En curso: estudiando o con intento abierto.',
+          'Aprobada / Reprobada: con puntaje según la exigencia del programa.',
+        ],
+      },
+      'Puede exportar un CSV de evidencias desde esa misma sección. Si un número no calza, confirme que la inducción esté Publicada y que la persona sea miembro de la organización.',
+    ],
+  },
+  {
+    slug: 'constancias',
+    tipo: 'documentacion',
+    categoria: 'Evidencia',
+    titulo: 'Constancias al aprobar',
+    resumen: 'Dónde se ven y qué muestran según el plan.',
+    fecha: '2026-11-11',
+    minutos: 2,
+    cuerpo: [
+      'Cuando un colaborador aprueba una inducción, puede abrir Constancia desde Mis programas o Mis certificados.',
+      {
+        lista: [
+          'Plan Demostración: constancia con marca Inducta.',
+          'Básico, Plus y Plus+: identidad corporativa de la empresa (logo de la organización cuando esté disponible).',
+        ],
+      },
+      'La nota mostrada es la obtenida en el cuestionario; no se inventa un 100 % si faltan datos.',
     ],
   },
   {
     slug: 'planes-y-pago',
     tipo: 'documentacion',
     categoria: 'Planes y pago',
-    titulo: 'Planes, facturación y pago con Webpay',
-    resumen: 'Cómo se contrata un plan y qué pasa si el pago no se completa.',
-    fecha: '2026-09-20',
-    minutos: 3,
+    titulo: 'Planes, límites y pago con Webpay',
+    resumen: 'Cupos por plan, facturación en UF e IVA, y qué pasa si el pago no se completa.',
+    fecha: '2026-11-11',
+    minutos: 4,
     cuerpo: [
-      'Los planes se pagan mensual o anualmente desde la página de Precios. El valor se expresa en UF.',
-      'Al contratar se piden los datos de facturación y el pago se hace en Webpay.',
+      'Los planes se eligen en Precios (mensual o anual). El valor se expresa en UF y el total a pagar incluye IVA (19 %). El monto definitivo lo calcula el servidor al iniciar Webpay.',
+      { h: 'Límites orientativos' },
       {
         lista: [
-          'Pago exitoso: recibe la confirmación por correo y puede ingresar a la plataforma.',
-          'Pago rechazado o anulado: no se realiza ningún cargo y puede intentarlo de nuevo.',
+          'Demostración: hasta 5 colaboradores y 1 evaluación (no contratible desde el sitio).',
+          'Empresa Básico: hasta 50 colaboradores y 5 evaluaciones.',
+          'Empresa Plus: hasta 250 colaboradores y evaluaciones sin límite.',
+          'Empresa Plus+: colaboradores y evaluaciones sin límite.',
+        ],
+      },
+      {
+        lista: [
+          'Pago exitoso: confirmación y acceso (cuenta temporal o renovación según el caso).',
+          'Pago rechazado o anulado: no se realiza el cargo; puede intentarlo de nuevo.',
         ],
       },
     ],
@@ -314,7 +415,7 @@ export function buscarTodo(consulta) {
         {
           kind: 'pagina',
           slug: 'soporte',
-          to: '/recursos/soporte',
+          to: `/recursos/soporte`,
           titulo: 'Soporte',
           resumen: 'Preguntas frecuentes y contacto con el equipo.',
           etiqueta: 'Sección',
@@ -335,11 +436,13 @@ export const fechaLarga = (iso) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })
 
 if (import.meta.env.DEV) {
-  if (buscar('documentacion', 'WEBPAY').length !== 1) throw new Error('recursos: búsqueda sin mayúsculas')
+  if (buscar('documentacion', 'WEBPAY').length < 1) throw new Error('recursos: búsqueda sin mayúsculas')
   if (buscar('guias', 'FISCALIZACION')[0]?.slug !== 'induccion-seguridad') throw new Error('recursos: tildes')
   if (buscar('guias', 'webpay').length !== 0) throw new Error('recursos: filtra por tipo')
-  if (buscar('guias', '').length !== 4) throw new Error('recursos: consulta vacía')
+  if (buscar('guias', '').length !== 4) throw new Error('recursos: consulta vacía guias')
+  if (buscar('documentacion', '').length !== 8) throw new Error('recursos: consulta vacía documentacion')
   if (buscar('documentacion', 'codigo')[0]?.slug !== 'codigo-verificacion') throw new Error('recursos: título primero')
+  if (buscar('documentacion', 'youtube')[0]?.slug !== 'niveles-de-estudio') throw new Error('recursos: niveles')
   if (buscarTodo('webpay').length < 1) throw new Error('recursos: buscarTodo webpay')
   if (buscarTodo('capacitacion').some((r) => r.slug === 'capacitaciones') === false)
     throw new Error('recursos: buscarTodo páginas')

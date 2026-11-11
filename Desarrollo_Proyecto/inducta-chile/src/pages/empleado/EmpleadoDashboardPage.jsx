@@ -1,49 +1,48 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Spinner,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Box, Button, Flex, Grid, Spinner, Text } from '@chakra-ui/react'
 import { useOrganization, useUser } from '@clerk/clerk-react'
-import { Award, BookOpen, CheckCircle2, ChevronRight, Play, TrendingUp } from 'lucide-react'
+import { Award, BookOpen, Play } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AccionCard from '../../components/dashboard/AccionCard'
 import CertificadoModal from '../../components/dashboard/CertificadoModal'
+import EstudioModulosModal from '../../components/dashboard/EstudioModulosModal'
 import RendirEvaluacionModal from '../../components/dashboard/RendirEvaluacionModal'
+import SettingsCard from '../../components/dashboard/SettingsCard'
 import WorkspaceHome from '../../components/dashboard/WorkspaceHome'
+import { useEmpresaCuenta } from '../../features/empresa/useEmpresaCuenta'
 import {
   getAvancesEmpleado,
   getEvaluacionConPreguntas,
   getEvaluacionesEmpresa,
+  idsItemsModulos,
+  modulosCompletos,
+  normalizarModulos,
+  progresoModulosPct,
 } from '../../features/programas/programasService'
 import { useSupabase } from '../../hooks/useSupabase'
 import { resolverBusquedaEmpleado } from '../../lib/panelBusqueda'
+import { getPlan } from '../../lib/planes'
 
 export default function EmpleadoDashboardPage() {
   const { user } = useUser()
   const { organization } = useOrganization()
   const supabase = useSupabase()
   const navigate = useNavigate()
+  const { empresa } = useEmpresaCuenta()
+  const plan = getPlan(empresa?.plan) || getPlan('demo')
   const nombre = user?.firstName || 'colaborador'
 
   const [evaluaciones, setEvaluaciones] = useState([])
   const [avances, setAvances] = useState([])
   const [loading, setLoading] = useState(true)
   const [testParaRendir, setTestParaRendir] = useState(null)
+  const [estudioAbierto, setEstudioAbierto] = useState(null)
   const [cargandoTest, setCargandoTest] = useState(false)
   const [certificadoSeleccionado, setCertificadoSeleccionado] = useState(null)
 
-  const cargarDatos = useCallback(async () => {
+  const cargarDatos = useCallback(async ({ silent = false } = {}) => {
     if (!organization?.id || !user?.id) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const [tests, regs] = await Promise.all([
         getEvaluacionesEmpresa(supabase, organization.id),
@@ -53,8 +52,10 @@ export default function EmpleadoDashboardPage() {
       setAvances(regs)
     } catch (e) {
       console.warn('Error cargando datos del empleado:', e)
+      setEvaluaciones([])
+      setAvances([])
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [organization?.id, user?.id, supabase])
 
@@ -71,21 +72,40 @@ export default function EmpleadoDashboardPage() {
     [navigate],
   )
 
-  // Métricas
   const aprobadosCount = avances.filter((a) => a.estado === 'aprobada').length
   const totalAsignados = evaluaciones.length
-
-  // Determinar la "Inducción activa" prioritaria
   const idsAprobados = new Set(
     avances.filter((a) => a.estado === 'aprobada').map((a) => Number(a.id_test)),
   )
-  const proximoTest = evaluaciones.find((t) => !idsAprobados.has(Number(t.id_test)))
+  const pendientes = evaluaciones.filter((t) => !idsAprobados.has(Number(t.id_test)))
+  const proximoTest = pendientes[0] || null
+  const pendientesCount = pendientes.length
+
+  const avanceProximo = proximoTest
+    ? avances.find((a) => Number(a.id_test) === Number(proximoTest.id_test))
+    : null
+  const hayModulosProximo = proximoTest ? idsItemsModulos(proximoTest.modulos).length > 0 : false
+  const estudioListoProximo =
+    !hayModulosProximo || modulosCompletos(proximoTest?.modulos, avanceProximo?.progreso_modulos)
+  const pctEstudioProximo = hayModulosProximo
+    ? progresoModulosPct(proximoTest.modulos, avanceProximo?.progreso_modulos)
+    : 0
+  const nNivelesProximo = proximoTest ? normalizarModulos(proximoTest.modulos).length : 0
 
   const handleIniciarRendir = async (test) => {
     setCargandoTest(true)
     try {
       const detalle = await getEvaluacionConPreguntas(supabase, test.id_test, organization?.id)
-      setTestParaRendir(detalle || test)
+      const full = detalle || test
+      const avance = avances.find((a) => Number(a.id_test) === Number(full.id_test))
+      if (
+        idsItemsModulos(full.modulos).length > 0 &&
+        !modulosCompletos(full.modulos, avance?.progreso_modulos)
+      ) {
+        setEstudioAbierto(full)
+        return
+      }
+      setTestParaRendir(full)
     } catch (e) {
       console.warn(e)
     } finally {
@@ -93,182 +113,156 @@ export default function EmpleadoDashboardPage() {
     }
   }
 
+  const handleListoParaRendir = (test, progresoOverride = null) => {
+    const avance = avances.find((a) => Number(a.id_test) === Number(test.id_test))
+    const progreso = progresoOverride || avance?.progreso_modulos
+    if (!modulosCompletos(test.modulos, progreso)) return
+    setEstudioAbierto(null)
+    setTestParaRendir(test)
+  }
+
   return (
     <WorkspaceHome
       pillLabel={organization?.name || 'Inducta Chile'}
-      pillTo="/empleado"
-      titulo={`Hola, ${nombre}.`}
+      pillTo="/empleado/perfil"
+      titulo={`¿Qué necesita hoy, ${nombre}?`}
       placeholder="Buscar sección o programa…"
       onBuscar={onBuscar}
     >
-      {/* Tarjetas de Resumen Dinámicas */}
-      <Box mb={8}>
-        <Text
-          fontSize="xs"
-          fontWeight="semibold"
-          letterSpacing="0.06em"
-          color="blackAlpha.500"
-          textTransform="uppercase"
-          mb={4}
-        >
-          Tu actividad
-        </Text>
-        <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={3}>
-          <ResumenCard label="Programas asignados" valor={String(totalAsignados)} color="brand.primary" />
-          <ResumenCard label="Etapas aprobadas" valor={String(aprobadosCount)} color="green.500" />
-          <ResumenCard label="Certificados disponibles" valor={String(aprobadosCount)} color="purple.500" />
-        </Grid>
-      </Box>
-
-      {/* Inducción Activa destacada */}
-      <Box
-        mb={8}
-        p={6}
-        borderWidth="1px"
-        borderColor="blackAlpha.100"
-        borderRadius="xl"
-        bg="white"
-        boxShadow="sm"
-      >
-        <Flex justify="space-between" align="center" mb={3}>
-          <Text fontWeight="semibold" color="brand.ink" fontSize="sm">
-            Inducción activa
-          </Text>
-          {proximoTest && (
-            <Badge colorScheme="blue" borderRadius="full" px={2.5} py={0.5} fontSize="2xs">
-              Pendiente
-            </Badge>
-          )}
+      {loading ? (
+        <Flex justify="center" py={10}>
+          <Spinner color="brand.primary" />
         </Flex>
-
-        {loading ? (
-          <Flex align="center" gap={3} py={3}>
-            <Spinner size="sm" color="brand.primary" />
-            <Text fontSize="sm" color="blackAlpha.500">
-              Cargando tus programas de inducción...
-            </Text>
-          </Flex>
-        ) : proximoTest ? (
-          <Flex
-            direction={{ base: 'column', sm: 'row' }}
-            justify="space-between"
-            align={{ base: 'flex-start', sm: 'center' }}
-            gap={4}
-          >
-            <Box>
-              <Text fontWeight="bold" fontSize="md" color="brand.ink">
-                {proximoTest.titulo}
-              </Text>
-              <Text color="blackAlpha.600" fontSize="sm" mt={0.5}>
-                Exigencia de aprobación: {proximoTest.porcentaje_aprobacion}% · {proximoTest.total_preguntas || 4} preguntas
-              </Text>
-            </Box>
-            <Button
-              size="sm"
-              variant="solid"
-              bg="brand.primary"
-              leftIcon={<Play size={14} fill="currentColor" />}
-              isLoading={cargandoTest}
-              onClick={() => handleIniciarRendir(proximoTest)}
-            >
-              Rendir evaluación
-            </Button>
-          </Flex>
-        ) : totalAsignados > 0 && aprobadosCount === totalAsignados ? (
-          <Flex align="center" justify="space-between" gap={4}>
-            <HStack spacing={3}>
-              <Icon as={CheckCircle2} color="green.500" boxSize={6} />
-              <Box>
+      ) : (
+        <>
+          {proximoTest ? (
+            <Box mb={5}>
+              <SettingsCard
+                icon={hayModulosProximo && !estudioListoProximo ? BookOpen : Play}
+                titulo="Siguiente inducción"
+                bajada={`${pendientesCount} pendiente${pendientesCount === 1 ? '' : 's'} de ${totalAsignados}.`}
+                footer={
+                  <Button
+                    size="sm"
+                    h="36px"
+                    leftIcon={
+                      hayModulosProximo && !estudioListoProximo ? (
+                        <BookOpen size={14} />
+                      ) : (
+                        <Play size={14} fill="currentColor" />
+                      )
+                    }
+                    isLoading={cargandoTest}
+                    onClick={() => handleIniciarRendir(proximoTest)}
+                  >
+                    {hayModulosProximo && !estudioListoProximo ? 'Estudiar' : 'Rendir ahora'}
+                  </Button>
+                }
+              >
                 <Text fontWeight="semibold" fontSize="sm" color="brand.ink">
-                  ¡Felicitaciones! Has completado todas tus inducciones.
+                  {proximoTest.titulo}
                 </Text>
-                <Text fontSize="xs" color="blackAlpha.600">
-                  Tus acreditaciones y certificados están disponibles para descarga.
+                <Text fontSize="xs" color="blackAlpha.600" mt={1}>
+                  {hayModulosProximo
+                    ? `${nNivelesProximo} nivel${nNivelesProximo === 1 ? '' : 'es'} · estudio ${pctEstudioProximo}% · `
+                    : ''}
+                  Exigencia {proximoTest.porcentaje_aprobacion}% ·{' '}
+                  {proximoTest.total_preguntas || 0} preguntas
                 </Text>
-              </Box>
-            </HStack>
-            <Button
-              size="sm"
-              variant="outline"
-              leftIcon={<Award size={15} />}
-              onClick={() => navigate('/empleado/certificados')}
-            >
-              Ver certificados
-            </Button>
-          </Flex>
-        ) : (
-          <Text color="blackAlpha.600" fontSize="sm">
-            Todavía no tienes un programa asignado. Cuando tu empresa publique inducciones o capacitaciones, aparecerán aquí.
-          </Text>
-        )}
-      </Box>
+              </SettingsCard>
+            </Box>
+          ) : null}
 
-      {/* Tarjetas de Navegación del Colaborador */}
-      <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
-        <AccionCard
-          icon={BookOpen}
-          titulo="Mis programas"
-          bajada="Revisa las inducciones y capacitaciones que tu empresa te ha asignado."
-          cta="Ver programas"
-          to="/empleado/programas"
-          primary
-        />
-        <AccionCard
-          icon={TrendingUp}
-          titulo="Mi progreso"
-          bajada="Consulta el avance por etapa y calificaciones de cada programa."
-          cta="Ver progreso"
-          to="/empleado/progreso"
-        />
-        <AccionCard
-          icon={Award}
-          titulo="Mis certificados"
-          bajada="Descarga las constancias de los programas que hayas aprobado."
-          cta="Ver certificados"
-          to="/empleado/certificados"
-        />
-      </Grid>
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+            <AccionCard
+              icon={BookOpen}
+              meta={totalAsignados > 0 ? `${aprobadosCount}/${totalAsignados}` : '0'}
+              titulo="Mis programas"
+              bajada={
+                pendientesCount > 0
+                  ? `${pendientesCount} inducción${pendientesCount === 1 ? '' : 'es'} por completar · estudio, estado y notas.`
+                  : totalAsignados > 0
+                    ? 'Todas las inducciones asignadas están al día.'
+                    : 'Cuando su empresa publique inducciones, aparecerán aquí.'
+              }
+              cta="Ir a programas"
+              to="/empleado/programas"
+              primary
+            />
+            <AccionCard
+              icon={Award}
+              meta={String(aprobadosCount)}
+              titulo="Mis certificados"
+              bajada={
+                aprobadosCount > 0
+                  ? 'Constancias listas para imprimir o guardar en PDF.'
+                  : 'Las constancias se desbloquean al aprobar una inducción.'
+              }
+              cta="Ver certificados"
+              to="/empleado/certificados"
+            />
+          </Grid>
+        </>
+      )}
 
-      {/* Modal Rendir Evaluación */}
+      <EstudioModulosModal
+        isOpen={Boolean(estudioAbierto)}
+        onClose={() => {
+          setEstudioAbierto(null)
+          cargarDatos({ silent: true })
+        }}
+        test={estudioAbierto}
+        idEmpresa={organization?.id}
+        user={user}
+        avance={
+          estudioAbierto
+            ? avances.find((a) => Number(a.id_test) === Number(estudioAbierto.id_test))
+            : null
+        }
+        onProgreso={(reg) => {
+          setAvances((prev) => {
+            const rest = prev.filter(
+              (a) => !(Number(a.id_test) === Number(reg.id_test) && a.id_usuario === reg.id_usuario),
+            )
+            return [reg, ...rest]
+          })
+        }}
+        onListoParaRendir={handleListoParaRendir}
+      />
+
       <RendirEvaluacionModal
         isOpen={Boolean(testParaRendir)}
-        onClose={() => setTestParaRendir(null)}
+        onClose={() => {
+          setTestParaRendir(null)
+          cargarDatos({ silent: true })
+        }}
         test={testParaRendir}
         idEmpresa={organization?.id}
         user={user}
-        onEvaluacionFinalizada={() => cargarDatos()}
+        avance={
+          testParaRendir
+            ? avances.find((a) => Number(a.id_test) === Number(testParaRendir.id_test))
+            : null
+        }
+        onRequiereEstudio={(t) => {
+          setTestParaRendir(null)
+          setEstudioAbierto(t)
+        }}
+        onEvaluacionFinalizada={() => cargarDatos({ silent: true })}
         onAbrirCertificado={(reg) => setCertificadoSeleccionado(reg)}
       />
 
-      {/* Modal Certificado */}
       <CertificadoModal
         isOpen={Boolean(certificadoSeleccionado)}
         onClose={() => setCertificadoSeleccionado(null)}
         avance={certificadoSeleccionado}
-        empresa={{ nombre_comercial: organization?.name }}
-        plan={null}
+        empresa={{
+          nombre_comercial: empresa?.nombre_comercial || organization?.name,
+          plan: empresa?.plan,
+        }}
+        plan={plan}
+        logoEmpresaUrl={organization?.imageUrl}
       />
     </WorkspaceHome>
-  )
-}
-
-function ResumenCard({ label, valor, color }) {
-  return (
-    <Box
-      p={4}
-      borderWidth="1px"
-      borderColor="blackAlpha.100"
-      borderRadius="lg"
-      bg="white"
-    >
-      <VStack align="start" spacing={1}>
-        <Text fontSize="xs" color="blackAlpha.500">
-          {label}
-        </Text>
-        <Text fontSize="2xl" fontWeight="semibold" color={color}>
-          {valor}
-        </Text>
-      </VStack>
-    </Box>
   )
 }

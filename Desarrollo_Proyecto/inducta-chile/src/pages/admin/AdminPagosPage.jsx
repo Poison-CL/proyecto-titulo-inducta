@@ -1,7 +1,9 @@
-import { Box, Button, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Text, VStack } from '@chakra-ui/react'
+import { CreditCard } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import { useSupabase } from '../../hooks/useSupabase'
 import { filtraPorCampos } from '../../lib/panelBusqueda'
 
@@ -54,34 +56,17 @@ export default function AdminPagosPage() {
   }, [supabase])
 
   return (
-    <Box maxW="56rem">
-      <Heading
-        as="h1"
-        fontSize={{ base: '2rem', md: '2.4rem' }}
-        fontWeight="semibold"
-        letterSpacing="-0.03em"
-        lineHeight="1.1"
-        color="brand.ink"
-        mb={3}
-      >
-        Pagos
-      </Heading>
-      <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight={1.6} maxW="44ch" mb={4}>
-        Historial de pagos Transbank. Para renovar un plan, edite la empresa o use contratar.
-      </Text>
-      <Button
-        as={RouterLink}
-        to="/admin/empresas"
-        variant="link"
-        color="brand.primary"
-        fontWeight="semibold"
-        p={0}
-        h="auto"
-        mb={12}
-        fontSize="sm"
-      >
-        Renovar desde Empresas →
-      </Button>
+    <Box maxW="56rem" mx="auto">
+      <PanelPageHeader
+        icon={CreditCard}
+        titulo="Pagos"
+        bajada="Historial de pagos Transbank. Para renovar un plan, edite la empresa."
+        actions={
+          <Button as={RouterLink} to="/admin/empresas" size="sm" h="36px" variant="outline">
+            Ir a empresas
+          </Button>
+        }
+      />
 
       {loading && (
         <Text fontSize="sm" color="blackAlpha.600">

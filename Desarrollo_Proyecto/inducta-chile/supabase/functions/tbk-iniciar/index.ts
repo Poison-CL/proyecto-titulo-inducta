@@ -1,56 +1,64 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
+import { corsHeaders, jsonResponse, optionsResponse } from '../_shared/cors.ts'
+import { montoClpConIva, ufHoyClp, ufNeto } from '../_shared/planes.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const PLANES_OK = new Set(['basico', 'plus', 'plusplus'])
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method === 'OPTIONS') return optionsResponse(req)
 
   try {
-    const { nombre_comercial, email_contacto, monto, plan_solicitado, periodo } = await req.json()
-    const periodoPago = periodo === 'anual' ? 'anual' : 'mensual'
+    const body = await req.json()
+    const nombre_comercial = String(body.nombre_comercial || '').trim()
+    const email_contacto = String(body.email_contacto || '').trim().toLowerCase()
+    const plan_solicitado = String(body.plan_solicitado || '').trim()
+    const periodoPago = body.periodo === 'anual' ? 'anual' : 'mensual'
+    // Ignorar monto del cliente (P0-3)
 
-    if (!nombre_comercial || !email_contacto || !monto || !plan_solicitado) {
-      return new Response(JSON.stringify({ error: 'Faltan datos del pago' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      })
+    if (!nombre_comercial || !email_contacto || !PLANES_OK.has(plan_solicitado)) {
+      return jsonResponse({ error: 'Datos inválidos (plan/periodo/contacto)' }, 400, req)
     }
+
+    const ufPlan = ufNeto(plan_solicitado, periodoPago)
+    if (ufPlan == null || ufPlan <= 0) {
+      return jsonResponse({ error: 'Plan no contratible' }, 400, req)
+    }
+
+    const ufClp = await ufHoyClp()
+    const monto = montoClpConIva(ufPlan, ufClp)
+
+    const commerce = Deno.env.get('TBK_COMMERCE_CODE') || '597055555532'
+    const apiKey = Deno.env.get('TBK_API_KEY') || '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C'
+    const tbkBase =
+      Deno.env.get('TBK_BASE_URL') ||
+      'https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2'
+
+    const buyOrder = `IND-${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 26)
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    const buyOrder = `ORDEN-${Math.floor(Math.random() * 1000000)}`
-
-    const tbkResponse = await fetch(
-      'https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions',
-      {
-        method: 'POST',
-        headers: {
-          'Tbk-Api-Key-Id': '597055555532',
-          'Tbk-Api-Key-Secret': '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          buy_order: buyOrder,
-          session_id: buyOrder,
-          amount: monto,
-          return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/tbk-confirmar`,
-        }),
+    const tbkResponse = await fetch(`${tbkBase}/transactions`, {
+      method: 'POST',
+      headers: {
+        'Tbk-Api-Key-Id': commerce,
+        'Tbk-Api-Key-Secret': apiKey,
+        'Content-Type': 'application/json',
       },
-    )
+      body: JSON.stringify({
+        buy_order: buyOrder,
+        session_id: buyOrder,
+        amount: monto,
+        return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/tbk-confirmar`,
+      }),
+    })
 
     const tbkData = await tbkResponse.json()
     if (!tbkData?.token || !tbkData?.url) {
-      return new Response(JSON.stringify(tbkData), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      })
+      return jsonResponse(tbkData, 400, req)
     }
 
     const { error } = await supabaseAdmin.from('pagos_transbank').insert({
@@ -65,13 +73,8 @@ serve(async (req) => {
     })
     if (error) throw error
 
-    return new Response(JSON.stringify(tbkData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return jsonResponse({ ...tbkData, monto, periodo: periodoPago, plan_solicitado }, 200, req)
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    })
+    return jsonResponse({ error: (error as Error).message }, 400, req)
   }
 })

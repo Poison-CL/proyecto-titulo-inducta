@@ -23,7 +23,7 @@ const fadeUp = keyframes`
 const preguntas = [
   {
     q: '¿Qué es Inducta Chile?',
-    a: 'Una plataforma para gestionar las inducciones y capacitaciones de su personal. Reúne los programas en un solo lugar, registra el avance de cada colaborador y guarda la evidencia que piden las auditorías.',
+    a: 'Una plataforma para gestionar las inducciones y capacitaciones de su personal. Reúne programas con niveles de estudio, cuestionarios, avance por colaborador y constancias para auditorías.',
   },
   {
     q: '¿Para qué empresas está pensada?',
@@ -31,19 +31,27 @@ const preguntas = [
   },
   {
     q: '¿Puedo probar la plataforma antes de contratar?',
-    a: 'Sí. Puede agendar una demo sin costo y recorrer el flujo completo con su equipo antes de decidir.',
+    a: 'Sí. Existe un plan Demostración (cupos limitados) y puede agendar una demo sin costo para recorrer el flujo con su equipo.',
   },
   {
     q: '¿Cómo se organizan los contenidos?',
-    a: 'Por área, cargo o normativa, como le acomode a su empresa. Cada programa deja registro de quién completó cada etapa y en qué fecha.',
+    a: 'Cada evaluación puede incluir niveles (Nivel → Lección → texto o YouTube) y un cuestionario. Si hay estudio, el colaborador debe completarlo antes de rendir. El avance y la nota quedan registrados.',
   },
   {
     q: '¿Cómo acceden los colaboradores?',
-    a: 'Usted crea los accesos desde el panel de su empresa. Cada colaborador entra con su correo y ve únicamente los programas asignados a su cargo.',
+    a: 'La empresa los invita desde Equipo. Cada persona entra desde Ingresar → Empleado con su correo y ve Mis programas, el estudio, el cuestionario y Mis certificados.',
+  },
+  {
+    q: '¿Qué límites tiene cada plan?',
+    a: 'Demo: hasta 5 colaboradores y 1 evaluación. Básico: 50 colaboradores y 5 evaluaciones. Plus: 250 colaboradores y evaluaciones sin límite. Plus+: sin límite de colaboradores ni evaluaciones.',
+  },
+  {
+    q: '¿Dónde está la evidencia y la constancia?',
+    a: 'En el panel de empresa, Programas → Avances muestra quién estudió y rindió. Quien aprueba puede abrir su constancia desde Mis certificados (con marca Inducta en Demo o identidad de la empresa en planes pagos).',
   },
   {
     q: '¿Cómo pido soporte?',
-    a: 'Escríbanos a contacto@inductachile.cl o use la sección Contacto del sitio. Respondemos en días hábiles.',
+    a: 'Revise Recursos → Soporte, escríbanos a contacto@inductachile.cl o use Contacto. Respondemos en días hábiles.',
   },
 ]
 

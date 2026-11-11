@@ -6,7 +6,14 @@ import { EncabezadoRecurso } from '../../layouts/RecursosLayout'
 import { buscar, getArticulo } from '../../lib/recursos'
 import { Buscador, CabeceraTemas, FilaArticulo, SinResultados } from './RecursosPage'
 
-const FRECUENTES = ['codigo-verificacion', 'ingresar-empresa-empleado', 'crear-accesos', 'planes-y-pago'].map(getArticulo)
+const FRECUENTES = [
+  'codigo-verificacion',
+  'ingresar-empresa-empleado',
+  'niveles-de-estudio',
+  'rendir-como-empleado',
+  'crear-accesos',
+  'planes-y-pago',
+].map(getArticulo)
 
 export default function SoportePage() {
   const [consulta, setConsulta] = useState('')

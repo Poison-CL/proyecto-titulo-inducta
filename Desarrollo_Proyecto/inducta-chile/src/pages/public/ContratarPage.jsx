@@ -186,12 +186,9 @@ export default function ContratarPage() {
     setErrorWebpay(false)
     setProcesandoPago(true)
     try {
-      const montoPagar = precioFinalClp(monto, ufClp)
-
       const tbkData = await iniciarPagoTransbank({
         nombre_comercial: datos.titular,
         email_contacto: datos.email,
-        monto: Math.round(montoPagar),
         plan_solicitado: plan.id,
         periodo,
       })

@@ -37,11 +37,21 @@ export function useEmpresaDatos() {
   const guardar = useCallback(
     async (campos) => {
       if (!organization?.id) return { ok: false, error: 'Sin organización activa' }
+      // P0-4: el cliente solo toca contacto; plan/cuenta los fija el servidor
+      const payload = {
+        ...(campos?.nombre_comercial !== undefined
+          ? { nombre_comercial: campos.nombre_comercial }
+          : {}),
+        ...(campos?.email_contacto !== undefined ? { email_contacto: campos.email_contacto } : {}),
+      }
+      if (!Object.keys(payload).length) {
+        return { ok: false, error: 'Sin campos permitidos' }
+      }
       setSaving(true)
       setError(null)
       const { data, error: err } = await supabase
         .from('empresa')
-        .update(campos)
+        .update(payload)
         .eq('id_empresa', organization.id)
         .select(CAMPOS)
         .maybeSingle()

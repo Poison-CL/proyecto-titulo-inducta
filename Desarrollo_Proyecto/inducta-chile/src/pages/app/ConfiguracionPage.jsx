@@ -6,8 +6,6 @@ import {
   FormControl,
   FormLabel,
   Grid,
-  Heading,
-  Icon,
   Input,
   Text,
   useToast,
@@ -16,47 +14,13 @@ import {
 import { useAuth, useClerk, useOrganization, useUser } from '@clerk/clerk-react'
 import { Building2, CreditCard, LogOut, Settings2, User, Users } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import SettingsCard, { SettingsRow } from '../../components/dashboard/SettingsCard'
 import { CompletarCuentaForm } from '../../features/cuenta/CompletarCuentaForm'
 import { useEmpresaCuenta } from '../../features/empresa/useEmpresaCuenta'
 import { useEmpresaDatos } from '../../features/empresa/useEmpresaDatos'
 import { esAdminEmpresa, etiquetaOrgRol } from '../../lib/authRol'
 import { estadoPlan, fechaCortaEs, getPlan } from '../../lib/planes'
-
-function PageHeader({ titulo, bajada }) {
-  return (
-    <Flex align="flex-start" gap={3} mb={8}>
-      <Flex
-        w="44px"
-        h="44px"
-        align="center"
-        justify="center"
-        borderRadius="lg"
-        borderWidth="1px"
-        borderColor="blackAlpha.100"
-        bg="brand.soft"
-        flexShrink={0}
-      >
-        <Icon as={Settings2} boxSize={5} color="brand.primary" strokeWidth={1.75} />
-      </Flex>
-      <Box>
-        <Heading
-          as="h1"
-          fontSize={{ base: '1.75rem', md: '2.1rem' }}
-          fontWeight="semibold"
-          letterSpacing="-0.03em"
-          lineHeight="1.15"
-          color="brand.ink"
-        >
-          {titulo}
-        </Heading>
-        <Text color="blackAlpha.600" fontSize="md" mt={1.5} lineHeight="1.5" maxW="48ch">
-          {bajada}
-        </Text>
-      </Box>
-    </Flex>
-  )
-}
 
 function CardSesion({ email }) {
   const { signOut } = useClerk()
@@ -353,7 +317,8 @@ export default function ConfiguracionPage() {
 
   return (
     <Box maxW="64rem" mx="auto">
-      <PageHeader
+      <PanelPageHeader
+        icon={Settings2}
         titulo="Configuración de cuenta"
         bajada={
           admin

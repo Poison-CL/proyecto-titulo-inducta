@@ -114,6 +114,35 @@ export function getPlan(id) {
   return PLANES.find((p) => p.id === id)
 }
 
+/** Branding de constancias (HU-17) según plan contratado. */
+export function brandingCertificado(plan) {
+  const p = plan || getPlan('demo') || PLANES[0]
+  const id = p.id || 'demo'
+  const logoInducta = '/logo-azul-oscuro.png'
+
+  if (id === 'demo') {
+    return {
+      planId: id,
+      planNombre: p.nombre,
+      logoInducta,
+      // Demo: certificación con marca Inducta
+      modo: 'marca_inducta',
+      identidadCorporativa: false,
+      etiquetaPie: 'Plan demostración · certificación marca Inducta',
+    }
+  }
+
+  // Básico / Plus / Plus+: identidad corporativa de la empresa
+  return {
+    planId: id,
+    planNombre: p.nombre,
+    logoInducta,
+    modo: 'identidad_empresa',
+    identidadCorporativa: true,
+    etiquetaPie: `Emitido con Inducta Chile · ${p.nombre}`,
+  }
+}
+
 export function montoPlan(plan, periodo) {
   return periodo === 'anual' ? plan.ufAnual : plan.ufMensual
 }

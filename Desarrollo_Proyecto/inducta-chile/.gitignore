@@ -30,3 +30,10 @@ agents.md
 *.njsproj
 *.sln
 *.sw?
+
+supabase/.temp/
+**/_mcp*
+**/_deploy*
+**/*.deploy*.json
+**/logo-b64.txt
+**/.index-content.txt

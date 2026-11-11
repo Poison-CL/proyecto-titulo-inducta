@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Flex,
-  Heading,
   Input,
   Text,
   Textarea,
@@ -10,8 +9,10 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { useAuth, useUser } from '@clerk/clerk-react'
+import { MessageSquare } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import { useSupabase } from '../../hooks/useSupabase'
 
 const FILTROS = [
@@ -373,20 +374,13 @@ export default function AdminSoportePage() {
 
   return (
     <Box maxW="78rem" h={{ lg: 'calc(100vh - 7rem)' }} display="flex" flexDirection="column">
-      <Box mb={4} flexShrink={0}>
-        <Heading
-          as="h1"
-          fontSize={{ base: '1.75rem', md: '2.1rem' }}
-          fontWeight="semibold"
-          letterSpacing="-0.03em"
-          color="brand.ink"
-          mb={1}
-        >
-          Soporte
-        </Heading>
-        <Text color="blackAlpha.600" fontSize="sm">
-          Conversaciones con clientes. Tome el ticket, responda por chat y cierre cuando esté listo.
-        </Text>
+      <Box flexShrink={0}>
+        <PanelPageHeader
+          icon={MessageSquare}
+          titulo="Soporte"
+          bajada="Conversaciones con clientes. Tome el ticket, responda por chat y cierre cuando esté listo."
+          mb={4}
+        />
       </Box>
 
       {error ? (
@@ -698,7 +692,6 @@ export default function AdminSoportePage() {
                           borderRadius="xl"
                           borderBottomRightRadius={propio ? 'sm' : 'xl'}
                           borderBottomLeftRadius={propio ? 'xl' : 'sm'}
-                          boxShadow="sm"
                           borderWidth={propio ? 0 : '1px'}
                           borderColor="blackAlpha.100"
                         >

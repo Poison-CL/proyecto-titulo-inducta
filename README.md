@@ -98,16 +98,18 @@ Capturas de la app en desarrollo.
 ### Sitio marketing
 
 - Home con hero, mockup del panel, sección **Cómo funciona** (4 pasos) y FAQ
-- **Hub de recursos** (`/recursos`) estilo documentación: búsqueda, tabs y artículos
-- **Precios** mensuales/anuales en UF, contratación y resultados de pago Webpay
+- **Hub de recursos** (`/recursos`): búsqueda, guías, documentación, capacitaciones, cumplimiento y soporte
+- **Precios** mensuales/anuales en UF + IVA, contratación y resultados de pago Webpay
 - Contacto y soporte público
 
-### Acceso y panel
+### Acceso y paneles
 
-- Login custom **Empresa / Empleado** (`/entrar`) con Clerk Organizations
+- Login custom **Empresa / Empleado** (`/entrar`) con Clerk Organizations (sin registro público)
 - Post-login y pantallas de ayuda si falta empresa o membresía
-- Panel empresa (`/dashboard`): Inicio, Equipo, Configuración
-- Shell compartido: topbar, sidebar, búsqueda del panel, cards de acción
+- **Panel empresa** (`/dashboard`): Programas (evaluaciones + niveles texto/YouTube), Avances, Equipo, Configuración
+- **Panel empleado** (`/empleado`): Mis programas (estudiar → rendir), Mis certificados, perfil
+- Gate de estudio: si hay niveles, el cuestionario solo se desbloquea al 100 %
+- Constancias al aprobar; matriz de avances exportable a CSV
 - Panel admin de plataforma (`/admin`): resumen, tickets, empresas, pagos, usuarios
 
 ### Rutas principales
@@ -119,8 +121,12 @@ Capturas de la app en desarrollo.
 | `/recursos/*` | Hub de docs, guías y soporte |
 | `/entrar` | Ingreso (empresa o empleado) |
 | `/dashboard` | Panel de la organización |
+| `/dashboard/programas` | Evaluaciones, niveles de estudio y Avances |
 | `/dashboard/equipo` | Invitaciones y roles |
 | `/dashboard/configuracion` | Plan y datos de contacto |
+| `/empleado` | Inicio del colaborador |
+| `/empleado/programas` | Estudiar y rendir inducciones |
+| `/empleado/certificados` | Constancias |
 | `/admin/*` | Administración de la plataforma |
 
 Código de la app: [Desarrollo_Proyecto/inducta-chile/README.md](Desarrollo_Proyecto/inducta-chile/README.md)
@@ -312,12 +318,13 @@ Multi-tenant con `empresa` como raíz: usuarios, tests de inducción, preguntas,
 
 ### Autenticación (Empresa / Empleado)
 
-1. La persona abre **Entrar** → `/entrar`.
-2. Escribe correo; Clerk valida la cuenta.
+1. La persona abre **Entrar** → `/entrar` (toggle Empresa / Empleado).
+2. Escribe correo; Clerk valida la cuenta (código o contraseña).
 3. Si hay sesión, va a `/post-login`.
 4. Si pertenece a una **Organization**:
-   - **Sí** → panel (`/dashboard`).
-   - **No** → ayuda (`/acceso/sin-empresa` o `/acceso/sin-membresia`).
+   - **Empresa (admin)** → `/dashboard`.
+   - **Empleado (miembro)** → `/empleado`.
+   - **Sin org** → ayuda (`/acceso/sin-empresa` o `/acceso/sin-membresia`).
 
 <p align="center">
   <img src="assets/diagrams/auth-login-clerk.png" alt="Secuencia login Clerk Inducta Chile" width="900">

@@ -6,20 +6,19 @@ import {
   CircleHelp,
   Home,
   Settings2,
-  TrendingUp,
 } from 'lucide-react'
 import { useCallback } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import InductaUserButton from '../components/auth/InductaUserButton'
-import PanelShell from '../components/dashboard/PanelShell'
-import { esAdminEmpresa } from '../lib/authRol'
+import PanelShell, { PlanWidget } from '../components/dashboard/PanelShell'
+import { esAdminEmpresa, etiquetaOrgRol } from '../lib/authRol'
 import { esAdminPlataforma, esOrgInducta } from '../lib/orgInducta'
 import { resolverBusquedaEmpleado } from '../lib/panelBusqueda'
 
 /**
  * Layout del dashboard de empleado.
- * Reutiliza PanelShell pero sin OrganizationSwitcher ni PlanWidget.
- * Sidebar: Inicio · Mis Programas · Mi Progreso · Mis Certificados · Mi Perfil
+ * Sidebar: Inicio · Mis Programas · Mis Certificados · Mi Perfil
+ * Abajo: empresa a la que pertenece.
  */
 export default function EmpleadoLayout() {
   const { membership, organization, isLoaded } = useOrganization()
@@ -40,13 +39,14 @@ export default function EmpleadoLayout() {
   const navPrimary = [
     { to: '/empleado', end: true, label: 'Inicio', icon: Home },
     { to: '/empleado/programas', label: 'Mis Programas', icon: BookOpen },
-    { to: '/empleado/progreso', label: 'Mi Progreso', icon: TrendingUp },
     { to: '/empleado/certificados', label: 'Mis Certificados', icon: Award },
   ]
 
   const navSettings = [
     { to: '/empleado/perfil', label: 'Mi Perfil', icon: Settings2 },
   ]
+
+  const rolLabel = membership ? etiquetaOrgRol(membership.role) : null
 
   return (
     <PanelShell
@@ -60,6 +60,15 @@ export default function EmpleadoLayout() {
       navSections={[navPrimary, navSettings]}
       resolverBusqueda={resolverBusqueda}
       searchPlaceholder="Buscar en el panel…"
+      planWidget={
+        <PlanWidget
+          titulo="Su empresa"
+          planLabel={organization?.name || 'Sin empresa'}
+          cta="Ver perfil"
+          to="/empleado/perfil"
+          meta={rolLabel ? `Rol: ${rolLabel}` : undefined}
+        />
+      }
     >
       <Box>
         <Outlet />

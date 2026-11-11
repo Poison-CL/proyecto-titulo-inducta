@@ -6,23 +6,23 @@ import LinkAlPanel from '../auth/LinkAlPanel'
 const PASOS = [
   {
     n: '01',
-    t: 'Programas por cargo',
-    d: 'Defina qué debe completar cada puesto: inducción general, seguridad y lo propio del área.',
+    t: 'Programas y estudio',
+    d: 'Arme la inducción con niveles (texto o video) y un cuestionario. Publique cuando esté lista.',
   },
   {
     n: '02',
-    t: 'Accesos y asignación',
-    d: 'De de alta a colaboradores con su correo y asígneles el programa que corresponde.',
+    t: 'Accesos del equipo',
+    d: 'Invite colaboradores por correo desde Equipo. Cada uno entra y ve Mis programas.',
   },
   {
     n: '03',
     t: 'Avance del equipo',
-    d: 'Controle quién está al día, quién se atrasó y el resultado de cada prueba.',
+    d: 'Vea quién estudió, quién rindió y el resultado. El cuestionario se desbloquea al completar el estudio.',
   },
   {
     n: '04',
     t: 'Evidencia lista',
-    d: 'Conserve quién, qué y cuándo: el registro queda disponible para auditorías y fiscalizaciones.',
+    d: 'Constancias al aprobar y Avances exportables: listo para auditorías y fiscalizaciones.',
   },
 ]
 

@@ -1,8 +1,15 @@
-import { useAuth } from '@clerk/clerk-react'
-import { useMemo } from 'react'
+import { useAuth, useOrganization } from '@clerk/clerk-react'
+import { useMemo, useRef } from 'react'
 import { createSupabaseClient } from '../lib/supabase'
 
 export function useSupabase() {
   const { getToken } = useAuth()
-  return useMemo(() => createSupabaseClient(getToken), [getToken])
+  const { organization } = useOrganization()
+  const orgIdRef = useRef(organization?.id || null)
+  orgIdRef.current = organization?.id || null
+
+  return useMemo(
+    () => createSupabaseClient(getToken, () => orgIdRef.current),
+    [getToken, organization?.id],
+  )
 }

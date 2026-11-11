@@ -4,15 +4,16 @@ import {
   Flex,
   FormControl,
   FormLabel,
-  Heading,
   Input,
   Select,
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { Building2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import BusquedaFiltroBanner from '../../components/dashboard/BusquedaFiltroBanner'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
 import { useSupabase } from '../../hooks/useSupabase'
 import { filtraPorCampos } from '../../lib/panelBusqueda'
 import { estadoPlan, fechaCortaEs, getPlan } from '../../lib/planes'
@@ -33,6 +34,7 @@ export default function AdminEmpresasPage() {
   const [editId, setEditId] = useState(null)
   const [vence, setVence] = useState('')
   const [plan, setPlan] = useState('basico')
+  const [periodo, setPeriodo] = useState('mensual')
   const [saving, setSaving] = useState(false)
 
   const visibles = useMemo(
@@ -77,6 +79,7 @@ export default function AdminEmpresasPage() {
     setEditId(e.id_empresa)
     setVence(e.plan_vence_en || '')
     setPlan(e.plan || 'basico')
+    setPeriodo(e.periodo || 'mensual')
   }
 
   async function guardarRenovacion(ev) {
@@ -89,7 +92,7 @@ export default function AdminEmpresasPage() {
       .update({
         plan,
         plan_vence_en: vence || null,
-        periodo: 'mensual',
+        periodo,
       })
       .eq('id_empresa', editId)
     setSaving(false)
@@ -102,21 +105,12 @@ export default function AdminEmpresasPage() {
   }
 
   return (
-    <Box maxW="56rem">
-      <Heading
-        as="h1"
-        fontSize={{ base: '2rem', md: '2.4rem' }}
-        fontWeight="semibold"
-        letterSpacing="-0.03em"
-        lineHeight="1.1"
-        color="brand.ink"
-        mb={3}
-      >
-        Empresas
-      </Heading>
-      <Text color="blackAlpha.700" fontSize={{ base: 'md', md: 'lg' }} lineHeight={1.6} maxW="44ch" mb={12}>
-        Cuentas, estado y vencimiento de plan. Puede renovar o ajustar el plan aquí.
-      </Text>
+    <Box maxW="56rem" mx="auto">
+      <PanelPageHeader
+        icon={Building2}
+        titulo="Empresas"
+        bajada="Cuentas, estado y vencimiento de plan. Renueve o ajuste el plan aquí."
+      />
 
       {loading && (
         <Text fontSize="sm" color="blackAlpha.600">

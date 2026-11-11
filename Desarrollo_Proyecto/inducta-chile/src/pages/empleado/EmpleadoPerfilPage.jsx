@@ -1,15 +1,8 @@
-import {
-  Avatar,
-  Box,
-  Divider,
-  Flex,
-  Heading,
-  Tag,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Avatar, Box, Text } from '@chakra-ui/react'
 import { useOrganization, useUser } from '@clerk/clerk-react'
-import { Settings2 } from 'lucide-react'
+import { Settings2, User } from 'lucide-react'
+import PanelPageHeader from '../../components/dashboard/PanelPageHeader'
+import SettingsCard, { SettingsRow } from '../../components/dashboard/SettingsCard'
 import { etiquetaOrgRol } from '../../lib/authRol'
 
 export default function EmpleadoPerfilPage() {
@@ -21,71 +14,27 @@ export default function EmpleadoPerfilPage() {
   const rolLabel = membership ? etiquetaOrgRol(membership.role) : '—'
 
   return (
-    <Box maxW="32rem" mx="auto">
-      <Flex align="center" gap={3} mb={6}>
-        <Settings2 size={20} strokeWidth={1.75} />
-        <Heading
-          as="h1"
-          fontSize={{ base: 'xl', md: '2xl' }}
-          fontWeight="semibold"
-          letterSpacing="-0.02em"
-          color="brand.ink"
-        >
-          Mi Perfil
-        </Heading>
-      </Flex>
+    <Box maxW="48rem" mx="auto">
+      <PanelPageHeader
+        icon={Settings2}
+        titulo="Mi perfil"
+        bajada="Datos de su cuenta en Inducta y la empresa a la que pertenece."
+      />
 
-      {/* Avatar + nombre */}
-      <Box
-        p={6}
-        borderWidth="1px"
-        borderColor="blackAlpha.100"
-        borderRadius="xl"
-        mb={4}
-      >
-        <Flex align="center" gap={4} mb={5}>
-          <Avatar
-            name={nombre}
-            src={user?.imageUrl}
-            size="lg"
-            bg="brand.primary"
-            color="white"
-          />
-          <Box>
-            <Text fontWeight="semibold" color="brand.ink">
-              {nombre}
-            </Text>
-            <Tag size="sm" colorScheme="blue" mt={1} borderRadius="full">
-              {rolLabel}
-            </Tag>
-          </Box>
-        </Flex>
+      <SettingsCard icon={User} titulo="Cuenta" bajada="Información visible para su organización.">
+        <Box mb={5}>
+          <Avatar name={nombre} src={user?.imageUrl} size="lg" bg="brand.primary" color="white" />
+        </Box>
+        <SettingsRow label="Nombre">{nombre}</SettingsRow>
+        <SettingsRow label="Correo">{email}</SettingsRow>
+        <SettingsRow label="Empresa">{organization?.name || '—'}</SettingsRow>
+        <SettingsRow label="Rol" last>
+          {rolLabel}
+        </SettingsRow>
+      </SettingsCard>
 
-        <Divider borderColor="blackAlpha.100" mb={4} />
-
-        <VStack align="stretch" spacing={3}>
-          <CampoInfo label="Correo electrónico" valor={email} />
-          <CampoInfo label="Empresa" valor={organization?.name || '—'} />
-          <CampoInfo label="Rol en la organización" valor={rolLabel} />
-        </VStack>
-      </Box>
-
-      <Text fontSize="xs" color="blackAlpha.500" textAlign="center">
-        Para cambiar tu nombre o correo, hazlo desde la configuración de cuenta
-        de Clerk (ícono de usuario en la esquina superior derecha).
-      </Text>
-    </Box>
-  )
-}
-
-function CampoInfo({ label, valor }) {
-  return (
-    <Box>
-      <Text fontSize="xs" color="blackAlpha.500" mb={0.5}>
-        {label}
-      </Text>
-      <Text fontSize="sm" color="brand.ink" fontWeight="medium">
-        {valor}
+      <Text fontSize="xs" color="blackAlpha.500" mt={4}>
+        Para cambiar nombre o correo, use el menú de cuenta (ícono de usuario arriba a la derecha).
       </Text>
     </Box>
   )
