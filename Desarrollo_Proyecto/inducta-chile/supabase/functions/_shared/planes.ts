@@ -18,19 +18,40 @@ export function montoClpConIva(ufValor: number, ufEnClp: number): number {
   return neto + Math.round(neto * IVA_CHILE)
 }
 
-export async function ufHoyClp(): Promise<number> {
+/** Último valor conocido si las APIs públicas fallan (mindicador suele caer). */
+const UF_FALLBACK_CLP = 41309.19
+
+async function fetchUf(url: string, pick: (data: unknown) => number | null): Promise<number | null> {
   const ctrl = new AbortController()
-  const t = setTimeout(() => ctrl.abort(), 8000)
+  const t = setTimeout(() => ctrl.abort(), 5000)
   try {
-    const res = await fetch('https://mindicador.cl/api/uf', { signal: ctrl.signal })
-    if (!res.ok) throw new Error(`mindicador ${res.status}`)
-    const data = await res.json()
-    const valor = data?.serie?.[0]?.valor
-    if (typeof valor !== 'number' || !Number.isFinite(valor) || valor <= 0) {
-      throw new Error('UF inválida')
-    }
-    return valor
+    const res = await fetch(url, { signal: ctrl.signal })
+    if (!res.ok) return null
+    return pick(await res.json())
+  } catch {
+    return null
   } finally {
     clearTimeout(t)
   }
+}
+
+function ufOk(v: unknown): number | null {
+  const n = typeof v === 'number' ? v : Number(v)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+export async function ufHoyClp(): Promise<number> {
+  // ponytail: mindicador cae seguido; cascada corta + fallback fijo
+  const fromMindicador = await fetchUf('https://mindicador.cl/api/uf', (d) =>
+    ufOk((d as { serie?: { valor?: number }[] })?.serie?.[0]?.valor),
+  )
+  if (fromMindicador != null) return fromMindicador
+
+  const fromIndicadores = await fetchUf('https://indicadores.cl/api/v1/uf.json', (d) =>
+    ufOk((d as { valor?: number })?.valor),
+  )
+  if (fromIndicadores != null) return fromIndicadores
+
+  const envFallback = ufOk(Deno.env.get('UF_FALLBACK_CLP'))
+  return envFallback ?? UF_FALLBACK_CLP
 }
