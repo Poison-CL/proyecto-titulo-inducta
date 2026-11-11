@@ -1,13 +1,28 @@
 import { supabasePublico as supabase } from '../lib/supabase'
 
+async function mensajeDesdeInvoke(data, error) {
+  if (data?.error) return String(data.error)
+  const ctx = error?.context
+  if (!ctx || typeof ctx.json !== 'function') return null
+  try {
+    const body = await ctx.json()
+    if (body?.error) return String(body.error)
+  } catch {
+    // cuerpo no JSON
+  }
+  return null
+}
+
 export const iniciarPagoTransbank = async (datosPago) => {
   const { data, error } = await supabase.functions.invoke('tbk-iniciar', {
     body: datosPago,
   })
 
-  // 409 / 400 suelen venir en data.error aunque invoke marque error
-  if (data?.error) {
-    throw new Error(String(data.error))
+  const msgNegocio = await mensajeDesdeInvoke(data, error)
+  if (msgNegocio) {
+    const err = new Error(msgNegocio)
+    err.code = data?.code || undefined
+    throw err
   }
 
   if (error) {

@@ -210,7 +210,8 @@ export default function ContratarPage() {
     } catch (error) {
       console.error('Error al iniciar el pago:', error)
       const msg = error?.message || ''
-      if (msg && !/conectar|servidor de pagos|inválida/i.test(msg)) {
+      // 409 email_en_uso u otros mensajes de negocio (no son falla de Webpay)
+      if (msg && !/conectar|servidor de pagos|inválida|Respuesta inválida/i.test(msg)) {
         setErrorPago(msg)
       } else {
         setErrorWebpay(true)
@@ -311,6 +312,13 @@ export default function ContratarPage() {
                       {errorPago ||
                         'No pudimos conectar con Webpay. No se realizó ningún cargo; intente de nuevo en unos minutos.'}
                     </Text>
+                    {errorPago && /correo ya|Ingrese/i.test(errorPago) ? (
+                      <Text mt={2} fontSize="sm">
+                        <Link as={RouterLink} to="/entrar" color="brand.primary" fontWeight="semibold">
+                          Ir a iniciar sesión
+                        </Link>
+                      </Text>
+                    ) : null}
                   </Box>
                 ) : null}
 

@@ -408,23 +408,19 @@ export async function crearEvaluacion(supabase, { id_empresa, titulo, porcentaje
   const parsedPorcentaje = Math.min(100, Math.max(1, Number(porcentaje_aprobacion) || 70))
   const modulosNorm = Array.isArray(modulos) ? modulos : []
 
-  // Debe quedar en BD: si solo va a localStorage el empleado nunca la ve.
+  // RPC: evita RLS cuando el JWT Clerk no trae org_role (caso frecuente).
   let testCreado = null
   let errTest = null
-  ;({ data: testCreado, error: errTest } = await supabase
-    .from('test_induccion')
-    .insert({
-      id_empresa,
-      titulo: titulo.trim(),
-      porcentaje_aprobacion: parsedPorcentaje,
-      estado,
-      modulos: modulosNorm,
-    })
-    .select('id_test, id_empresa, titulo, porcentaje_aprobacion, estado, modulos')
-    .single())
+  ;({ data: testCreado, error: errTest } = await supabase.rpc('admin_insertar_test_induccion', {
+    p_id_empresa: id_empresa,
+    p_titulo: titulo.trim(),
+    p_porcentaje_aprobacion: parsedPorcentaje,
+    p_estado: estado,
+    p_modulos: modulosNorm,
+  }))
 
-  // Compat: columna modulos aún no migrada
-  if (errTest && /modulos/i.test(errTest.message || '')) {
+  if (errTest || !testCreado?.id_test) {
+    // Fallback insert directo (por si la RPC aún no está desplegada)
     ;({ data: testCreado, error: errTest } = await supabase
       .from('test_induccion')
       .insert({
@@ -432,8 +428,9 @@ export async function crearEvaluacion(supabase, { id_empresa, titulo, porcentaje
         titulo: titulo.trim(),
         porcentaje_aprobacion: parsedPorcentaje,
         estado,
+        modulos: modulosNorm,
       })
-      .select('id_test, id_empresa, titulo, porcentaje_aprobacion, estado')
+      .select('id_test, id_empresa, titulo, porcentaje_aprobacion, estado, modulos')
       .single())
   }
 
@@ -448,15 +445,24 @@ export async function crearEvaluacion(supabase, { id_empresa, titulo, porcentaje
   const preguntasGuardadas = []
 
   for (const preg of preguntas) {
-    const { data: pregCreada, error: errPreg } = await supabase
-      .from('pregunta')
-      .insert({
-        id_test: idTestGenerado,
-        id_empresa,
-        enunciado: preg.enunciado.trim(),
-      })
-      .select('id_pregunta')
-      .single()
+    let pregCreada = null
+    let errPreg = null
+    ;({ data: pregCreada, error: errPreg } = await supabase.rpc('admin_insertar_pregunta', {
+      p_id_empresa: id_empresa,
+      p_id_test: idTestGenerado,
+      p_enunciado: preg.enunciado.trim(),
+    }))
+    if (errPreg || !pregCreada?.id_pregunta) {
+      ;({ data: pregCreada, error: errPreg } = await supabase
+        .from('pregunta')
+        .insert({
+          id_test: idTestGenerado,
+          id_empresa,
+          enunciado: preg.enunciado.trim(),
+        })
+        .select('id_pregunta')
+        .single())
+    }
 
     if (errPreg || !pregCreada?.id_pregunta) {
       throw new Error(errPreg?.message || 'No se pudieron guardar las preguntas de la evaluación')
