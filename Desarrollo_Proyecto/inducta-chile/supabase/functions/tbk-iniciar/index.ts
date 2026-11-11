@@ -19,10 +19,60 @@ serve(async (req) => {
     if (!nombre_comercial || !email_contacto || !PLANES_OK.has(plan_solicitado)) {
       return jsonResponse({ error: 'Datos inválidos (plan/periodo/contacto)' }, 400, req)
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_contacto)) {
+      return jsonResponse({ error: 'Correo de contacto inválido' }, 400, req)
+    }
 
     const ufPlan = ufNeto(plan_solicitado, periodoPago)
     if (ufPlan == null || ufPlan <= 0) {
       return jsonResponse({ error: 'Plan no contratible' }, 400, req)
+    }
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+
+    // Evitar pagar de nuevo si el correo ya tiene empresa/cuenta Clerk.
+    const { data: empresaExistente } = await supabaseAdmin
+      .from('empresa')
+      .select('id_empresa, cuenta_estado')
+      .eq('email_contacto', email_contacto)
+      .in('cuenta_estado', ['temporal', 'pendiente_verificacion', 'verificada', 'activa'])
+      .limit(1)
+      .maybeSingle()
+
+    if (empresaExistente) {
+      return jsonResponse(
+        {
+          error:
+            'Este correo ya está vinculado a una cuenta Inducta. Ingrese con ese correo o use otro para contratar.',
+          code: 'email_en_uso',
+        },
+        409,
+        req,
+      )
+    }
+
+    const clerkKey = Deno.env.get('CLERK_SECRET_KEY')
+    if (clerkKey) {
+      const clerkRes = await fetch(
+        `https://api.clerk.com/v1/users?email_address=${encodeURIComponent(email_contacto)}`,
+        { headers: { Authorization: `Bearer ${clerkKey}` } },
+      )
+      const clerkData = await clerkRes.json().catch(() => [])
+      const clerkUser = Array.isArray(clerkData) ? clerkData[0] : clerkData?.data?.[0]
+      if (clerkUser?.id) {
+        return jsonResponse(
+          {
+            error:
+              'Este correo ya está registrado. Ingrese a Inducta o use otro correo para una cuenta nueva.',
+            code: 'email_en_uso',
+          },
+          409,
+          req,
+        )
+      }
     }
 
     const ufClp = await ufHoyClp()
@@ -35,11 +85,6 @@ serve(async (req) => {
       'https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2'
 
     const buyOrder = `IND-${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 26)
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    )
 
     const tbkResponse = await fetch(`${tbkBase}/transactions`, {
       method: 'POST',

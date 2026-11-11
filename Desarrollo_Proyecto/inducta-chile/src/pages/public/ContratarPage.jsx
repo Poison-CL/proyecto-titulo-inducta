@@ -141,6 +141,7 @@ export default function ContratarPage() {
   const [listo, setListo] = useState(false)
   const [procesandoPago, setProcesandoPago] = useState(false)
   const [errorWebpay, setErrorWebpay] = useState(false)
+  const [errorPago, setErrorPago] = useState('')
 
   const errorPago = params.get('error')
   if (errorPago === 'pago_fallido' || errorPago === 'servidor') {
@@ -184,6 +185,7 @@ export default function ContratarPage() {
 
   const handleIniciarPago = async () => {
     setErrorWebpay(false)
+    setErrorPago('')
     setProcesandoPago(true)
     try {
       const tbkData = await iniciarPagoTransbank({
@@ -207,7 +209,12 @@ export default function ContratarPage() {
       form.submit()
     } catch (error) {
       console.error('Error al iniciar el pago:', error)
-      setErrorWebpay(true)
+      const msg = error?.message || ''
+      if (msg && !/conectar|servidor de pagos|inválida/i.test(msg)) {
+        setErrorPago(msg)
+      } else {
+        setErrorWebpay(true)
+      }
     } finally {
       setProcesandoPago(false)
     }
@@ -298,16 +305,17 @@ export default function ContratarPage() {
                   ))}
                 </Box>
 
-                {errorWebpay ? (
+                {errorPago || errorWebpay ? (
                   <Box role="alert" mt={6} px={4} py={3} borderRadius="lg" bg="red.50" borderWidth="1px" borderColor="red.100">
                     <Text fontSize="sm" color="red.700" lineHeight="1.5">
-                      No pudimos conectar con Webpay. No se realizó ningún cargo; intente de nuevo en unos minutos.
+                      {errorPago ||
+                        'No pudimos conectar con Webpay. No se realizó ningún cargo; intente de nuevo en unos minutos.'}
                     </Text>
                   </Box>
                 ) : null}
 
                 <Button
-                  mt={errorWebpay ? 4 : 8}
+                  mt={errorPago || errorWebpay ? 4 : 8}
                   h="48px"
                   width="full"
                   onClick={handleIniciarPago}

@@ -208,22 +208,36 @@ serve(async (req) => {
       body: JSON.stringify({
         email_address: [emailLogin],
         password,
-        public_metadata: { rol: 'empresa', cuenta_temporal: true },
         first_name: 'Acceso',
         last_name: 'Temporal',
       }),
     })
     clerkUserId = user.id
+    await clerk(`/users/${user.id}/metadata`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        public_metadata: { rol: 'empresa', cuenta_temporal: true },
+      }),
+    })
 
     const org = await clerk('/organizations', {
       method: 'POST',
       body: JSON.stringify({
         name: String(nombre_comercial).slice(0, 80),
         created_by: user.id,
-        public_metadata: { plan: plan_solicitado },
       }),
     })
     clerkOrgId = org.id
+    try {
+      await clerk(`/organizations/${org.id}/metadata`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          public_metadata: { plan: plan_solicitado },
+        }),
+      })
+    } catch (e) {
+      console.warn('org metadata:', (e as Error).message)
+    }
 
     try {
       await clerk(`/organizations/${org.id}/memberships/${user.id}`, {
