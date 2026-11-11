@@ -1,7 +1,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 
-const FRONTEND = Deno.env.get('FRONTEND_URL') ?? 'http://localhost:5173'
+// FRONTEND_URL puede ser lista CORS (coma); redirect usa solo el primero (producción).
+const FRONTEND =
+  String(Deno.env.get('FRONTEND_URL') ?? 'http://localhost:5173')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)[0] || 'http://localhost:5173'
 
 function redirect(path: string, qs = '') {
   return new Response(null, {

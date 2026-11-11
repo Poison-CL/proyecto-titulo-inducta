@@ -12,9 +12,19 @@ export function factorByStrategy(signIn, strategy) {
   return signIn?.supportedFirstFactors?.find((f) => f.strategy === strategy) ?? null
 }
 
-export function pasoSiguiente(signIn) {
+/** Correos @tmp.inductachile.cl no tienen bandeja: no sirven para códigos. */
+export function esCorreoTemporal(email) {
+  return String(email || '')
+    .trim()
+    .toLowerCase()
+    .endsWith('@tmp.inductachile.cl')
+}
+
+export function pasoSiguiente(signIn, email = '') {
   const password = Boolean(factorByStrategy(signIn, 'password'))
   const emailCode = Boolean(factorByStrategy(signIn, 'email_code'))
+  // ponytail: temporales solo contraseña (el código nunca llega)
+  if (esCorreoTemporal(email) && password) return PASO.PASSWORD
 
   if (password && emailCode) return PASO.METHOD
   if (emailCode) return PASO.CODE

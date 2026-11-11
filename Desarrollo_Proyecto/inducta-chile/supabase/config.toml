@@ -46,6 +46,11 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/admin-reset-password/index.ts"
 
+[functions.login-ticket-temporal]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/login-ticket-temporal/index.ts"
+
 # Auth Clerk validada dentro de la función (Bearer + verifyToken)
 [functions.publicar-avance]
 enabled = true
