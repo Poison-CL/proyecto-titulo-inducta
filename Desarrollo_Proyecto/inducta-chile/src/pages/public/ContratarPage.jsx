@@ -342,31 +342,58 @@ export default function ContratarPage() {
                     <LabelAyuda ayuda="Boleta si factura a su nombre. Factura si es empresa o pyme con giro.">
                       Documento tributario
                     </LabelAyuda>
-                    <Flex bg="blackAlpha.50" borderRadius="full" p={1} gap={1} maxW="280px">
-                      {[
-                        ['boleta', 'Boleta'],
-                        ['factura', 'Factura'],
-                      ].map(([tipo, label]) => {
-                        const activo = documento === tipo
-                        return (
-                          <Button
-                            key={tipo}
-                            type="button"
-                            flex="1"
-                            size="sm"
-                            h="36px"
-                            aria-pressed={activo}
-                            bg={activo ? 'white' : 'transparent'}
-                            color={activo ? 'brand.primary' : 'blackAlpha.700'}
-                            boxShadow={activo ? '0 1px 3px rgba(13, 13, 13, 0.12)' : 'none'}
-                            _hover={{ bg: activo ? 'white' : 'blackAlpha.50' }}
-                            onClick={() => setDocumento(tipo)}
-                          >
-                            {label}
-                          </Button>
-                        )
-                      })}
-                    </Flex>
+                    <Box
+                      position="relative"
+                      maxW="280px"
+                      h="40px"
+                      bg="blackAlpha.50"
+                      borderRadius="full"
+                      borderWidth="1px"
+                      borderColor="blackAlpha.100"
+                      p="4px"
+                    >
+                      <Box
+                        position="absolute"
+                        top="4px"
+                        bottom="4px"
+                        left="4px"
+                        w="calc(50% - 4px)"
+                        bg="white"
+                        borderRadius="full"
+                        boxShadow="0 1px 3px rgba(13, 13, 13, 0.12)"
+                        transform={documento === 'factura' ? 'translateX(100%)' : 'none'}
+                        transition="transform 0.2s ease"
+                        zIndex={0}
+                      />
+                      <Flex position="relative" zIndex={1} h="full">
+                        {[
+                          ['boleta', 'Boleta'],
+                          ['factura', 'Factura'],
+                        ].map(([tipo, label]) => {
+                          const activo = documento === tipo
+                          return (
+                            <Button
+                              key={tipo}
+                              type="button"
+                              flex="1"
+                              h="full"
+                              borderRadius="full"
+                              variant="unstyled"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              aria-pressed={activo}
+                              color={activo ? 'brand.primary' : 'blackAlpha.600'}
+                              onClick={() => setDocumento(tipo)}
+                            >
+                              {label}
+                            </Button>
+                          )
+                        })}
+                      </Flex>
+                    </Box>
                   </FormControl>
 
                   <FormControl isRequired>
